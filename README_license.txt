@@ -11,7 +11,8 @@ General Public License for more details.
 The bundled applications (EvoFold, dfgEval, and dfgTrain) are
 distributed under the same terms.
 
-The full version of the GNU General Public License can be found at:
+See the LICENSE file for a copy of the GPL License. The latest version
+of the GNU General Public License can be found at:
 http://www.gnu.org/licenses/.
 
 Jakob Skou Pedersen (mail: jakob.skou@clin.au.dk)
