@@ -1,0 +1,48 @@
+digraph G {
+0 [label=""]
+;
+1 [label="Bovine"]
+;
+2 [label=""]
+;
+3 [label="Hylobates"]
+;
+4 [label=""]
+;
+5 [label="Pongo"]
+;
+6 [label=""]
+;
+7 [label="G._Gorilla"]
+;
+8 [label=""]
+;
+9 [label="P._paniscus"]
+;
+10 [label="H._sapiens"]
+;
+11 [label="Rodent"]
+;
+0->1  [label="0.69395"]
+;
+0->2  [label="0.54939"]
+;
+2->3  [label="0.36079"]
+;
+2->4  [label="0.15057"]
+;
+4->5  [label="0.33636"]
+;
+4->6  [label="0.06124"]
+;
+6->7  [label="0.17147"]
+;
+6->8  [label="0.08386"]
+;
+8->9  [label="0.19268"]
+;
+8->10  [label="0.11927"]
+;
+0->11  [label="1.2146"]
+;
+}

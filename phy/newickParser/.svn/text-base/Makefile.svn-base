@@ -1,0 +1,24 @@
+include ./config
+
+all: NewickParserBase.cpp NewickParserBase.h NewickLexer.cpp
+	$(MAKE) install
+
+NewickParserBase.cpp NewickParserBase.h: newick.y
+	bison++ -d -t -o NewickParserBase.cpp newick.y
+
+NewickLexer.cpp: newick.l
+	flex -+ -oNewickLexer.cpp  newick.l
+
+install:
+	cp -f NewickParserBase.h NewickParserBase.cpp NewickLexer.cpp ../
+
+clean:
+	rm -f *.o *~
+	rm -f core*
+	rm -f NewickLexer.cpp NewickParserBase.cpp 
+	rm -f NewickParserBase.h
+
+
+
+# #rpm bison++ package can be found at:
+# #http://packages.debian.org/unstable/devel/bison++.html

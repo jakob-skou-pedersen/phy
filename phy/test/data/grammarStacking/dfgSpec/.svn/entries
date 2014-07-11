@@ -1,0 +1,64 @@
+8
+
+dir
+53
+svn+ssh://appserver.binf.ku.dk/data/svn/jsp/prog/phy/trunk/src/test/data/dfgSpec
+svn+ssh://appserver.binf.ku.dk/data/svn/jsp
+
+
+
+2009-06-13T10:44:58.161896Z
+53
+jsp
+
+
+svn:special svn:externals svn:needs-lock
+
+factorPotentials.txt
+file
+58
+
+
+
+2009-06-19T12:06:42.000000Z
+35eda3ac91021cc552ac788c6f8d9f66
+2009-06-19T15:19:59.163219Z
+58
+jsp
+
+stateMaps.txt
+file
+55
+
+
+
+2009-06-17T06:44:11.000000Z
+a52445366143252f6405a4ac9c4a5526
+2009-06-17T18:38:04.161939Z
+55
+jsp
+
+variables.txt
+file
+58
+
+
+
+2009-06-19T12:23:30.000000Z
+da5745ebc10eba58ebcc6b8c3389584d
+2009-06-19T15:19:59.163219Z
+58
+jsp
+
+factorGraph.txt
+file
+58
+
+
+
+2009-06-19T12:12:10.000000Z
+83af86f66191751f98bf1d0776429f34
+2009-06-19T15:19:59.163219Z
+58
+jsp
+

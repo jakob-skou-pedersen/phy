@@ -1,0 +1,17 @@
+a score=0.000000 ENTRY=RF_site5.384.352 
+s 	hg18	0	115	+	115	GGCCACAGGC
+s 	rheMac2	0	115	+	115	GGCCACAGGC
+s 	tupBel1	0	127	+	127	TGTCACAGAT
+s 	cavPor3	0	92	+	92	----------
+s 	dipOrd1	0	114	+	114	GACTGTCCAG
+s 	rn4	0	115	+	115	AACCCTTTGT
+s 	mm9	0	115	+	115	AACCTTATGT
+s 	turTru1	0	115	+	115	CGCCTCAGCC
+s 	equCab2	0	115	+	115	GGCCTCAGTT
+s 	canFam2	0	105	+	105	AGTCTCATCT
+s 	pteVam1	0	115	+	115	CAGCGCAGTT
+s 	sorAra1	0	88	+	88	----------
+s 	eriEur1	0	100	+	100	----------
+s 	proCap1	0	112	+	112	AGCCGTCCGG
+#l	pairingmask				..........
+l	pairingmask				.((...))..

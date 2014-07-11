@@ -1,0 +1,13 @@
+GRAMMAR_VERSION:  1
+
+NAME:       0.0
+TYPE:       PAIR
+FROM:       0
+TO:         0
+PROB:       0.9
+EMIT_MODEL: 0
+
+NAME:       0.1
+TYPE:       END
+FROM:       0
+PROB:       0.1

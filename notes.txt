@@ -1,0 +1,45 @@
+Compilation instructions, etc.
+
+# if autoconf etc. is not present, then install these first
+sudo apt-get install libtool automake autoconf autotools-dev
+
+# check out
+svn co svn+ssh://login.binf.ku.dk/data/svn/jsp/prog/phy/trunk phy
+
+# autotool configuration
+autoreconf --install 
+
+#setting compilation flags:
+# for debugging
+# bison.cpp does not like pedantic and the test library needs exceptions
+#./configure CXXFLAGS=" -Wall -pedantic -fno-default-inline -fno-exceptions -ggdb3 -O0" 
+./configure CXXFLAGS=" -Wall -fno-default-inline  -ggdb3 -O0" 
+
+# for profiling: CXXFLAGS=" -Wall -O3 -pg " 
+
+# for production
+# note that NDEBUG is essential for ublas and makes a huge run time difference
+# (factor 2-3 in my test case)
+./configure CXXFLAGS=" -Wall -O2 -DNDEBUG -I/opt/local/include" 
+
+
+## on mac
+#libboost_unit_test_framework-xgcc40-mt instead of boost_unit_test_framework-gcc41-mt
+./configure CXXFLAGS="-Wall -fno-default-inline -g3 -I/opt/local/include -I/opt/local/include/boost-1_37" LDFLAGS="-L/opt/local/lib" CXXFLAGS="-g3 -O0"
+# production (mac)
+./configure CXXFLAGS="-Wall -O2 -DNDEBUG -I/opt/local/include -I/opt/local/include/boost-1_37" LDFLAGS="-L/opt/local/lib"
+
+
+# handling shared libraries on mac
+# export LD_LIBRARY_PATH=/opt/local/lib (for some reason this does not work, although it should according to: http://tinyurl.com/anr4m)
+export DYLD_LIBRARY_PATH=/opt/local/lib
+
+# dynmamic lib
+# You may also place the .dylib file at a nonstandard location in your filesystem, but you must add that location to one of these environment variables:
+o LD_LIBRARY_PATH
+o DYLD_LIBRARY_PATH
+o DYLD_FALLBACK_LIBRARY_PATH
+
+## General notes
+# I had a lot of problems linking, since yywrap was referenced but not defined. I got it working by including the following at the end of newick.l (in phy/phy/testParser)
+int NewickFlexLexer::yywrap() {return 1;}

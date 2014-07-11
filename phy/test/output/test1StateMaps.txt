@@ -1,0 +1,4 @@
+
+NAME:	twoState
+SYMBOLS:	 A B
+META_SYMBOLS:	 . = A B; * = A B;

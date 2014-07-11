@@ -1,0 +1,11 @@
+# Specification of state maps
+
+NAME:		twoState
+SYMBOLS:	a b
+META_SYMBOLS:	*=a b; .=a b
+
+# specification of the same state map as above, but with a multiplicity of two (symbols then become: aa ab ba bb)
+NAME:		2-twoState
+SYMBOLS:	a b
+META_SYMBOLS:	*=a b; .=a b
+MULTIPLICITY:	2

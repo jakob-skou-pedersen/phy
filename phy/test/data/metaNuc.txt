@@ -1,0 +1,9 @@
+# a nuc alphabet
+ALPHABET_NAME:	 nuc
+
+# a single meta nuc alphabet
+ALPHABET_NAME:	 metaNuc
+
+# a di-nuc alphabet
+ALPHABET_NAME:	 2-metaNuc
+

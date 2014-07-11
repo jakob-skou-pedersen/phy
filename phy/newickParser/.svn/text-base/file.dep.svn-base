@@ -1,0 +1,3 @@
+newickParser.o: newickParser.c tree.h
+newickLexer.o: newickLexer.c newickParser.h
+tree.o: tree.c tree.h

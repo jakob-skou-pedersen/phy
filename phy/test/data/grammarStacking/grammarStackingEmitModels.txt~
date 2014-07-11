@@ -1,0 +1,19 @@
+EMIT_MODEL_COUNT: 3 
+
+# remember that file names must be given relative to pwd 
+
+TYPE:	dfg
+NAME:	single
+DIR:	./dfgSpec/singleEmitModel/
+
+KIND:	dfg
+TYPE:	pair
+NAME:	pair
+MIN_DIST:	4
+DIR:	./dfgSpec/pairEmitModel/
+
+KIND:   dfg
+TYPE:   pair 
+NAME:   stack
+MIN_DIST:       4
+DIR:    ./dfgSpec/stackingEmitModel/

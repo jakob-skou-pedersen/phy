@@ -1,0 +1,17 @@
+Explanation of output fields:
+
+seqId         - Sequence identifier
+beginPos      - Structure begin position (0-based)
+endPos	      - Structure end position (0-based and not included)
+basePairCount - Count of base pairs in structure prediction
+strCykProb    - Probability of (most probable) predicted structure under the structure model
+bgCykProb     - Probability of most probable prediction under the background model
+strProb	      - Likelihood of the region under the structure model
+bgProb	      - Likelihood of the region under the background model
+cykScore      - log-odds ratio of strCykProb and bgCykProb [ log(strCykProb / bgCykProb) ]
+score	      - log-odds ratio of strProb and bgProb [ log(strProb / bgProb) ]
+strPostProb   - Posterior proability of the predicted structure
+fold	      - Predicted structure in parenthesis format 
+                (for complete predeictions this may be devoid if base-pris / parentheses)
+posScore      - Position specific posterior probabilities along the region
+

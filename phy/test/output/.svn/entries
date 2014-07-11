@@ -1,0 +1,28 @@
+8
+
+dir
+47
+svn+ssh://appserver.binf.ku.dk/data/svn/jsp/prog/phy/trunk/phy/test/output
+svn+ssh://appserver.binf.ku.dk/data/svn/jsp
+
+
+
+2009-01-04T11:03:11.650360Z
+29
+jsp
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+ba8d864e-3c39-0410-826d-ad064623088f
+

@@ -1,0 +1,12 @@
+
+Locating shared libraries in gdb:
+on athena:  
+set environment LD_LIBRARY_PATH=../.libs/
+
+debugging testRunner on mac (pwd = test):
+set environment DYLD_LIBRARY_PATH=../.libs/:/opt/local/lib
+file .libs/testRunner
+
+# showing dot format
+cat out.dot | dot -Kneato -Gsize="7.5,10" -Tps -o out.ps
+gv out.ps

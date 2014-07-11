@@ -1,0 +1,13 @@
+Generating test maf file on athena.binf.ku.dk:
+
+  mafFrags hg18 multiz28way test1.bed test1.maf 
+  #cat vert28way.nwk | sed -e 's/[;()]//g' -e 's/:0.[0-9]*//g' -e 's/,,*/,/g'
+  #hg18,panTro2,rheMac2,otoGar1,tupBel1,rn4,mm8,cavPor2,oryCun1,sorAra1,eriEur1,canFam2,felCat3,equCab1,bosTau3,dasNov1,loxAfr1,echTel1,monDom4,ornAna1,galGal3,anoCar1,xenTro2,tetNig1,fr2,gasAcu1,oryLat1,danRer4
+  cat test1.maf | ~/scripts/amaManip.py -f hg18 --removeRefGaps --nameList "hg18,panTro2,rheMac2,otoGar1,tupBel1,rn4,mm8,cavPor2,oryCun1,sorAra1,eriEur1,canFam2,felCat3,equCab1,bosTau3,dasNov1,loxAfr1,echTel1,monDom4,ornAna1,galGal3,anoCar1,xenTro2,tetNig1,fr2,gasAcu1,oryLat1,danRer4" | sed -e 's/id=/ENTRY=/'> test1.ama
+
+
+Copying to local host:
+
+  scp athena.binf.ku.dk:/home/jsp/tmp/ama/test.bed .
+  scp athena.binf.ku.dk:/home/jsp/tmp/ama/test1.ama .
+

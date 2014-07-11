@@ -1,0 +1,99 @@
+#     SEQUENCE TO OBSERVED RANDOM VARIABLE SYMBOL SPECIFICATION FILE
+#
+# This file defines the mapping between sequential input data and the
+# observed symbols taken as input for the discrete factor graph
+# (DFG). One use if for when SCFG emission models are defined in terms
+# of DFGs. Then the input is typically sequences, whereas the DFG takes
+# individual symbols mapped to the subset of observed random variables
+# as input. This files thus defined how these observed symbols are
+# defined for each index (or pair of indexes) of the input sequences.
+#
+# BASIC SYMBOL SPECIFICATION
+#
+# The specification is based on stanzas separated by blank lines. Each
+# stanza defines the input symbols for an observed random variable
+# (RV) of the DFG. The basic format is as follows:
+#
+#
+# VAR_NAME:	 name_of_random_variable 
+# SEQ_NAME:	 name_of_input_sequence  
+# SIZE:		 size_of_symbol              (default=1)
+# SYMBOL_OFFSET: offset_from_previous_symbol (default=size_of_symbol)
+# INDEX_OFFSET:  offset_relative_to_current_sequence_index (default=0)
+# OPTIONAL:      any_value_means_true   (default=false, true when given)
+#
+# 
+# Note that only VAR_NAME and SEQ_NAME are required, with the optional
+# having default values.
+#
+#
+# Additional description and interpretation of some of the parameters
+# follows:
+#
+# SYMBOL_OFFSET: If SYMBOL_OFFSET is smaller than its default value of
+# SIZE, then the symbols will overlap in the specied input sequence.
+#
+# INDEX_OFFSET: if INDEX_OFFSET differs from the default value of
+# zero, the start position of the symbol is shifted accordinly
+# relative to the current index. The INDEX_OFFSET value is given in
+# characters, even if the symbol SIZE is greater than one.
+
+# OPTIONAL: By default the given input sequences must be present for
+# listed observed random variables or the program will terminate with
+# an error. If OPTIONAL is given, the random variable will be treated
+# as missing data if specified input sequence is not found. In this
+# case the random variable will typically be treated as nuisance
+# parameter and marginalized in the algorithmic calculations.
+#
+#
+# EXPLICIT PAIRED DI-SYMBOL SPECIFICATION:
+#
+# In some applications, such as paired observations for SCFGs, the
+# final symbol will be combined from a left part and a right part -
+# here called a di-symbol. In these cases, the above specification
+# defines both left and righ parts by default. This means, for
+# instance, that the final paired-symbol will be twice as long as
+# specified by SIZE. The INDEX_OFFSET will pertain to both left and
+# right part, and define the shifting of the start position of
+# both. However, the right part is shifted by minus the value
+# INDEX_OFFSET value. 
+
+# It is possible to specify separate SIZE and INDEX_OFFSET values for
+# the left and right side of the di-symbols, by explicitly define
+# separate values for the right part:
+#
+# R_SIZE:	        length_of_right_part        (default=SIZE)
+# R_INDEX_OFFSET: index_offset_of_right_part  (default= (-1) * INDEX_OFFSET)
+# 
+
+
+# the below to stanzas are made up for testing purposes.
+VAR_NAME:	H
+SEQ_NAME:	dna
+SIZE:		2
+SYMBOL_OFFSET:  2
+INDEX_OFFSET:   3
+OPTIONAL:       1
+
+VAR_NAME:	O
+SEQ_NAME:	dna
+SIZE:		2
+SYMBOL_OFFSET:  2
+INDEX_OFFSET:	1
+R_SIZE:		1
+R_INDEX_OFFSET: -2
+
+VAR_NAME:	O2
+SEQ_NAME:	numbers
+
+VAR_NAME:	O3
+SEQ_NAME:	numbers
+SIZE:		1
+SYMBOL_OFFSET:  1
+INDEX_OFFSET:	2
+R_SIZE:		2
+
+VAR_NAME:	O4
+SEQ_NAME:	numbers
+INDEX_OFFSET:	-1
+R_INDEX_OFFSET:	1

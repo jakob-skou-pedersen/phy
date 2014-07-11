@@ -1,0 +1,50 @@
+#            FACTOR GRAPH SPECIFICATION FILE
+#
+# This file spcifies factors, their neigboring random variables (RVs),
+# and the factor potentials. Note that factor graphs are dual graphs
+# and that the entire graph structure is therefore determined by
+# specifying factors and their RV neighbors. RVs are thus only
+# implicitly defined in this file.
+#
+# The specification is divided into stanza separated by blank
+# (empty or all whitespace) lines. Lines starting with a '#' are treated as
+# comments. Each stanza line consist of key / value pairs separated by
+# whitespace. In general keywords of the specification are written in
+# upper case followed by a colon. Each stanza has the following format:
+#
+# NAME:     factor_name
+# NB1:	    RV_neighbor_1   (see variables.txt)
+# NB2:	    RV_neighbor_2   (see variables.txt)
+# POT:	    potential_name  (see factorPotentials.txt)
+#
+# In the current version a factor can have at most two RV
+# neighbors. (It is possible to define only one neighbor, see H.prior
+# in example below.) 
+#
+# When implementing directed graphical models, NB1 should refer to the
+# parent node and NB2 to the descendent node.
+#
+# The example in this file specifies a aimple three-state (and
+# three-factor) factor graph, with the following graph structure:
+#
+#                     H.prior (pot=prior)
+#                     |
+#                     H
+#                    / \
+#    (pot=inner) H.01   H.O2 (pot=inner2)
+#                  /     \
+#                O1       O2
+
+NAME:		H.prior
+NB1:		H
+POT:		prior
+
+NAME:		H.O1
+NB1:		H
+NB2:		O1
+POT:		inner
+
+NAME:		H.O2
+NB1:		H
+NB2:		O2
+POT:		inner2

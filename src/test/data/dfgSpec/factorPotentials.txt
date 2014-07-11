@@ -1,0 +1,63 @@
+#      FACTOR POTENTIAL SPECIFICATION FILE
+#
+# Specification of factor potentials and potentially pseudo counts for
+# training.
+#
+#
+# The specification is based on stanza separated by blank lines. Each
+# stanza is defined a factor potential (pot) and should follow this
+# format: 
+#
+# NAME:    pot_name (must be unique)
+# TYPE:	   pot_type (currently one of: rowNorm, colNorm, and globNorm. See below)
+# POT_MAT: pot_matrix (matrix specification in ublas format)
+# PC_MAT:  pot_pseudo_counts (pseudo count matrix specification in ublas format)
+# 
+# A given factor potential can be used by more than one factor
+# (specified in the factorGraph.txt file). Specification of
+# pseudo-counts
+#
+
+# Potential types: Is only of importance in training and defines
+# constraints on the potential space. Currently only three potential
+# types are implemented and they are probabilistic. (It should be
+# stressed that potentials need not define probability distributions,
+# it is only a current restriction on training.) In 'rowNorm' each
+# column must sum to one. In 'colNorm' each column must sum to
+# one. And in 'globNorm' the entire matrix must sum to one. These are
+# intended for implementing directed graphical models. 'rowNorm'
+# should be used when modelling a relationship of the type P(NB2|NB1)
+# and 'colNorm' when modelling a relationship of the type P(NB1|NB2)
+# (where NB1 and NB2 are defined in factorGraph.txt).
+#
+# As stated in factorGraph.txt, NB1 should refer to the parent node in
+# the case of directed graphical models. In general the dimension of
+# the NB1 node should match the first dimension of the factor
+# potential and the dimension of NB2 should match the second dimension
+# of the factor potential. However, if factors only have one neighbor,
+# then the dimension of the NB1 RV should match the second dimention
+# of the fator potential (i.e. the potential matrix is a 1xn matrix,
+# where n is the dimension of the NB1 node). This is checked by the
+# dfg framework (e.g., by the constructor of the DFG class).
+#
+#
+# Factor potentials of three-random variable example:
+
+NAME:		prior
+TYPE:		rowNorm
+POT_MAT:	[1, 2] ((0.8, 0.2))
+PC_MAT:		[1, 2] ((0.0, 0.0))
+
+NAME:		inner
+TYPE:		rowNorm
+POT_MAT:        [2, 2] ((0.5, 0.5),
+                        (0.1, 0.9))
+PC_MAT:         [2, 2] ((0.0, 0.0),
+                        (0.0, 0.0))
+
+NAME:		inner2
+TYPE:		rowNorm
+POT_MAT:        [2, 4] ((0.25, 0.1, 0.4, 0.25),
+                        (0.25, 0.25, 0.25, 0.25))
+PC_MAT:         [2, 4] ((0.25, 0.1, 0.4, 0.25),
+                        (0.25, 0.25, 0.25, 0.25))

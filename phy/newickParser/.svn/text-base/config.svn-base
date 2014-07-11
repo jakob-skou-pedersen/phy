@@ -1,0 +1,26 @@
+######## compilation flags #########################################
+
+# version
+VERSION	= 0.3
+
+# C compiler
+CC	= gcc
+
+# CXX compiler
+CXX	= g++
+
+# linker
+LD	= gcc
+
+# archiver
+AR	= ar
+
+# Extra flags to give to the C compiler
+##CFLAGS= -Wall -O3 -ansi
+CFLAGS	= -Wall -ggdb
+#CFLAGS = -O3
+
+
+# library paths
+LIB   = -I ../../inc 
+

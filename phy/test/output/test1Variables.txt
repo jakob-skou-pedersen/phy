@@ -1,0 +1,3 @@
+STATE_MAP_NAME:	twoState
+VAR_NAMES:	H O1 O2 
+

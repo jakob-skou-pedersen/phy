@@ -1,0 +1,11 @@
+PARSER_TEST 1
+
+
+#comment bla bla
+
+NAME1: first
+NAME2:	second
+
+
+NAME1: first.2  # another comment
+NAME2:	second.2

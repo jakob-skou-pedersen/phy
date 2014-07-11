@@ -1,0 +1,97 @@
+8
+
+dir
+48
+svn+ssh://appserver.binf.ku.dk/data/svn/jsp/prog/phy/trunk/src/test/data
+svn+ssh://appserver.binf.ku.dk/data/svn/jsp
+
+
+
+2009-04-17T11:27:59.180624Z
+48
+jsp
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+ba8d864e-3c39-0410-826d-ad064623088f
+
+EvoFoldConfig
+dir
+
+test1VarData.tab
+file
+55
+
+
+
+2009-06-19T12:35:30.000000Z
+b9d378fe6b69246d61d1979eb49eff0d
+2009-06-17T18:38:04.161939Z
+55
+jsp
+
+vert28way.nwk
+file
+
+
+
+
+2009-02-23T11:52:30.000000Z
+8266f6790c1c1bbf01516b1e302ea05c
+2009-02-24T08:28:01.479517Z
+39
+jsp
+
+test1FacData.tab
+file
+58
+
+
+
+2009-06-19T11:24:58.000000Z
+e701e8965a0091eccde1fd077139bf3d
+2009-06-19T15:19:59.163219Z
+58
+jsp
+
+multinomial
+dir
+
+dfgSpec
+dir
+
+test1.ama
+file
+
+
+
+
+2009-02-26T08:25:46.000000Z
+80b29048785a428ec6e19f105c0c5a59
+2009-02-28T11:10:08.378960Z
+41
+jsp
+
+test2.ama
+file
+
+
+
+
+2009-03-03T20:23:20.000000Z
+9656ad20b7059c1cd89a4d436a0f3b5c
+2009-04-06T12:10:07.312275Z
+43
+jsp
+

@@ -1,0 +1,14 @@
+EMIT_MODEL_COUNT: 2
+
+# remember that file names must be given relative to pwd 
+
+KIND:	phylo
+TYPE:	single
+NAME:	single
+FILE:	sngNucPhyloModel.v3.txt
+
+KIND:	phylo
+TYPE:	pair
+NAME:	pair
+MIN_DIST:	4
+FILE:	dinucPhyloModel.v3.txt

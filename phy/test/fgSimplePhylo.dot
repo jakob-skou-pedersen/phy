@@ -1,0 +1,19 @@
+graph G {
+0 [label="v0\n0"]
+;
+1 [label="v1\n1"]
+;
+2 [label="v2\n2"]
+;
+3 [label="f0\n3", shape=box]
+;
+4 [label="f1\n4", shape=box]
+;
+5 [label="f2\n5", shape=box]
+;
+0--3 ;
+0--4 ;
+0--5 ;
+1--3 ;
+2--4 ;
+}

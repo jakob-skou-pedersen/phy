@@ -1,0 +1,334 @@
+#ifndef YY_NewickParserBase_h_included
+#define YY_NewickParserBase_h_included
+
+#line 1 "/usr/local/lib/bison.h"
+/* before anything */
+#ifdef c_plusplus
+#ifndef __cplusplus
+#define __cplusplus
+#endif
+#endif
+#ifdef __cplusplus
+#ifndef YY_USE_CLASS
+#define YY_USE_CLASS
+#endif
+#else
+#endif
+#include <stdio.h>
+
+/* #line 14 "/usr/local/lib/bison.h" */
+#line 21 "NewickParserBase.h"
+#line 3 "newick.y"
+
+#include <iostream>
+#include <sstream>
+#undef  yyFlexLexer
+#define yyFlexLexer NewickFlexLexer
+#include <FlexLexer.h>
+#include "phy/NewickNode.h"
+
+#line 12 "newick.y"
+typedef union {
+  NewickNode *node;
+  vector<NewickNode *> *nodePointerList;
+  string *label;
+  double value;
+  } yy_NewickParserBase_stype;
+#define YY_NewickParserBase_STYPE yy_NewickParserBase_stype
+#define YY_NewickParserBase_LEX_BODY   {return lexer.yylex(); }
+#define YY_NewickParserBase_ERROR_BODY                                         \
+{cerr << "syntax error in newick tree format before: \""  \
+      << lexer.YYText()                                   \
+      << "\"."                                            \
+      << endl;}
+#define YY_NewickParserBase_MEMBERS                                            \
+  virtual ~NewickParserBase() {}                          \
+  NewickNode *parseTree(string const &tree);              \
+  protected:                                              \
+  virtual NewickNode *makeNode(string nm,                 \
+		     double bl,				  \
+		     NewickNode *p,			  \
+		     vector<NewickNode *> *dl) = 0;	  \
+  void setParentPointer(NewickNode *np, NewickNode *pp);  \
+  NewickNode *theTree;	                                  \
+  NewickFlexLexer lexer;                                  \
+
+
+#line 14 "/usr/local/lib/bison.h"
+ /* %{ and %header{ and %union, during decl */
+#ifndef YY_NewickParserBase_COMPATIBILITY
+#ifndef YY_USE_CLASS
+#define  YY_NewickParserBase_COMPATIBILITY 1
+#else
+#define  YY_NewickParserBase_COMPATIBILITY 0
+#endif
+#endif
+
+#if YY_NewickParserBase_COMPATIBILITY != 0
+/* backward compatibility */
+#ifdef YYLTYPE
+#ifndef YY_NewickParserBase_LTYPE
+#define YY_NewickParserBase_LTYPE YYLTYPE
+/* WARNING obsolete !!! user defined YYLTYPE not reported into generated header */
+/* use %define LTYPE */
+#endif
+#endif
+#ifdef YYSTYPE
+#ifndef YY_NewickParserBase_STYPE 
+#define YY_NewickParserBase_STYPE YYSTYPE
+/* WARNING obsolete !!! user defined YYSTYPE not reported into generated header */
+/* use %define STYPE */
+#endif
+#endif
+#ifdef YYDEBUG
+#ifndef YY_NewickParserBase_DEBUG
+#define  YY_NewickParserBase_DEBUG YYDEBUG
+/* WARNING obsolete !!! user defined YYDEBUG not reported into generated header */
+/* use %define DEBUG */
+#endif
+#endif
+#ifdef YY_NewickParserBase_STYPE
+#ifndef yystype
+#define yystype YY_NewickParserBase_STYPE
+#endif
+#endif
+/* use goto to be compatible */
+#ifndef YY_NewickParserBase_USE_GOTO
+#define YY_NewickParserBase_USE_GOTO 1
+#endif
+#endif
+
+/* use no goto to be clean in C++ */
+#ifndef YY_NewickParserBase_USE_GOTO
+#define YY_NewickParserBase_USE_GOTO 0
+#endif
+
+#ifndef YY_NewickParserBase_PURE
+
+/* #line 63 "/usr/local/lib/bison.h" */
+#line 110 "NewickParserBase.h"
+
+#line 63 "/usr/local/lib/bison.h"
+/* YY_NewickParserBase_PURE */
+#endif
+
+/* #line 65 "/usr/local/lib/bison.h" */
+#line 117 "NewickParserBase.h"
+
+#line 65 "/usr/local/lib/bison.h"
+/* prefix */
+#ifndef YY_NewickParserBase_DEBUG
+
+/* #line 67 "/usr/local/lib/bison.h" */
+#line 124 "NewickParserBase.h"
+#define YY_NewickParserBase_DEBUG 1
+
+#line 67 "/usr/local/lib/bison.h"
+/* YY_NewickParserBase_DEBUG */
+#endif
+#ifndef YY_NewickParserBase_LSP_NEEDED
+
+/* #line 70 "/usr/local/lib/bison.h" */
+#line 133 "NewickParserBase.h"
+
+#line 70 "/usr/local/lib/bison.h"
+ /* YY_NewickParserBase_LSP_NEEDED*/
+#endif
+/* DEFAULT LTYPE*/
+#ifdef YY_NewickParserBase_LSP_NEEDED
+#ifndef YY_NewickParserBase_LTYPE
+typedef
+  struct yyltype
+    {
+      int timestamp;
+      int first_line;
+      int first_column;
+      int last_line;
+      int last_column;
+      char *text;
+   }
+  yyltype;
+
+#define YY_NewickParserBase_LTYPE yyltype
+#endif
+#endif
+/* DEFAULT STYPE*/
+#ifndef YY_NewickParserBase_STYPE
+#define YY_NewickParserBase_STYPE int
+#endif
+/* DEFAULT MISCELANEOUS */
+#ifndef YY_NewickParserBase_PARSE
+#define YY_NewickParserBase_PARSE yyparse
+#endif
+#ifndef YY_NewickParserBase_LEX
+#define YY_NewickParserBase_LEX yylex
+#endif
+#ifndef YY_NewickParserBase_LVAL
+#define YY_NewickParserBase_LVAL yylval
+#endif
+#ifndef YY_NewickParserBase_LLOC
+#define YY_NewickParserBase_LLOC yylloc
+#endif
+#ifndef YY_NewickParserBase_CHAR
+#define YY_NewickParserBase_CHAR yychar
+#endif
+#ifndef YY_NewickParserBase_NERRS
+#define YY_NewickParserBase_NERRS yynerrs
+#endif
+#ifndef YY_NewickParserBase_DEBUG_FLAG
+#define YY_NewickParserBase_DEBUG_FLAG yydebug
+#endif
+#ifndef YY_NewickParserBase_ERROR
+#define YY_NewickParserBase_ERROR yyerror
+#endif
+
+#ifndef YY_NewickParserBase_PARSE_PARAM
+#ifndef __STDC__
+#ifndef __cplusplus
+#ifndef YY_USE_CLASS
+#define YY_NewickParserBase_PARSE_PARAM
+#ifndef YY_NewickParserBase_PARSE_PARAM_DEF
+#define YY_NewickParserBase_PARSE_PARAM_DEF
+#endif
+#endif
+#endif
+#endif
+#ifndef YY_NewickParserBase_PARSE_PARAM
+#define YY_NewickParserBase_PARSE_PARAM void
+#endif
+#endif
+
+/* TOKEN C */
+#ifndef YY_USE_CLASS
+
+#ifndef YY_NewickParserBase_PURE
+extern YY_NewickParserBase_STYPE YY_NewickParserBase_LVAL;
+#endif
+
+
+/* #line 143 "/usr/local/lib/bison.h" */
+#line 211 "NewickParserBase.h"
+#define	SIGNED_NUMBER	258
+#define	UNSIGNED_NUMBER	259
+#define	UNQUOTED_LABEL	260
+#define	QUOTED_LABEL	261
+
+
+#line 143 "/usr/local/lib/bison.h"
+ /* #defines token */
+/* after #define tokens, before const tokens S5*/
+#else
+#ifndef YY_NewickParserBase_CLASS
+#define YY_NewickParserBase_CLASS NewickParserBase
+#endif
+
+#ifndef YY_NewickParserBase_INHERIT
+#define YY_NewickParserBase_INHERIT
+#endif
+#ifndef YY_NewickParserBase_MEMBERS
+#define YY_NewickParserBase_MEMBERS 
+#endif
+#ifndef YY_NewickParserBase_LEX_BODY
+#define YY_NewickParserBase_LEX_BODY  
+#endif
+#ifndef YY_NewickParserBase_ERROR_BODY
+#define YY_NewickParserBase_ERROR_BODY  
+#endif
+#ifndef YY_NewickParserBase_CONSTRUCTOR_PARAM
+#define YY_NewickParserBase_CONSTRUCTOR_PARAM
+#endif
+/* choose between enum and const */
+#ifndef YY_NewickParserBase_USE_CONST_TOKEN
+#define YY_NewickParserBase_USE_CONST_TOKEN 0
+/* yes enum is more compatible with flex,  */
+/* so by default we use it */ 
+#endif
+#if YY_NewickParserBase_USE_CONST_TOKEN != 0
+#ifndef YY_NewickParserBase_ENUM_TOKEN
+#define YY_NewickParserBase_ENUM_TOKEN yy_NewickParserBase_enum_token
+#endif
+#endif
+
+class YY_NewickParserBase_CLASS YY_NewickParserBase_INHERIT
+{
+public: 
+#if YY_NewickParserBase_USE_CONST_TOKEN != 0
+/* static const int token ... */
+
+/* #line 182 "/usr/local/lib/bison.h" */
+#line 260 "NewickParserBase.h"
+static const int SIGNED_NUMBER;
+static const int UNSIGNED_NUMBER;
+static const int UNQUOTED_LABEL;
+static const int QUOTED_LABEL;
+
+
+#line 182 "/usr/local/lib/bison.h"
+ /* decl const */
+#else
+enum YY_NewickParserBase_ENUM_TOKEN { YY_NewickParserBase_NULL_TOKEN=0
+
+/* #line 185 "/usr/local/lib/bison.h" */
+#line 273 "NewickParserBase.h"
+	,SIGNED_NUMBER=258
+	,UNSIGNED_NUMBER=259
+	,UNQUOTED_LABEL=260
+	,QUOTED_LABEL=261
+
+
+#line 185 "/usr/local/lib/bison.h"
+ /* enum token */
+     }; /* end of enum declaration */
+#endif
+public:
+ int YY_NewickParserBase_PARSE(YY_NewickParserBase_PARSE_PARAM);
+ virtual void YY_NewickParserBase_ERROR(char *msg) YY_NewickParserBase_ERROR_BODY;
+#ifdef YY_NewickParserBase_PURE
+#ifdef YY_NewickParserBase_LSP_NEEDED
+ virtual int  YY_NewickParserBase_LEX(YY_NewickParserBase_STYPE *YY_NewickParserBase_LVAL,YY_NewickParserBase_LTYPE *YY_NewickParserBase_LLOC) YY_NewickParserBase_LEX_BODY;
+#else
+ virtual int  YY_NewickParserBase_LEX(YY_NewickParserBase_STYPE *YY_NewickParserBase_LVAL) YY_NewickParserBase_LEX_BODY;
+#endif
+#else
+ virtual int YY_NewickParserBase_LEX() YY_NewickParserBase_LEX_BODY;
+ YY_NewickParserBase_STYPE YY_NewickParserBase_LVAL;
+#ifdef YY_NewickParserBase_LSP_NEEDED
+ YY_NewickParserBase_LTYPE YY_NewickParserBase_LLOC;
+#endif
+ int YY_NewickParserBase_NERRS;
+ int YY_NewickParserBase_CHAR;
+#endif
+#if YY_NewickParserBase_DEBUG != 0
+public:
+ int YY_NewickParserBase_DEBUG_FLAG;	/*  nonzero means print parse trace	*/
+#endif
+public:
+ YY_NewickParserBase_CLASS(YY_NewickParserBase_CONSTRUCTOR_PARAM);
+public:
+ YY_NewickParserBase_MEMBERS 
+};
+/* other declare folow */
+#endif
+
+
+#if YY_NewickParserBase_COMPATIBILITY != 0
+/* backward compatibility */
+#ifndef YYSTYPE
+#define YYSTYPE YY_NewickParserBase_STYPE
+#endif
+
+#ifndef YYLTYPE
+#define YYLTYPE YY_NewickParserBase_LTYPE
+#endif
+#ifndef YYDEBUG
+#ifdef YY_NewickParserBase_DEBUG 
+#define YYDEBUG YY_NewickParserBase_DEBUG
+#endif
+#endif
+
+#endif
+/* END */
+
+/* #line 236 "/usr/local/lib/bison.h" */
+#line 334 "NewickParserBase.h"
+#endif

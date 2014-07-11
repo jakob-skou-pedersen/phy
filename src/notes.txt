@@ -1,0 +1,6 @@
+# static linking EvoFold requires of blas and gfortran to be explicitly linked as well:
+g++ --static -Wall -O2 -DNDEBUG -o .libs/EvoFold_static EvoFold.o ../phy/.libs/libphy.a -lboost_program_options -llapack -lblas -lntl -lopt -lnewmat -lm -lgfortran 
+g++ --static -Wall -O2 -DNDEBUG -o .libs/dfgTrain_static dfgTrain.o ../phy/.libs/libphy.a -lboost_program_options -llapack -lblas -lntl -lopt -lnewmat -lm -lgfortran 
+g++ --static -Wall -O2 -DNDEBUG -o .libs/dfgEval_static dfgEval.o ../phy/.libs/libphy.a -lboost_program_options -llapack -lblas -lntl -lopt -lnewmat -lm -lgfortran 
+g++ --static -Wall -O2 -DNDEBUG -o .libs/multinomial_static multinomial.o ../phy/.libs/libphy.a -lboost_program_options -llapack -lblas -lntl -lopt -lnewmat -lm -lgfortran 
+g++ --static -Wall -O2 -DNDEBUG -o .libs/ProbFold_static ProbFold.o ../phy/.libs/libphy.a -lboost_program_options -llapack -lblas -lntl -lopt -lnewmat -lm -lgfortran 

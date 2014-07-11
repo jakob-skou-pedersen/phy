@@ -1,0 +1,17 @@
+01.28.2009:
+
+o commit all new code to svn
+
+o Make EvoFold application
+
+Missing parts:
+
+o IO of phylo models
+o Allow GTR rate matrix to read raw matrix and infer parameters (this
+  would allow use of any other already infererred rate matrix)
+o Define format. Include NAMED_ALPHABET
+o Specify emission distribution wrappers for phylogenetic models
+o functions that generate emssion vectors and emission matrices.
+
+o Define main with optionparser for main binary
+o compare with existing EvoFold app

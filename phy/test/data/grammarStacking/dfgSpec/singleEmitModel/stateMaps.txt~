@@ -1,0 +1,5 @@
+# Specification of state maps
+
+NAME:	        single	
+SYMBOLS:	A C G T  
+META_SYMBOLS:	*=A C G T; .=A C G T

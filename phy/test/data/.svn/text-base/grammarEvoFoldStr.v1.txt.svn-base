@@ -1,0 +1,106 @@
+GRAMMAR_VERSION:  1
+
+# meta model (4 states, 7 transitions -- simplified version
+# of high-level model used in RNA-decoder)
+
+NAME:       MS.0
+TYPE:       SILENT
+FROM:       MS
+TO:         B_NS
+PROB:       0.9351
+
+NAME:       MS.1
+TYPE:       SILENT
+FROM:       MS
+TO:         I
+PROB:       0.0649
+
+NAME:       B_NS.0
+TYPE:       BIFURCATE
+FROM:       B_NS
+TO_LEFT:    E_NS
+TO_RIGHT:   I
+PROB:       1.0
+
+# The 'I' state was named 'S' in RNA-decoder.
+NAME:       I.0
+TYPE:       SILENT
+FROM:       I
+TO:         B_S
+PROB:       0.532977
+
+NAME:       I.1
+TYPE:       END
+FROM:       I
+PROB:       0.467023
+
+NAME:       B_S.0
+TYPE:       BIFURCATE
+FROM:       B_S
+TO_LEFT:    P
+TO_RIGHT:   B_NS
+PROB:       0.929766
+
+NAME:       B_S.1
+TYPE:       BIFURCATE
+FROM:       B_S
+TO_LEFT:    P
+TO_RIGHT:   I
+PROB:       0.0702341
+
+# structural model  (3 states, 6 transitions -- almost identical to Knudsen 99)
+
+NAME:       P.0
+TYPE:       PAIR
+FROM:       P
+TO:         P
+PROB:       0.797853
+EMIT_MODEL: pair
+
+NAME:       P.1
+TYPE:       SILENT
+FROM:       P
+TO:         B
+PROB:       0.202147
+
+NAME:       B.0
+TYPE:       BIFURCATE
+FROM:       B
+TO_LEFT:    E
+TO_RIGHT:   B
+PROB:       0.590478
+
+NAME:       B.1
+TYPE:       BIFURCATE
+FROM:       B
+TO_LEFT:    E
+TO_RIGHT:   E
+PROB:       0.409522
+
+NAME:       E.0
+TYPE:       PAIR
+FROM:       E
+TO:         P
+PROB:       0.067748
+EMIT_MODEL: pair
+
+NAME:       E.1
+TYPE:       TERMINAL
+FROM:       E
+PROB:       0.932252
+EMIT_MODEL: single
+
+# non-structural model (1 state, 2 transitions)
+
+NAME:       E_NS.0
+TYPE:       LEFT
+FROM:       E_NS
+TO:         E_NS
+PROB:       0.958403
+EMIT_MODEL: single
+
+NAME:       E_NS.1
+TYPE:       TERMINAL
+FROM:       E_NS
+PROB:       0.0415971
+EMIT_MODEL: single

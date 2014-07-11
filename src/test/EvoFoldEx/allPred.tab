@@ -1,0 +1,2 @@
+# seqId	beginPos	endPos	basePairCount	strCykProb	bgCykProb	strProb	bgProb	cykScore	score	strPostProb	fold	posScore
+test3	0	14	2	0.2270204769e-88	0	0.294512908e-88	0	inf	inf	0.77083	((..........))	1,1,1,1,1,1,1,1,1,1,1,1,1,1

@@ -1,0 +1,10 @@
+# The first line of the parameters file must begin with "NAME:",
+# followed by a descriptive name of each the n parameters (can just be
+# the numbers 1 - n). The subsequent lines each define multinomial
+# distributions with n parameters.
+
+NAME:	A	C	G	T
+mId_1	0.25	0.25	0.25	0.25
+mId_2	0.2	0.3	0.1	0.4
+mId_3	0.999	0.0003	0.0003	0.0004
+mId_3	0.5	0.5	0.0	0.0

@@ -1,0 +1,7 @@
+# Specification of variables' stateMap usage
+
+STATE_MAP_NAME:	twoState
+VAR_NAMES:	H O1
+
+STATE_MAP_NAME:	2-twoState
+VAR_NAMES:	O2

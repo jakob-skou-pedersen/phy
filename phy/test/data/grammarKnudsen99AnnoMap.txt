@@ -1,0 +1,11 @@
+# annotation map for the knudsen 99 grammar
+# annotations are associated with emit models (phylo-models in this case)
+
+# di-nuc emit model
+NAME:       pair
+ANNO_LEFT:  (
+ANNO_RIGHT: )
+
+# single-nuc emit model
+NAME:       single
+ANNO:	    .

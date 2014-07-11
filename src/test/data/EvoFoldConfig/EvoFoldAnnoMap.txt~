@@ -1,0 +1,23 @@
+# annotation map for the EvoFold v.1 grammar
+
+# P.0 is of type PAIR
+NAME:       P.0
+ANNO_LEFT:  (
+ANNO_RIGHT: )
+
+# E.0 is of type PAIR
+NAME:       E.0
+ANNO_LEFT:  (
+ANNO_RIGHT: )
+
+# E.1 is of type TERMINAL
+NAME:       E.1
+ANNO:	    .
+
+# E_NS.0 is of type LEFT
+NAME:       E_NS.0
+ANNO:	    .
+
+# E_NS.1 is of type TERMINAL
+NAME:       E_NS.1
+ANNO:	    .

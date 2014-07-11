@@ -1,0 +1,17 @@
+GRAMMAR_VERSION:  1
+TRANSITION_COUNT: 2
+
+# non-structural model (1 state, 2 transitions)
+
+NAME:       E_NS.0
+TYPE:       LEFT
+FROM:       E_NS
+TO:         E_NS
+PROB:       0.958403
+EMIT_MODEL: single
+
+NAME:       E_NS.1
+TYPE:       TERMINAL
+FROM:       E_NS
+PROB:       0.0415971
+EMIT_MODEL: single

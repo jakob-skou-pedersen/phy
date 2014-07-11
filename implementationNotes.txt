@@ -1,0 +1,85 @@
+
+Design questions:
+
+Use different approaches for sequential data:
+ - specify model in terms of slices
+ - use for loops instead of recursions
+ - use external data strcutures for dynnamic programming tables
+
+
+For non-sequential data (e.g., phylo-models):
+
+Graphical model specification:
+
+  - Graph structure
+  - variable nodes
+    o dimension
+  - factor nodes:
+    o potential
+    o variable order
+
+
+Algorithms:
+	
+  - sum-product
+    - marginal of specific nodes
+    - marginal of factor neighbor combinations
+  - max-sum
+    - max probs
+    - arg_max
+
+Support algorithms:
+
+  - Init observed values
+    - map from 
+
+
+
+---- 
+
+Design questions:
+
+  - Should factors expose their matrix of vector potentials. 
+    - (not if algorithms should not make use of them. In other words,
+      not if other potential implementations are intended.)
+  - Should factors be implemented in terms of an inheritance hirarchy.
+    - only if we need to specialize implementations.
+  - Do we need a general ordering of the FG nodes (variable and factors).
+
+factorGraph constructor should take
+
+vector<unsigned> dimensions; //
+vector<matrix_t> potentials; // matrix_t has one row if potential one-dimensional
+vector<vector<unsigned> > varNeighbor;
+vector<vector<unsigned> > facNeighbors;
+
+
+need variable vector
+
+vector< vector< unsigned > > neighbors;
+
+vector<FGBase *> nodes;
+
+vector<unsigned> factors;    // factor indices in nodes
+
+vector<unsigned> variables;  // variable indices in nodes
+
+
+---
+scratch
+
+nodes:
+1:
+factor neighbors: [1, 2]
+dimension: 4
+
+factors:
+1:
+potential: []
+variable neighbors: 1
+
+2:
+potential: []
+variable neighbors: 2
+
+

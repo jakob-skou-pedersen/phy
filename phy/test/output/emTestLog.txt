@@ -1,0 +1,4 @@
+minDeltaLogLik: 0.0001
+maxIter:        1000
+
+iter	logLik	deltaLogLik

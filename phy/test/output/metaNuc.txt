@@ -1,0 +1,6 @@
+ALPHABET_NAME:	nuc
+
+ALPHABET_NAME:	metaNuc
+
+ALPHABET_NAME:	2-metaNuc
+

@@ -1,0 +1,8 @@
+# Specification of variables' stateMap usage
+
+STATE_MAP_NAME: pair	
+VAR_NAMES:	H 
+
+STATE_MAP_NAME: outerpair
+VAR_NAMES:      O
+

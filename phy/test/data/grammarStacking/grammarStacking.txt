@@ -1,0 +1,55 @@
+GRAMMAR_VERSION:  1
+
+NAME:       S.0
+TYPE:       BIFURCATE
+FROM:       S
+TO_LEFT:    L
+TO_RIGHT:   S
+PROB:       0.5
+
+NAME:       S.1
+TYPE:       SILENT
+FROM:       S
+TO:         L
+PROB:       0.5
+
+NAME:       L.0
+TYPE:       TERMINAL
+FROM:       L
+PROB:       0.5
+EMIT_MODEL: single
+
+NAME:       L.1
+TYPE:       PAIR
+FROM:       L
+TO:         P 
+PROB:       0.5
+EMIT_MODEL: pair
+
+NAME:       P.0
+TYPE:       PAIR
+FROM:       P 
+TO:    	    F 
+PROB:       0.5 
+EMIT_MODEL: stack
+
+NAME:       P.1
+TYPE:       BIFURCATE
+FROM:       P
+TO_LEFT:    L
+TO_RIGHT:   S 
+PROB:       0.5
+
+NAME:       F.0
+TYPE:       BIFURCATE
+FROM:       F
+TO_LEFT:    L
+TO_RIGHT:   S
+PROB:       0.5
+
+NAME:       F.1
+TYPE:       PAIR
+FROM:       F
+TO:         F
+PROB:       0.5
+EMIT_MODEL: stack

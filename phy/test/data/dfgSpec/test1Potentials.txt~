@@ -1,0 +1,14 @@
+# Specification of factor potentials and potentially pseudo counts for training
+# name must be unique
+
+NAME:		prior1
+TYPE:		rowNorm
+POT_MAT:	[1, 2] ((0.8, 0.2))
+PC_MAT:		[1, 2] ((4.0, 1.0))
+
+NAME:		inner
+TYPE:		rowNorm
+POT_MAT:        [2, 2] ((0.5, 0.5),
+                        (0.1, 0.9))
+PC_MAT:         [2, 2] ((2.0, 2.0),
+                        (0.4, 3.6))

@@ -1,0 +1,6 @@
+# Specification of state maps
+
+NAME:           pair
+SYMBOLS:        A C G T
+META_SYMBOLS:   U=T; *=A C G T; .=A C G T
+MULTIPLICITY:   2

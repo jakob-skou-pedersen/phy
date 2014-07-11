@@ -1,0 +1,11 @@
+# example of var data specification 
+# note that 'NAME:' is a keyword
+# symbols are separated by whitespace 
+# comment lines starting with '#' are allowed
+NAME:	  O1	O2
+id_1	  a	aa
+id_2	  b	aa
+id_3	  *	**
+id_4	  a	ab
+id_5	  b	ab
+id_6	  *	**

@@ -1,0 +1,15 @@
+# annotation map for the EvoFold v.1 grammar
+# annotations are associated with phylo models
+
+# di-nuc phylo model
+NAME:       pair
+ANNO_LEFT:  (
+ANNO_RIGHT: )
+
+# single-nuc phylo model
+NAME:       single
+ANNO:	    .
+
+# slow single-nuc phylo model
+NAME:       singleSlow
+ANNO:	    .

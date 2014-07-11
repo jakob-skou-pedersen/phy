@@ -1,0 +1,5 @@
+# example of var data specification 
+# note that 'NAME:' is a keyword
+NAME:	    var1_id	      var2_id
+data1_id    A		      A
+data2_id    B		      A

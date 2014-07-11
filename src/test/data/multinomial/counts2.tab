@@ -1,0 +1,16 @@
+# The first line of the counts file must begin with "NAME:",
+# followed by a descriptive name of each the n counts categories (can just be
+# the numbers 1 - n). These should match with names given in the
+# parameters file. The subsequent lines each define a set of counts
+# and must start with an id tag.
+NAME:	A	C	G	T
+cId_1	30	3	7	40
+cId_2	4000	200	10	1
+cId_3	99000	300	200	2
+cId_4	1	1	1	2
+cId_5	350	350	350	35
+cId_6	350	350	350	350
+cId_7	30	3	7	40
+cId_8	4000	200	10	1
+cId_9	99000	300	200	2
+cId_10	1	1	1	2

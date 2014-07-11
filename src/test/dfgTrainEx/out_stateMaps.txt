@@ -1,0 +1,8 @@
+
+NAME:	2-twoState
+SYMBOLS:	 aa ab ba bb
+META_SYMBOLS:	 b. = ba bb; a* = aa ab; .a = aa ba; .b = ab bb; b* = ba bb; *a = aa ba; *. = aa ab ba bb; a. = aa ab; .. = aa ab ba bb; .* = aa ab ba bb; *b = ab bb; ** = aa ab ba bb;
+
+NAME:	twoState
+SYMBOLS:	 a b
+META_SYMBOLS:	 . = a b; * = a b;
