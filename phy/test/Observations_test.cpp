@@ -78,16 +78,27 @@ BOOST_AUTO_TEST_CASE(ObservationsIO_stateMap_1)
   //  ofstream fOut("./output/metaNuc.txt");
 
   StateMap sm("");
+  vector<state_t> v(2);
+  v.at(0) = 1; v.at(1) = 0;
 
   // twoState
   fIn >> sm;
   BOOST_CHECK(sm.name() == "twoState");
   BOOST_CHECK(sm.stateCount() == 2);
   BOOST_CHECK(sm.symbol2State("A") == 0);
+  BOOST_CHECK(sm.state2Symbol(0) == "A");
   BOOST_CHECK(sm.symbol2State("B") == 1);
+  BOOST_CHECK(sm.state2Symbol(1) == "B");
+
+  BOOST_CHECK_EQUAL(sm.state2Symbol(v).size(), 2);
+  BOOST_CHECK_EQUAL(sm.state2Symbol(v)[0], "B");
+  BOOST_CHECK_EQUAL(sm.state2Symbol(v)[1], "A");
+
   BOOST_CHECK(sm.metaStateCount() == 2 + 2);
   BOOST_CHECK(sm.degeneracyVector("*")[0] == "A");
   BOOST_CHECK(sm.degeneracyVector("*")[1] == "B");
+
+
 
   // 2-twoState  (meaning four two-long states)
   fIn >> sm;

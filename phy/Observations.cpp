@@ -41,7 +41,8 @@ namespace phy {
 
   vector<symbol_t> const StateMap::state2Symbol(vector<state_t> v) const
   {
-    vector<symbol_t> u( v.size() );
+    vector<symbol_t> u;
+    u.reserve( v.size() );
     for (unsigned i = 0; i < v.size(); i++) {
       u.push_back( state2Symbol(v[i]) );
     }
