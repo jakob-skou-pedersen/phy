@@ -3,8 +3,6 @@
  *
  * See README_license.txt for license agreement.
  *******************************************************************/
-#ifndef NO_FLEX
-
 #ifndef YY_NewickParserBase_h_included
 #define YY_NewickParserBase_h_included
 
@@ -339,14 +337,3 @@ public:
 /* #line 236 "/usr/local/lib/bison.h" */
 #line 334 "NewickParserBase.h"
 #endif
-
-
-#else  /* NO_FLEX */
-
-class NewickParserBase {
-public:
-  virtual NewickNode *parseTree(string const &tree);
-  void setParentPointer(NewickNode *np, NewickNode *pp);
-};
-
-#endif /* NO_FLEX */

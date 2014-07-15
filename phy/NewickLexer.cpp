@@ -1,10 +1,3 @@
-/******************************************************************** 
- * Copyright (C) 2008-2014 Jakob Skou Pedersen - All Rights Reserved.
- *
- * See README_license.txt for license agreement.
- *******************************************************************/
-#ifndef NO_FLEX
-
 #line 2 "NewickLexer.cpp"
 
 #line 4 "NewickLexer.cpp"
@@ -1605,5 +1598,3 @@ void yyfree (void * ptr )
 
 
 int NewickFlexLexer::yywrap() {return 1;}
-
-#endif /* NO_FLEX */

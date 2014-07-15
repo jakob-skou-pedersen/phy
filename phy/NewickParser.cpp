@@ -19,7 +19,6 @@ NewickNode *NewickParser::makeNode(string nm,
 }
 
 
-# ifndef NO_FLEX
 // undefined functions from NewickParserBase
 NewickNode *NewickParserBase::parseTree(string const &tree)
 {
@@ -31,16 +30,6 @@ NewickNode *NewickParserBase::parseTree(string const &tree)
   return theTree;
 }				  
 
-# else
-NewickNode *NewickParserBase::parseTree(string const &tree)
-{
-  cerr << "NewickParserBase::parseTree cannot be called when compiled with NO_FLEX preprocessor flag. Install needed libraries (Flex and Bison) and recompile witout the NO_FLEX flag. Program terminating." << endl;
-  exit(0);
-  
-  NewickNode * np = NULL;
-  return np;
-}				  
-# endif /* NO_FLEX */
 
 void NewickParserBase::setParentPointer(NewickNode *np, NewickNode *pp)
 {

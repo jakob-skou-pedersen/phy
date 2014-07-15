@@ -24,11 +24,11 @@ optimization (Newmat and OPT++); parser generation (Flex and Bison).
 
 Not all of these libraries are needed for all functionality. The OPT++
 and Newmat libraries can optionally be left out using a preprocessor
-directive (NO_OPTPP) and Flex and Bison can be left out using a
-similar directive (NO_FLEX). In this case the numerical optimization
-routines are not provided and phylogenetic trees in the Newick format
-cannot be parsed. This functionality is currently only used for
-phylogenetic analysis.
+directive (NO_OPTPP), in which case the numerical optimization
+routines are not provided. This functionality is currently only used
+for estimating rate matrices for phylogenetic analysis. The Flex and
+Bison libraries are not needed for compilation, as the the relevant
+Flex header file is included in the distribution.
 
 The installation of the third party libraries is descibed in
 README_thirdPartyLibraries.txt.
@@ -64,14 +64,13 @@ versions:
 
 A) For production (fastest running applications):
 
-  ./configure CXXFLAGS="-Wall -O2 -DNDEBUG -isystem /usr/local/include -D NO_OPTPP -D NO_FLEX"
+  ./configure CXXFLAGS="-Wall -O2 -DNDEBUG -isystem /usr/local/include -D NO_OPTPP"
 
 B) For development (including debugging information):
 
-  ./configure CXXFLAGS=" -Wall -ggdb3 -O0 -isystem /usr/local/include -D NO_OPTPP -D NO_FLEX" 
+  ./configure CXXFLAGS=" -Wall -ggdb3 -O0 -isystem /usr/local/include -D NO_OPTPP" 
 
-To include OPT++ and Flex / Bison libraries leave out "-D NO_OPTPP -D
-NO_FLEX" from the above.
+To include OPT++ leave out "-D NO_OPTPP" from the above.
 
 
 Compilation, checking (running a unit test suite), and installation of
