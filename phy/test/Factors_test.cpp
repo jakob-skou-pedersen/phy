@@ -270,6 +270,17 @@ BOOST_AUTO_TEST_CASE(readFactorFile_1)
   BOOST_CHECK_EQUAL(factorMap["inner"]->mkFactor()(1,0), 0.1);
 }
 
+BOOST_AUTO_TEST_CASE(readFactorFile_2) 
+{
+  map<string, AbsBasFacPtr_t> factorMap = readFactorFile("./data/dfgSpec/test2Potentials.txt");
+
+  BOOST_CHECK(factorMap["prior"] != NULL);
+  BOOST_CHECK_EQUAL(factorMap["prior"]->mkFactor().size1(), (unsigned) 1);
+  BOOST_CHECK_EQUAL(factorMap["prior"]->mkFactor().size2(), (unsigned) 12);
+  // BOOST_CHECK_EQUAL(factorMap["prior"]->mkFactor()(0,1), 0.2);
+}
+
+
 
 BOOST_AUTO_TEST_CASE(writeFactorMap_1) 
 {

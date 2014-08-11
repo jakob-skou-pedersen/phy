@@ -4,12 +4,15 @@
  * See README_license.txt for license agreement.
  *******************************************************************/
 #include "phy/FactorsIO.h"
+#include <stdio.h>
+#include <cassert>
 
 namespace phy {
 
   // helper functions
   AbsBasFacPtr_t readAbstractFullyParameterizedFactor(istream & str, string const & type, string const & name)
   {
+    if(type == "rowNorm" or type == "colNorm" or type == "globNorm" ){
     matrix_t potMat;
     getFeatureAndSkipLine(str, "POT_MAT:", potMat);
 
@@ -26,10 +29,31 @@ namespace phy {
       return  AbsBasFacPtr_t(new ColumnNormFactor(name, potMat, pcMat) );
     if (type == "globNorm")
       return  AbsBasFacPtr_t(new GlobalNormFactor(name, potMat, pcMat) );
-    else {
-      errorAbort("From readAbstractFullyParameterizedFactor: Unknown type ('" + type + "') in specification of factor with name '" + name + "'.");
-      exit(1); // to satisfy compiler
+
     }
+    if (type == "normal"){
+      //TODO Read all sorts of tags
+      int no_bp = 0;
+      getFeatureAndSkipLine(str, "BREAKPOINTS:", no_bp); std::cout << "Breakpoints read from file: " << no_bp << std::endl;
+
+      double min = 0;
+      double max = 0;
+      getFeatureAndSkipLine(str, "MIN:", min);
+      getFeatureAndSkipLine(str, "MAX:", max);
+      printf("Range [%f;%f]\n", min, max);
+
+      //TODO Assert min < max
+      assert(min < max );
+
+      vector_t breakpoints(no_bp);
+      for(int i = 0; i < no_bp; ++i)
+	breakpoints(i) = min + i* (max-min)/(no_bp-1);
+
+      return AbsBasFacPtr_t(new NormalFactor(name, 1, 1, breakpoints));
+    }
+
+    errorAbort("From readAbstractFullyParameterizedFactor: Unknown type ('" + type + "') in specification of factor with name '" + name + "'.");
+    exit(1); // to satisfy compiler
   }
 
 
@@ -58,7 +82,7 @@ namespace phy {
     getFeatureAndSkipLine(str, "TYPE:", type);
 
     // dispatch the correct parser depending on type
-    if (type == "rowNorm" or type == "colNorm" or type == "globNorm")
+    if (type == "rowNorm" or type == "colNorm" or type == "globNorm" or type == "normal")
       return pair<string, AbsBasFacPtr_t>(name, readAbstractFullyParameterizedFactor(str, type, name) );
     else {
       errorAbort("From readFactor: Unknown type ('" + type + "') in specification of factor with name '" + name + "'.");

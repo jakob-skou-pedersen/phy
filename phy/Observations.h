@@ -13,6 +13,7 @@
 #include "boost/foreach.hpp"
 #include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp> 
+#include <boost/lexical_cast.hpp>
 #include <string>
 #include <vector>
 #include <utility>
@@ -48,6 +49,9 @@ namespace phy {
  
     /** Constructor of n-long multiSymbols based on a basic stateMap. If staMap has a name, and no explicit name is given, the name of the constructed StateMap will be n-name.*/
     StateMap(StateMap const & staMap, unsigned n, string const & explicitName = "");
+
+    /** Constructor for continuous type StateMap */
+    StateMap( vector_t const & breakpoints, string const & name = "") : name_(name), isCont_(true),  breakpoints_(breakpoints), states_(vector<state_t>(breakpoints.size() + 1)) { initCont(); };
  
     /** Copy assignment operator. */
     StateMap const & operator=(StateMap const &rhs);
@@ -80,6 +84,7 @@ namespace phy {
 
     /** setup data structures */
     void init();
+    void initCont();
 
     vector<symbol_t> state2Symbol_;
     boost::unordered_map<symbol_t, state_t> symbol2State_;
@@ -88,6 +93,11 @@ namespace phy {
     unsigned metaStateCount_;
     unsigned symbolSize_;
     string name_;
+
+    //TODO I would rather have an interface class with discrete and continous implementations
+    bool isCont_; //TODO initialize to false in existing constructors
+    vector_t breakpoints_;
+    vector<state_t> states_;
   };
 
   /** returns an n-state symbol with state 'state' based on stateMap. */

@@ -1,0 +1,5 @@
+NAME:		prior
+TYPE:		normal
+BREAKPOINTS:	11
+MIN:		0.0
+MAX:		1.0

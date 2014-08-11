@@ -113,6 +113,20 @@ BOOST_AUTO_TEST_CASE(ObservationsIO_stateMap_1)
   BOOST_CHECK(sm.degeneracyVector("..")[1] == "AB");
 }
 
+BOOST_AUTO_TEST_CASE(ObservationsIO_stateMap_2) 
+{
+  ifstream fIn("./data/dfgSpec/test2StateMaps.txt");
+  
+  StateMap sm("");
+  fIn >> sm;
+  
+  //Testing constructor
+  BOOST_CHECK_EQUAL( sm.breakpoints_.size(), 11);
+
+  //Testing Parsing
+  BOOST_CHECK_EQUAL( sm.symbol2State("0.03"), 1);
+  BOOST_CHECK_EQUAL( sm.symbol2State("0.43"), 5);
+}
 
 
 BOOST_AUTO_TEST_CASE(Observations_mkDiSymbol_1) 

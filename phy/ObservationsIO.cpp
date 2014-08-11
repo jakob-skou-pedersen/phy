@@ -47,6 +47,11 @@ namespace phy {
     unsigned mult = 1; // multiplicity
     string name;
     string tag;
+    string real;
+    bool is_real = false;
+    double min;
+    double max;
+    int no_bp;
     str >> tag;
 
     if (tag == "ALPHABET_NAME:") {  // use pre-defined state map
@@ -84,15 +89,46 @@ namespace phy {
 	  str >> mult;
 	  skipLine(str); // skip rest of line
 	}
+	else if (tag == "REAL:") {
+	  str >> real;
+	  if( real == "TRUE" or real == "T")
+	    is_real = true;
+	  else if ( real == "FALSE" or real == "F")
+	    is_real = false;
+	  else
+	    errorAbort("REAL: tag should be either T, TRUE, F, FALSE, note default is FALSE");
+	  skipLine(str);
+	}
+	else if ( tag == "BREAKPOINTS:" ){
+	  str >> no_bp;
+	  skipLine(str);
+	}
+	else if ( tag == "MIN:"){
+	  str >> min;
+	  skipLine(str);
+	}
+	else if ( tag == "MAX:"){
+	  str >> max;
+	  skipLine(str);
+	}
 	else
 	  errorAbort("Unknown tag ('" + tag + "') in state map specification with name '" + name + "'.");
       }
       // check
-      if (symbols.size() == 0)
+      if (symbols.size() == 0 && !is_real)
 	errorAbort("Missing symbol string in state map spscification with name  '" + name + "'.");
 	
-      staMap = StateMap(symStrToSymVec(symbols), metaSymStrToMetaSymMap(metaSymbols), name);
-      
+      if(!is_real)
+	staMap = StateMap(symStrToSymVec(symbols), metaSymStrToMetaSymMap(metaSymbols), name);
+      if(is_real){
+	//TODO Redundant code
+	vector_t breakpoints(no_bp);
+	std::cout << "breakpoints.size(): " << breakpoints.size() << std::endl;
+	for(int i = 0; i < no_bp; ++i)
+	  breakpoints(i) = min + i*(max-min)/(no_bp-1);
+	staMap = StateMap( breakpoints, name);
+      }
+
       // use multiplicity
       assert(mult > 0 and mult <= 4); // limit on possible sizes of n 
       if (mult > 1)

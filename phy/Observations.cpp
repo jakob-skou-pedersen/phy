@@ -16,6 +16,11 @@ namespace phy {
     metaStateCount_ = rhs.metaStateCount_;
     symbolSize_ = rhs.symbolSize_;
     name_ = rhs.name_;
+
+    //TODO Remember rather an interface
+    isCont_ = rhs.isCont_;
+    breakpoints_ = rhs.breakpoints_;
+    states_ = rhs.states_;
     return *this;
   }
 
@@ -53,6 +58,23 @@ namespace phy {
   // Returns state corresponding to symbol s. Aborts on nonexisting symbols.
   state_t const & StateMap::symbol2State(symbol_t const & s) const 
   {
+    //Continuous version
+    if(isCont_){
+      double sym;
+      try{
+	sym = boost::lexical_cast<double>(s);
+      }
+      catch( boost::bad_lexical_cast &){
+	errorAbort("Statemap::symbol2State: Symbol '" + s + "' could not be converted to double");
+      }
+      //TODO Binary search?
+      for(state_t i = 0; i < breakpoints_.size(); ++i){
+	if(sym < breakpoints_(i)) return states_.at(i);
+      }
+      return states_.at(breakpoints_.size());
+    }
+
+    //Non continuous version
     boost::unordered_map<symbol_t, state_t >::const_iterator it = symbol2State_.find(s);
     if ( it == symbol2State_.end() )
       errorAbort("StateMap::symbol2State: Symbol '" + s + "' not found in stateMap.");
@@ -82,6 +104,7 @@ namespace phy {
 
   void StateMap::init()
   {
+    isCont_ = false; //TODO Remove if interface is implemented
     stateCount_ = state2Symbol_.size();
     // add basic symbols to degeneracy map
     BOOST_FOREACH(symbol_t const & sym,  state2Symbol_)
@@ -98,6 +121,13 @@ namespace phy {
       symbol2State_[ state2Symbol_[i] ] = i;
     // symbolSize
     symbolSize_= (stateCount_ > 0) ? state2Symbol_[0].size() : 0;
+  }
+
+  void StateMap::initCont()
+  {
+    for(int i = 0; i < states_.size(); ++i){
+      states_.at(i) = i;
+    }
   }
 
 
