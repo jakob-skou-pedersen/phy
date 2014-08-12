@@ -42,14 +42,13 @@ namespace phy {
       getFeatureAndSkipLine(str, "MAX:", max);
       printf("Range [%f;%f]\n", min, max);
 
-      //TODO Assert min < max
       assert(min < max );
-
       vector_t breakpoints(no_bp);
       for(int i = 0; i < no_bp; ++i)
 	breakpoints(i) = min + i* (max-min)/(no_bp-1);
+      
 
-      return AbsBasFacPtr_t(new NormalFactor(name, 1, 1, breakpoints));
+      return AbsBasFacPtr_t(new NormalFactor(name, (max+min)/2 , ((max-min)/2/1.96)*((max-min)/2/1.96), breakpoints));
     }
 
     errorAbort("From readAbstractFullyParameterizedFactor: Unknown type ('" + type + "') in specification of factor with name '" + name + "'.");

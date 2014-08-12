@@ -165,7 +165,7 @@ namespace phy {
     /** Constructor taking mean and variance */
     NormalFactor(string const & name, number_t const & mean, number_t const & var, vector_t const & breakpoints, matrix_t const & pseudoCounts = matrix_t() )
       : AbstractFullyParameterizedFactor("normal", name, matrix_t(1,breakpoints.size()+1), pseudoCounts), mean_(mean), var_(var), breakpoints_(breakpoints) { 
-      //calcPotentials(); 
+      init();
     };
 
     /** Classic constructor */

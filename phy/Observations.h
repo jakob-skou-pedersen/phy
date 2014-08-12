@@ -79,7 +79,7 @@ namespace phy {
     /** Returns StateMap name. Name is empty ("") if not a canonical
 	type. Useful in IO-functions. */
     string const & name() const {return name_;}
-
+    bool const & isContinuous() const{ return isCont_;}
   protected:
 
     /** setup data structures */
@@ -138,14 +138,14 @@ namespace phy {
   class StateMaskMap {
   public:
 
-    // to do: could allow dynamic calculation of stateMasks to save space
+    //TODO: could allow dynamic calculation of stateMasks to save space Especially for continous factors!
     StateMaskMap(StateMap const & staMap);
 
     /** Return the bit vector corresponding to state i */
     stateMask_t const & metaState2StateMask(state_t i) const {return metaState2StateMask_[i];}
 
   protected:
-    
+    bool isCont_;
     vector<stateMask_t> metaState2StateMask_;
   };
 

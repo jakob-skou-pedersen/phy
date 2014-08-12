@@ -437,6 +437,56 @@ BOOST_AUTO_TEST_CASE(readAndWriteDfgInfo_1)
   BOOST_CHECK(dfgInfo.dfg.neighbors    == dfgInfo2.dfg.neighbors);
 }
 
+BOOST_AUTO_TEST_CASE(readDfgInfo_2){
+  string const inPrefix = "./data/dfgSpecNorm/";
+  string const stateMapsFile           = "test1StateMaps.txt";
+  string const factorPotentialsFile    = "test1Potentials.txt";
+  string const variablesFile           = "test1Variables.txt";
+  string const factorGraphFile         = "test1FactorGraph.txt";
+
+  vector<string> varNames;
+  vector<string> facNames;
+  vector<string> potNames; 
+  vector<vector<unsigned> > facNeighbors;
+
+  //Check readFactorGraph
+  readFactorGraph( inPrefix + factorGraphFile, varNames, facNames, potNames, facNeighbors);
+  BOOST_CHECK(varNames.at(0) == "O1");
+  BOOST_CHECK(varNames.size() == 1);
+  BOOST_CHECK(facNames.at(0) == "O1");
+  BOOST_CHECK(potNames.at(0) == "norm");
+  BOOST_CHECK(potNames.size() == 1);
+  BOOST_CHECK(facNeighbors.at(0).at(0) == 0);
+
+  //Check readStateMapFile
+  map<string, StateMapPtr_t> smMap = readStateMapFile( inPrefix + stateMapsFile );
+  BOOST_CHECK( smMap["realMap"]->stateCount_ == 12);
+
+  //Check readFactorFile
+  map<string, AbsBasFacPtr_t> facMap = readFactorFile( inPrefix + factorPotentialsFile);
+  BOOST_CHECK( facMap["norm"]->type() == "normal");
+  BOOST_CHECK( facMap["norm"]->size1_ == 1);
+  BOOST_CHECK( facMap["norm"]->size2_ == 12);
+
+  //Check readVariables
+  map<string, string> var2smMap = readVariables( inPrefix + variablesFile);
+  BOOST_CHECK( var2smMap["O1"] == "realMap" );
+   
+  //Checking DfgInfo constructor and the methods it calls
+  vector<AbsBasFacPtr_t> facVec( mkFacVec(potNames, facMap));
+  CompositeFactorSet facSet(facVec);
+  vector<StateMapPtr_t> stateMapVec( mkStateMapVec(varNames, var2smMap , smMap) );
+  BOOST_CHECK( stateMapVec.size() == 1) ;
+  BOOST_CHECK( stateMapVec.at(0)->name_ == "realMap");
+
+  std::cout << stateMapVec[0] << std::endl;
+
+  StateMaskMapPtr_t smm_ptr = StateMaskMapPtr_t( new StateMaskMap(*stateMapVec[0]) );
+  StateMaskMapSet stateMaksMapSet( stateMapVec);
+
+  
+}
+
 
 
 BOOST_AUTO_TEST_CASE(VarData_1) 

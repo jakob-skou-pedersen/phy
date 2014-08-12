@@ -4,6 +4,7 @@
  * See README_license.txt for license agreement.
  *******************************************************************/
 #include "phy/Observations.h"
+#include <sstream>
 
 namespace phy {
 
@@ -43,7 +44,26 @@ namespace phy {
     init();
   }
 
-
+  /*
+  symbol_t const & StateMap::state2Symbol(state_t i) const {
+    if(isCont_){
+      std::stringstream s;
+      s << '(';
+      if(i == 0)
+	s << '-Inf';
+      else
+	s << breakpoints_(i-1) ;
+      s << ';';
+      if(i < breakpoints_.size())
+	s << breakpoints_(i);
+      else
+	s << 'Inf';
+      s << ')';
+    }
+    return state2Symbol_[i];
+  } 
+  */
+  
   vector<symbol_t> const StateMap::state2Symbol(vector<state_t> v) const
   {
     vector<symbol_t> u;
@@ -125,11 +145,15 @@ namespace phy {
 
   void StateMap::initCont()
   {
+    stateCount_ = states_.size();
+    metaStateCount_ = states_.size();
     for(int i = 0; i < states_.size(); ++i){
       states_.at(i) = i;
     }
-  }
 
+    for(int i = 0; i < states_.size(); ++i)
+      state2Symbol_.push_back("h");
+  }
 
   string mkMultiStateSymbol(unsigned state, StateMap const & sm, unsigned n)
   {
@@ -252,18 +276,28 @@ namespace phy {
 
 
   StateMaskMap::StateMaskMap(StateMap const & staMap)
-    : metaState2StateMask_( staMap.metaStateCount() , stateMask_t(staMap.stateCount(), false) )
+    : metaState2StateMask_( staMap.metaStateCount() , stateMask_t(staMap.stateCount(), false) ),
+      isCont_(staMap.isContinuous() )
   {
-    unsigned metaCount = staMap.metaStateCount();
+    if(!isCont_){
+      unsigned metaCount = staMap.metaStateCount();
     
-    for (unsigned i = 0; i < metaCount; i++) {
-      symbol_t sym = staMap.state2Symbol(i);
-      vector<symbol_t> const & v = staMap.degeneracyVector(sym);
-      for (vector<symbol_t>::const_iterator it = v.begin(); it < v.end(); it++) {
-	state_t j = staMap.symbol2State(*it);
-	if (j >= staMap.stateCount()) 
-	  errorAbort("StateMaskMap::StateMaskMap: Degenerate symbol '" + sym + "' is defined in terms of another meta-symbol '" + *it + "'.");
-	metaState2StateMask_[i][j] = true;
+      for (unsigned i = 0; i < metaCount; i++) {
+	symbol_t sym = staMap.state2Symbol(i);
+	vector<symbol_t> const & v = staMap.degeneracyVector(sym);
+	for (vector<symbol_t>::const_iterator it = v.begin(); it < v.end(); it++) {
+	  state_t j = staMap.symbol2State(*it);
+	  if (j >= staMap.stateCount())
+	    errorAbort("StateMaskMap::StateMaskMap: Degenerate symbol '" + sym + "' is defined in terms of another meta-symbol '" + *it + "'.");
+	  metaState2StateMask_[i][j] = true;
+	}
+      }
+    }
+    else{
+      if( ! (staMap.metaStateCount() == staMap.stateCount() ) ) 
+	errorAbort("Continuous factor should have metaStateCount == stateCount" ) ;
+      for(int i = 0 ; i < staMap.stateCount() ; ++i ){
+	metaState2StateMask_[i][i] = true;
       }
     }
   }

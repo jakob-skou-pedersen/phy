@@ -85,6 +85,12 @@ namespace phy {
     FacData(string const & file, vector<string> const & allNames) : NamedData<xmatrix_t>(file, allNames) {};
   };
 
+  /** Helper functions declared here for debug purposes */
+  vector<AbsBasFacPtr_t> mkFacVec(vector<string> const & potNames, map<string, AbsBasFacPtr_t> const & facMap);
+  vector<StateMapPtr_t> mkStateMapVec(vector<string> const & varNames, map<string, string> const & var2smMap, map<string, StateMapPtr_t> const & smMap);
+  vector<unsigned> mkVarDimensions(vector<StateMapPtr_t> const & smVec);
+  map<string, StateMapPtr_t> smVecToSmMap(vector<StateMapPtr_t> const & smVec);
+  vector<string> mkPotNames(vector<AbsBasFacPtr_t> const & facVec);
 } // end namespace phy
 
 #endif  // __DfgIO_h

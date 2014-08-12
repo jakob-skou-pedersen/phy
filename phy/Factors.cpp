@@ -71,13 +71,14 @@ namespace phy {
 
     for(unsigned i = 1; i < breakpoints_.size(); ++i)
       midpoints_(i) = (breakpoints_(i-1)+breakpoints_(i))/2;
+
+    calcPotentials();
   }
 
   int NormalFactor::optimizeParametersImpl()
   {
     //TODO Stabilitity of singel pass variance calculation
     //TODO Check if maximum likelihood based estimates are better
-    init(); //Initialize midpoints
     number_t S = inner_prod(row(counts_,0), midpoints_);
     number_t USS = inner_prod(row(counts_,0), element_prod(midpoints_, midpoints_));
     number_t n = sum(row(counts_,0));
