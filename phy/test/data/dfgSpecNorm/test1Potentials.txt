@@ -1,0 +1,8 @@
+# Specification of factor potentials and potentially pseudo counts for training
+# name must be unique
+
+NAME:		norm
+TYPE:		normal
+BREAKPOINTS:	11
+MIN:		0.0
+MAX:		1.0

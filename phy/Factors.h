@@ -159,6 +159,39 @@ namespace phy {
     virtual int optimizeParametersImpl();  
   };
 
+  /** @brief Normally distributed prior */
+  class NormalFactor : public AbstractFullyParameterizedFactor {
+  public:
+    /** Constructor taking mean and variance */
+    NormalFactor(string const & name, number_t const & mean, number_t const & var, vector_t const & breakpoints, matrix_t const & pseudoCounts = matrix_t() )
+      : AbstractFullyParameterizedFactor("normal", name, matrix_t(1,breakpoints.size()+1), pseudoCounts), mean_(mean), var_(var), breakpoints_(breakpoints) { 
+      //calcPotentials(); 
+    };
+
+    /** Classic constructor */
+    NormalFactor(string const & name, matrix_t const & m, matrix_t const & pseudoCounts = matrix_t()) : AbstractFullyParameterizedFactor("normal", name, m, pseudoCounts) { };
+    
+    /** Destructor */
+    virtual ~NormalFactor() {} ;
+
+    /** Initialization of midpoints */
+    void init();
+    
+    /** Calculation of potentials based on mean and var */
+    void calcPotentials();
+    
+    /** For debug purposes have a print method */
+    void print();
+
+  protected:
+    virtual int optimizeParametersImpl();
+
+  private:
+    number_t mean_; ///< Mean of Normal distribution
+    number_t var_; ///< Variance of Normal distribution
+    vector_t breakpoints_; // Breakpoints for bins #Bins = 1+#Breakpoints
+    vector_t midpoints_; // Midpoints for each bin derived from breakpoints
+  };
 
   class AbstractBaseFactorSet {
 

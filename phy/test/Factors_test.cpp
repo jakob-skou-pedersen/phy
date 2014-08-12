@@ -166,6 +166,38 @@ BOOST_AUTO_TEST_CASE(ColumnNormFactor_general_1)
   //  cout << n << endl;
 }
 
+BOOST_AUTO_TEST_CASE(NormalFactor_general_1)
+{
+  vector_t breakpoints(10);
+  for(int i = 0; i < 10; ++i)
+    breakpoints(i) = i*0.2+0.6;
+
+  NormalFactor nf("noName", 5, 2, breakpoints);
+  
+  //TODO Add some data and run init
+ 
+  std::cout << "Adding data" << std::endl;
+  for(int i = 0; i < 11; ++i)
+      nf.counts_(0,i) = -(i-3)*(i-3)+64;
+ 
+  std::cout << "Running init and optimization" << std::endl;
+  nf.init(); 
+  nf.optimizeParametersImpl();
+
+  /* R-code
+     > bp <- c(0.6,0.7,0.9,1.1,1.3,1.5,1.7,1.9,2.1,2.3,2.4)
+     > counts <- c((55),(60),(63),(64),(63),(60),(55),(48),(39),(28),(15))
+     > mean(sweep(as.matrix(bp),1,counts,FUN=rep))
+     [1] 1.347273
+     > var(sweep(as.matrix(bp),1,counts,FUN=rep))
+     [1] 0.290621
+  */
+
+  //Test equality with some margin
+  BOOST_CHECK_CLOSE( nf.mean_ , 1.347273, 0.001);
+  BOOST_CHECK_CLOSE( nf.var_  , 0.290621, 0.001);
+}
+
 
 BOOST_AUTO_TEST_CASE(CompositeFactorSet_mkFactor_1) 
 {
