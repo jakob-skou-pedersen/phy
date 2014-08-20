@@ -35,23 +35,37 @@ namespace phy {
       greater than the basic states. Multiple symbols may map to the
       same set of states, however, they are assigned different
       metaStates internally.*/
+
+  class StateMapImpl;
+
+  class StateMapImpl{
+  public:
+    //    virtual ~StateMapImpl();
+    virtual state_t const & symbol2State(symbol_t const & s) const = 0;
+    //    virtual symbol_t const & state2Symbol(state_t i) const = 0;
+    //virtual const state2Symbol(state_t i, symbol_t & s) const = 0;
+  };
+  class StateMapImplContinuous;
+  class StateMapImplSymbol;
+  typedef boost::shared_ptr<StateMapImpl> StateMapImplPtr_t;
+  
   class StateMap {
   public:
     
     /** Constructor */
-    StateMap(string const & symbols, string const & name = "") : state2Symbol_( stringToVectorOfStrings(symbols) ), name_(name) {init();}
+    StateMap(string const & symbols, string const & name = "");
 
     /** Constructor */
-    StateMap(vector<symbol_t> const & symbols, string const & name = "") : state2Symbol_(symbols), name_(name) {init();}
+    StateMap(vector<symbol_t> const & symbols, string const & name = "") ;
 
     /** Constructor */
-    StateMap(vector<symbol_t> const & symbols, boost::unordered_map<symbol_t, vector<symbol_t> > const & metaSymbolDegeneracyMap, string const & name = "") : state2Symbol_(symbols), degeneracyMap_(metaSymbolDegeneracyMap), name_(name) {init();}
+    StateMap(vector<symbol_t> const & symbols, boost::unordered_map<symbol_t, vector<symbol_t> > const & metaSymbolDegeneracyMap, string const & name = "");
  
     /** Constructor of n-long multiSymbols based on a basic stateMap. If staMap has a name, and no explicit name is given, the name of the constructed StateMap will be n-name.*/
     StateMap(StateMap const & staMap, unsigned n, string const & explicitName = "");
 
     /** Constructor for continuous type StateMap */
-    StateMap( vector_t const & breakpoints, string const & name = "") : name_(name), isCont_(true),  breakpoints_(breakpoints), states_(vector<state_t>(breakpoints.size() + 1)) { initCont(); };
+    StateMap( vector_t const & breakpoints, string const & name = "");
  
     /** Copy assignment operator. */
     StateMap const & operator=(StateMap const &rhs);
@@ -61,7 +75,7 @@ namespace phy {
     vector<symbol_t> const state2Symbol(vector<state_t> v) const;
 
     /** Returns state corresponding to symbol s. Aborts on nonexisting symbols. */
-    state_t const & symbol2State(symbol_t const & s) const;
+    state_t const & symbol2State(symbol_t const & s) const ;
     vector<state_t> const symbol2State(vector<symbol_t> v) const;
 
     /** returns degeneracy vector for symbol s */
@@ -98,6 +112,8 @@ namespace phy {
     bool isCont_; //TODO initialize to false in existing constructors
     vector_t breakpoints_;
     vector<state_t> states_;
+  private:
+    StateMapImplPtr_t pImpl;
   };
 
   /** returns an n-state symbol with state 'state' based on stateMap. */

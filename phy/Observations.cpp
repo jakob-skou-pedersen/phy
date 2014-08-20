@@ -8,6 +8,144 @@
 
 namespace phy {
 
+
+  /****************************************
+   Split into another header
+   ****************************************/
+
+  /** Implementations of StateMaps following the PIMPL idiom **/
+  class StateMapImplContinuous : public StateMapImpl {
+  public:
+    StateMapImplContinuous( vector_t const & breakpoints) : breakpoints_(breakpoints), states_(vector<state_t>(breakpoints.size() + 1)) { init(); }
+    
+    virtual state_t const & symbol2State(symbol_t const & s) const;
+    //    virtual symbol_t const & state2Symbol(state_t i) const;
+
+  private:
+    void init();
+    vector_t breakpoints_;
+    vector<state_t> states_; //TODO Check if this can be avoided
+    vector<stateMask_t> metaState2StateMask_; //TODO make dynamic
+
+    //TODO Remove this:
+    //    symbol_t state2Symbol_;
+    unsigned stateCount_;
+  };
+
+  class StateMapImplSymbol : public StateMapImpl {
+  public:
+    StateMapImplSymbol(string const & symbols) : state2Symbol_( stringToVectorOfStrings(symbols) ) { init(); }
+    StateMapImplSymbol(vector<symbol_t> const & symbols) : state2Symbol_(symbols) { init(); }
+    StateMapImplSymbol(vector<symbol_t> const & symbols, boost::unordered_map<symbol_t, vector<symbol_t> > const & metaSymbolDegeneracyMap) : state2Symbol_(symbols), degeneracyMap_(metaSymbolDegeneracyMap){ init(); }
+    StateMapImplSymbol(StateMap const & staMap, unsigned n);
+
+    virtual state_t const & symbol2State(symbol_t const & s) const;
+    // virtual symbol_t const & state2Symbol(state_t i) const { return state2Symbol_[i]; }
+  private:
+    void init();
+
+    vector<symbol_t> state2Symbol_;
+    boost::unordered_map<symbol_t, state_t> symbol2State_;
+    boost::unordered_map<symbol_t, vector<symbol_t> > degeneracyMap_;
+    unsigned stateCount_;
+    unsigned metaStateCount_;
+    unsigned symbolSize_;
+  };
+
+  StateMapImplSymbol::StateMapImplSymbol(StateMap const & staMap, unsigned n){
+    state2Symbol_ = mkMultiStateSymbols(staMap, n);
+    boost::unordered_map<symbol_t, vector<symbol_t> > degMap;
+    for (unsigned i = staMap.stateCount(); i < staMap.metaStateCount(); i++) {
+      symbol_t sym = staMap.state2Symbol(i);
+      degMap[sym] = staMap.degeneracyVector(sym);
+    }
+    degeneracyMap_ = mkMultiStateSymbolDegeneracyMap(degMap, staMap, n);
+
+    init();
+  }
+
+  void StateMapImplSymbol::init(){
+    stateCount_ = state2Symbol_.size();
+    // add basic symbols to degeneracy map
+    BOOST_FOREACH(symbol_t const & sym,  state2Symbol_)
+      degeneracyMap_[sym] = vector<symbol_t>(1, sym);
+    // add (only) metaSymbols to state2Symbols_
+    symbol_t sym;
+    vector<symbol_t> degSymVec;
+    BOOST_FOREACH(boost::tie(sym, degSymVec), degeneracyMap_)
+      if ( find(state2Symbol_.begin(), state2Symbol_.end(), sym) == state2Symbol_.end() ) // not found
+	state2Symbol_.push_back(sym);
+    metaStateCount_ = state2Symbol_.size();
+
+    // symbol2State
+    for (unsigned i = 0; i < metaStateCount_; i++)
+      symbol2State_[ state2Symbol_[i] ] = i;
+    //symbolSize
+    symbolSize_= (stateCount_ > 0) ? state2Symbol_[0].size() : 0;
+  }
+
+  void StateMapImplContinuous::init(){
+    stateCount_ = states_.size();
+    //    metaStateCount_ = states_.size();
+    for(int i = 0; i < states_.size(); ++i){
+      states_.at(i) = i;
+    }
+
+    //state2Symbol_ = "h";
+    /*
+    for(int i = 0; i < states_.size(); ++i)
+      state2Symbol_.push_back("h");
+    */
+  }
+
+  state_t const & StateMapImplSymbol::symbol2State(symbol_t const & s) const {
+    boost::unordered_map<symbol_t, state_t >::const_iterator it = symbol2State_.find(s);
+    if ( it == symbol2State_.end() )
+      errorAbort("StateMap::symbol2State: Symbol '" + s + "' not found in stateMap.");
+    return it->second;
+  }
+
+  state_t const & StateMapImplContinuous::symbol2State(symbol_t const & s) const {
+    double sym;
+    try{
+      sym = boost::lexical_cast<double>(s);
+    }
+    catch( boost::bad_lexical_cast &){
+      errorAbort("Statemap::symbol2State: Symbol '" + s + "' could not be converted to double");
+    }
+    //TODO Binary search?
+    for(state_t i = 0; i < breakpoints_.size(); ++i){
+      if(sym < breakpoints_(i)) return states_.at(i);
+    }
+    return states_.at(breakpoints_.size());
+  }
+
+  /*
+  symbol_t const & StateMapImplContinuous::state2Symbol(state_t i) const {
+    //TODO have a function that takes a reference to a string stream. And append the following
+    /*
+    std::stringstream s;
+    s << '(';
+    if(i == 0)
+      s << '-Inf';
+    else
+      s << breakpoints_(i-1) ;
+    s << ';';
+    if(i < breakpoints_.size())
+      s << breakpoints_(i);
+    else
+      s << 'Inf';
+    s << ')';
+    return s.str();
+
+    return state2Symbol_;
+  }
+  */
+
+  /*****************************************
+     StateMap stuff
+   *****************************************/
+
   StateMap const & StateMap::operator=(StateMap const &rhs)
   {
     state2Symbol_ = rhs.state2Symbol_;
@@ -17,6 +155,7 @@ namespace phy {
     metaStateCount_ = rhs.metaStateCount_;
     symbolSize_ = rhs.symbolSize_;
     name_ = rhs.name_;
+    pImpl = rhs.pImpl;
 
     //TODO Remember rather an interface
     isCont_ = rhs.isCont_;
@@ -25,8 +164,20 @@ namespace phy {
     return *this;
   }
 
+  /* StateMap constructors */
+  /** Constructor */
+  StateMap::StateMap(string const & symbols, string const & name) : state2Symbol_( stringToVectorOfStrings(symbols) ), name_(name), pImpl(new StateMapImplSymbol(symbols)) {init();}
 
-  StateMap::StateMap(StateMap const & staMap, unsigned n, string const & explicitName) : name_(explicitName)
+  /** Constructor */
+  StateMap::StateMap(vector<symbol_t> const & symbols, string const & name) : state2Symbol_(symbols), name_(name), pImpl(new StateMapImplSymbol(symbols)) {init();}
+
+  /** Constructor */
+  StateMap::StateMap(vector<symbol_t> const & symbols, boost::unordered_map<symbol_t, vector<symbol_t> > const & metaSymbolDegeneracyMap, string const & name) : state2Symbol_(symbols), degeneracyMap_(metaSymbolDegeneracyMap), name_(name), pImpl(new StateMapImplSymbol(symbols, metaSymbolDegeneracyMap)) {init();}
+ 
+  /** Constructor for continuous type StateMap */
+  StateMap::StateMap( vector_t const & breakpoints, string const & name) : name_(name), isCont_(true),  breakpoints_(breakpoints), states_(vector<state_t>(breakpoints.size() + 1)), pImpl(new StateMapImplContinuous(breakpoints)) { initCont(); };
+
+  StateMap::StateMap(StateMap const & staMap, unsigned n, string const & explicitName) : name_(explicitName), pImpl( new StateMapImplSymbol(staMap, n) )
   {
     state2Symbol_ = mkMultiStateSymbols(staMap, n);
     boost::unordered_map<symbol_t, vector<symbol_t> > degMap;
@@ -44,26 +195,6 @@ namespace phy {
     init();
   }
 
-  /*
-  symbol_t const & StateMap::state2Symbol(state_t i) const {
-    if(isCont_){
-      std::stringstream s;
-      s << '(';
-      if(i == 0)
-	s << '-Inf';
-      else
-	s << breakpoints_(i-1) ;
-      s << ';';
-      if(i < breakpoints_.size())
-	s << breakpoints_(i);
-      else
-	s << 'Inf';
-      s << ')';
-    }
-    return state2Symbol_[i];
-  } 
-  */
-  
   vector<symbol_t> const StateMap::state2Symbol(vector<state_t> v) const
   {
     vector<symbol_t> u;
@@ -74,33 +205,13 @@ namespace phy {
     return u;
   }
 
-
-  // Returns state corresponding to symbol s. Aborts on nonexisting symbols.
-  state_t const & StateMap::symbol2State(symbol_t const & s) const 
+ state_t const & StateMap::symbol2State(symbol_t const & s) const 
   {
-    //Continuous version
-    if(isCont_){
-      double sym;
-      try{
-	sym = boost::lexical_cast<double>(s);
-      }
-      catch( boost::bad_lexical_cast &){
-	errorAbort("Statemap::symbol2State: Symbol '" + s + "' could not be converted to double");
-      }
-      //TODO Binary search?
-      for(state_t i = 0; i < breakpoints_.size(); ++i){
-	if(sym < breakpoints_(i)) return states_.at(i);
-      }
-      return states_.at(breakpoints_.size());
-    }
-
-    //Non continuous version
     boost::unordered_map<symbol_t, state_t >::const_iterator it = symbol2State_.find(s);
     if ( it == symbol2State_.end() )
       errorAbort("StateMap::symbol2State: Symbol '" + s + "' not found in stateMap.");
     return it->second;
   }
-
 
   vector<state_t> const StateMap::symbol2State(vector<symbol_t> v) const
   {
@@ -276,8 +387,8 @@ namespace phy {
 
 
   StateMaskMap::StateMaskMap(StateMap const & staMap)
-    : metaState2StateMask_( staMap.metaStateCount() , stateMask_t(staMap.stateCount(), false) ),
-      isCont_(staMap.isContinuous() )
+    : isCont_(staMap.isContinuous() ),
+      metaState2StateMask_( staMap.metaStateCount() , stateMask_t(staMap.stateCount(), false) )      
   {
     if(!isCont_){
       unsigned metaCount = staMap.metaStateCount();
