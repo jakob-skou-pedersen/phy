@@ -19,8 +19,11 @@ namespace phy {
     StateMapImplContinuous( vector_t const & breakpoints) : breakpoints_(breakpoints), states_(vector<state_t>(breakpoints.size() + 1)) { init(); }
     
     virtual state_t const & symbol2State(symbol_t const & s) const;
-    //    virtual symbol_t const & state2Symbol(state_t i) const;
-
+    virtual symbol_t const & state2Symbol(state_t i) const;
+    virtual unsigned stateCount() const { return stateCount_; }
+    virtual unsigned metaStateCount() const { return stateCount_; }
+    virtual state_t symbolSize() const{ return 1;}
+    virtual vector<symbol_t> const degeneracyVector(symbol_t const & s) const;
   private:
     void init();
     vector_t breakpoints_;
@@ -28,9 +31,13 @@ namespace phy {
     vector<stateMask_t> metaState2StateMask_; //TODO make dynamic
 
     //TODO Remove this:
-    //    symbol_t state2Symbol_;
+    symbol_t state2Symbol_;
     unsigned stateCount_;
+
+    //TODO Definitely improve(remove)
+    static vector<symbol_t> dummyVecSymbol;
   };
+  vector<symbol_t> StateMapImplContinuous::dummyVecSymbol = vector<symbol_t>(1,"");
 
   class StateMapImplSymbol : public StateMapImpl {
   public:
@@ -40,7 +47,12 @@ namespace phy {
     StateMapImplSymbol(StateMap const & staMap, unsigned n);
 
     virtual state_t const & symbol2State(symbol_t const & s) const;
-    // virtual symbol_t const & state2Symbol(state_t i) const { return state2Symbol_[i]; }
+    virtual symbol_t const & state2Symbol(state_t i) const { return state2Symbol_[i]; }
+    virtual unsigned stateCount() const { return stateCount_; } //Move to StateMapImpl?
+    virtual unsigned metaStateCount() const { return metaStateCount_; }
+    virtual state_t symbolSize() const { return symbolSize_; } //TODO Move to StateMapImpl
+    virtual vector<symbol_t> const degeneracyVector(symbol_t const & s) const;
+
   private:
     void init();
 
@@ -91,7 +103,7 @@ namespace phy {
       states_.at(i) = i;
     }
 
-    //state2Symbol_ = "h";
+    state2Symbol_ = "h";
     /*
     for(int i = 0; i < states_.size(); ++i)
       state2Symbol_.push_back("h");
@@ -120,7 +132,6 @@ namespace phy {
     return states_.at(breakpoints_.size());
   }
 
-  /*
   symbol_t const & StateMapImplContinuous::state2Symbol(state_t i) const {
     //TODO have a function that takes a reference to a string stream. And append the following
     /*
@@ -137,10 +148,21 @@ namespace phy {
       s << 'Inf';
     s << ')';
     return s.str();
-
+    */
     return state2Symbol_;
   }
-  */
+
+  vector<symbol_t> const StateMapImplContinuous::degeneracyVector(symbol_t const & s) const{
+    //TODO Refactor this function away
+    return dummyVecSymbol;
+  }
+
+  vector<symbol_t> const StateMapImplSymbol::degeneracyVector(symbol_t const & s) const{
+    boost::unordered_map<symbol_t, vector<symbol_t> >::const_iterator it = degeneracyMap_.find(s);
+    if ( it == degeneracyMap_.end() )
+      errorAbort("StateMap::degeneracyVector: Symbol '" + s + "' not found in stateMap.");
+    return it->second;
+  }
 
   /*****************************************
      StateMap stuff
@@ -205,14 +227,6 @@ namespace phy {
     return u;
   }
 
- state_t const & StateMap::symbol2State(symbol_t const & s) const 
-  {
-    boost::unordered_map<symbol_t, state_t >::const_iterator it = symbol2State_.find(s);
-    if ( it == symbol2State_.end() )
-      errorAbort("StateMap::symbol2State: Symbol '" + s + "' not found in stateMap.");
-    return it->second;
-  }
-
   vector<state_t> const StateMap::symbol2State(vector<symbol_t> v) const
   {
     vector<state_t> u( v.size() );
@@ -221,17 +235,6 @@ namespace phy {
     }
     return u;
   }
-
-
-  //returns degeneracy vector for symbol s 
-  vector<symbol_t> const StateMap::degeneracyVector(symbol_t const & s) const 
-  {
-    boost::unordered_map<symbol_t, vector<symbol_t> >::const_iterator it = degeneracyMap_.find(s);
-    if ( it == degeneracyMap_.end() )
-      errorAbort("StateMap::degeneracyVector: Symbol '" + s + "' not found in stateMap.");
-    return it->second;
-  }
-
 
   void StateMap::init()
   {

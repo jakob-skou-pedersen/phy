@@ -42,8 +42,21 @@ namespace phy {
   public:
     //    virtual ~StateMapImpl();
     virtual state_t const & symbol2State(symbol_t const & s) const = 0;
-    //    virtual symbol_t const & state2Symbol(state_t i) const = 0;
-    //virtual const state2Symbol(state_t i, symbol_t & s) const = 0;
+    virtual symbol_t const & state2Symbol(state_t i) const = 0;
+    //virtual symbol_t state2Symbol(state_t i, symbol_t & s) const = 0;
+
+
+    /** returns degeneracy vector for symbol s */
+    virtual vector<symbol_t> const degeneracyVector(symbol_t const & s) const = 0;
+
+    /** returns number of basic states */
+    virtual unsigned stateCount() const = 0;
+
+    /** returns number of meta states (includes basic states) */
+    virtual unsigned metaStateCount() const = 0;
+
+    /** returns length (in chars) of symbols */
+    virtual state_t symbolSize() const = 0;
   };
   class StateMapImplContinuous;
   class StateMapImplSymbol;
@@ -71,24 +84,24 @@ namespace phy {
     StateMap const & operator=(StateMap const &rhs);
 
     /** Returns symbol corresponding to state i */
-    symbol_t const & state2Symbol(state_t i) const {return state2Symbol_[i];}
+    symbol_t const & state2Symbol(state_t i) const {return pImpl->state2Symbol(i);}
     vector<symbol_t> const state2Symbol(vector<state_t> v) const;
 
     /** Returns state corresponding to symbol s. Aborts on nonexisting symbols. */
-    state_t const & symbol2State(symbol_t const & s) const ;
+    state_t const & symbol2State(symbol_t const & s) const { return pImpl->symbol2State(s);}
     vector<state_t> const symbol2State(vector<symbol_t> v) const;
 
     /** returns degeneracy vector for symbol s */
-    vector<symbol_t> const degeneracyVector(symbol_t const & s) const;
+    vector<symbol_t> const degeneracyVector(symbol_t const & s) const { return pImpl->degeneracyVector(s);}
 
     /** returns number of basic states */
-    unsigned stateCount() const {return stateCount_;}
+    unsigned stateCount() const {return pImpl->stateCount();}
 
     /** returns number of meta states (includes basic states) */
     unsigned metaStateCount() const {return metaStateCount_;}
 
     /** returns length (in chars) of symbols */
-    state_t symbolSize() const  {return symbolSize_;}
+    state_t symbolSize() const  {return pImpl->symbolSize(); }
 
     /** Returns StateMap name. Name is empty ("") if not a canonical
 	type. Useful in IO-functions. */
