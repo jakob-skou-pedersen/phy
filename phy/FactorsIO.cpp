@@ -34,13 +34,12 @@ namespace phy {
     if (type == "normal"){
       //TODO Read all sorts of tags
       int no_bp = 0;
-      getFeatureAndSkipLine(str, "BREAKPOINTS:", no_bp); std::cout << "Breakpoints read from file: " << no_bp << std::endl;
+      getFeatureAndSkipLine(str, "BREAKPOINTS:", no_bp);
 
       double min = 0;
       double max = 0;
       getFeatureAndSkipLine(str, "MIN:", min);
       getFeatureAndSkipLine(str, "MAX:", max);
-      printf("Range [%f;%f]\n", min, max);
 
       assert(min < max );
       vector_t breakpoints(no_bp);

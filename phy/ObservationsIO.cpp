@@ -123,7 +123,6 @@ namespace phy {
       if(is_real){
 	//TODO Redundant code
 	vector_t breakpoints(no_bp);
-	std::cout << "breakpoints.size(): " << breakpoints.size() << std::endl;
 	for(int i = 0; i < no_bp; ++i)
 	  breakpoints(i) = min + i*(max-min)/(no_bp-1);
 	staMap = StateMap( breakpoints, name);

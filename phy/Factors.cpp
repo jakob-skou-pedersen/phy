@@ -96,7 +96,7 @@ namespace phy {
       m_(0,i) = cdf(norm, breakpoints_(i)) - prevCdf;
       prevCdf = cdf(norm, breakpoints_(i));
     }
-    m_(0,breakpoints_.size()) = 1-prevCdf;   std::cout << "DEBUG l36 Factors.cpp" << std::endl;
+    m_(0,breakpoints_.size()) = 1-prevCdf;
   }
 
   void NormalFactor::print()

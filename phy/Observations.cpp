@@ -10,7 +10,7 @@ namespace phy {
 
 
   /****************************************
-   Split into another header
+   TODO Split into another header
    ****************************************/
 
   /** Implementations of StateMaps following the PIMPL idiom **/
@@ -24,6 +24,7 @@ namespace phy {
     virtual unsigned metaStateCount() const { return stateCount_; }
     virtual state_t symbolSize() const{ return 1;}
     virtual vector<symbol_t> const degeneracyVector(symbol_t const & s) const;
+    virtual void setMetaState2StateMask(vector<stateMask_t> & metaState2StateMask_) const;
   private:
     void init();
     vector_t breakpoints_;
@@ -52,6 +53,7 @@ namespace phy {
     virtual unsigned metaStateCount() const { return metaStateCount_; }
     virtual state_t symbolSize() const { return symbolSize_; } //TODO Move to StateMapImpl
     virtual vector<symbol_t> const degeneracyVector(symbol_t const & s) const;
+    virtual void setMetaState2StateMask(vector<stateMask_t> & metaState2StateMask_) const;
 
   private:
     void init();
@@ -94,6 +96,38 @@ namespace phy {
       symbol2State_[ state2Symbol_[i] ] = i;
     //symbolSize
     symbolSize_= (stateCount_ > 0) ? state2Symbol_[0].size() : 0;
+
+    //Init metaState2StateMask_
+    /*
+    metaState2StateMask_ = vector<stateMask_t>( metaStateCount_, stateMask_t(stateCount_, false) );
+    for (unsigned i = 0; i < metaStateCount_; i++) {
+      symbol_t sym = state2Symbol(i);
+      vector<symbol_t> const & v = degeneracyVector(sym);
+      for (vector<symbol_t>::const_iterator it = v.begin(); it < v.end(); it++) {
+	state_t j = symbol2State(*it);
+	if (j >= stateCount_)
+	  errorAbort("StateMaskMap::StateMaskMap: Degenerate symbol '" + sym + "' is defined in terms of another meta-symbol '" + *it + "'.");
+	metaState2StateMask_.at(i)(j) = true;
+      }
+    }
+    */
+  }
+
+  void StateMapImplSymbol::setMetaState2StateMask(vector<stateMask_t> & metaState2StateMask) const{
+    //Checks
+    if(metaState2StateMask.size() != metaStateCount_)
+      errorAbort("StateMapImplSymbol: metaState2StateMask_.size() != metaStateCount_");
+
+    for (unsigned i = 0; i < metaStateCount_; i++) {
+      symbol_t sym = state2Symbol(i);
+      vector<symbol_t> const & v = degeneracyVector(sym);
+      for (vector<symbol_t>::const_iterator it = v.begin(); it < v.end(); it++) {
+	state_t j = symbol2State(*it);
+	if (j >= stateCount_)
+	  errorAbort("StateMaskMap::StateMaskMap: Degenerate symbol '" + sym + "' is defined in terms of another meta-symbol '" + *it + "'.");
+	metaState2StateMask.at(i)(j) = true;
+      }
+    }
   }
 
   void StateMapImplContinuous::init(){
@@ -103,11 +137,20 @@ namespace phy {
       states_.at(i) = i;
     }
 
+    //TODO Check if neccesary i.e. who calls state2Symbol?
     state2Symbol_ = "h";
-    /*
-    for(int i = 0; i < states_.size(); ++i)
-      state2Symbol_.push_back("h");
-    */
+
+    //Init metaState2StateMask_
+    //    metaState2StateMask_ = vector<stateMask_t>( stateCount_, stateMask_t(stateCount_, false) );
+  }
+
+  void StateMapImplContinuous::setMetaState2StateMask(vector<stateMask_t> & metaState2StateMask) const {
+    if(metaState2StateMask.size() != stateCount_)
+      errorAbort("StateMapImplSymbol: metaState2StateMask_.size() != stateCount_");
+
+    for(int i = 0 ; i < stateCount_ ; ++i ){
+      metaState2StateMask.at(i)(i) = true;
+    }    
   }
 
   state_t const & StateMapImplSymbol::symbol2State(symbol_t const & s) const {
@@ -393,6 +436,8 @@ namespace phy {
     : isCont_(staMap.isContinuous() ),
       metaState2StateMask_( staMap.metaStateCount() , stateMask_t(staMap.stateCount(), false) )      
   {
+    staMap.setMetaState2StateMask(metaState2StateMask_);
+    /*
     if(!isCont_){
       unsigned metaCount = staMap.metaStateCount();
     
@@ -414,6 +459,7 @@ namespace phy {
 	metaState2StateMask_[i][i] = true;
       }
     }
+    */
   }
 
 

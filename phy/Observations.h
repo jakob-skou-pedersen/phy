@@ -57,7 +57,10 @@ namespace phy {
 
     /** returns length (in chars) of symbols */
     virtual state_t symbolSize() const = 0;
+
+    virtual void setMetaState2StateMask(vector<stateMask_t> & metaState2StateMask_) const = 0;
   };
+
   class StateMapImplContinuous;
   class StateMapImplSymbol;
   typedef boost::shared_ptr<StateMapImpl> StateMapImplPtr_t;
@@ -102,6 +105,9 @@ namespace phy {
 
     /** returns length (in chars) of symbols */
     state_t symbolSize() const  {return pImpl->symbolSize(); }
+
+    /** Set metaState2StateMask for the StateMaskMap class */
+    void setMetaState2StateMask(vector<stateMask_t> & metaState2StateMask) const { pImpl->setMetaState2StateMask( metaState2StateMask);}
 
     /** Returns StateMap name. Name is empty ("") if not a canonical
 	type. Useful in IO-functions. */
@@ -166,12 +172,11 @@ namespace phy {
      discrete factor graphs. **/
   class StateMaskMap {
   public:
-
     //TODO: could allow dynamic calculation of stateMasks to save space Especially for continous factors!
     StateMaskMap(StateMap const & staMap);
 
     /** Return the bit vector corresponding to state i */
-    stateMask_t const & metaState2StateMask(state_t i) const {return metaState2StateMask_[i];}
+    stateMask_t const & metaState2StateMask(state_t i) const {return metaState2StateMask_.at(i);} 
 
   protected:
     bool isCont_;
