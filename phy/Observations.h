@@ -101,7 +101,7 @@ namespace phy {
     unsigned stateCount() const {return pImpl->stateCount();}
 
     /** returns number of meta states (includes basic states) */
-    unsigned metaStateCount() const {return metaStateCount_;}
+    unsigned metaStateCount() const {return pImpl->metaStateCount();}
 
     /** returns length (in chars) of symbols */
     state_t symbolSize() const  {return pImpl->symbolSize(); }
@@ -112,25 +112,9 @@ namespace phy {
     /** Returns StateMap name. Name is empty ("") if not a canonical
 	type. Useful in IO-functions. */
     string const & name() const {return name_;}
-    bool const & isContinuous() const{ return isCont_;}
+
   protected:
-
-    /** setup data structures */
-    void init();
-    void initCont();
-
-    vector<symbol_t> state2Symbol_;
-    boost::unordered_map<symbol_t, state_t> symbol2State_;
-    boost::unordered_map<symbol_t, vector<symbol_t> > degeneracyMap_;
-    unsigned stateCount_;
-    unsigned metaStateCount_;
-    unsigned symbolSize_;
     string name_;
-
-    //TODO I would rather have an interface class with discrete and continous implementations
-    bool isCont_; //TODO initialize to false in existing constructors
-    vector_t breakpoints_;
-    vector<state_t> states_;
   private:
     StateMapImplPtr_t pImpl;
   };
@@ -179,7 +163,7 @@ namespace phy {
     stateMask_t const & metaState2StateMask(state_t i) const {return metaState2StateMask_.at(i);} 
 
   protected:
-    bool isCont_;
+    //bool isCont_;
     vector<stateMask_t> metaState2StateMask_;
   };
 

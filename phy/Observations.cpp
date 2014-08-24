@@ -96,21 +96,6 @@ namespace phy {
       symbol2State_[ state2Symbol_[i] ] = i;
     //symbolSize
     symbolSize_= (stateCount_ > 0) ? state2Symbol_[0].size() : 0;
-
-    //Init metaState2StateMask_
-    /*
-    metaState2StateMask_ = vector<stateMask_t>( metaStateCount_, stateMask_t(stateCount_, false) );
-    for (unsigned i = 0; i < metaStateCount_; i++) {
-      symbol_t sym = state2Symbol(i);
-      vector<symbol_t> const & v = degeneracyVector(sym);
-      for (vector<symbol_t>::const_iterator it = v.begin(); it < v.end(); it++) {
-	state_t j = symbol2State(*it);
-	if (j >= stateCount_)
-	  errorAbort("StateMaskMap::StateMaskMap: Degenerate symbol '" + sym + "' is defined in terms of another meta-symbol '" + *it + "'.");
-	metaState2StateMask_.at(i)(j) = true;
-      }
-    }
-    */
   }
 
   void StateMapImplSymbol::setMetaState2StateMask(vector<stateMask_t> & metaState2StateMask) const{
@@ -132,16 +117,12 @@ namespace phy {
 
   void StateMapImplContinuous::init(){
     stateCount_ = states_.size();
-    //    metaStateCount_ = states_.size();
     for(int i = 0; i < states_.size(); ++i){
       states_.at(i) = i;
     }
 
     //TODO Check if neccesary i.e. who calls state2Symbol?
     state2Symbol_ = "h";
-
-    //Init metaState2StateMask_
-    //    metaState2StateMask_ = vector<stateMask_t>( stateCount_, stateMask_t(stateCount_, false) );
   }
 
   void StateMapImplContinuous::setMetaState2StateMask(vector<stateMask_t> & metaState2StateMask) const {
@@ -213,51 +194,29 @@ namespace phy {
 
   StateMap const & StateMap::operator=(StateMap const &rhs)
   {
-    state2Symbol_ = rhs.state2Symbol_;
-    symbol2State_ = rhs.symbol2State_;
-    degeneracyMap_ = rhs.degeneracyMap_;
-    stateCount_ = rhs.stateCount_;
-    metaStateCount_ = rhs.metaStateCount_;
-    symbolSize_ = rhs.symbolSize_;
     name_ = rhs.name_;
     pImpl = rhs.pImpl;
-
-    //TODO Remember rather an interface
-    isCont_ = rhs.isCont_;
-    breakpoints_ = rhs.breakpoints_;
-    states_ = rhs.states_;
     return *this;
   }
 
   /* StateMap constructors */
   /** Constructor */
-  StateMap::StateMap(string const & symbols, string const & name) : state2Symbol_( stringToVectorOfStrings(symbols) ), name_(name), pImpl(new StateMapImplSymbol(symbols)) {init();}
+  StateMap::StateMap(string const & symbols, string const & name) : name_(name), pImpl(new StateMapImplSymbol(symbols)) { }
 
   /** Constructor */
-  StateMap::StateMap(vector<symbol_t> const & symbols, string const & name) : state2Symbol_(symbols), name_(name), pImpl(new StateMapImplSymbol(symbols)) {init();}
+  StateMap::StateMap(vector<symbol_t> const & symbols, string const & name) : name_(name), pImpl(new StateMapImplSymbol(symbols)) { }
 
   /** Constructor */
-  StateMap::StateMap(vector<symbol_t> const & symbols, boost::unordered_map<symbol_t, vector<symbol_t> > const & metaSymbolDegeneracyMap, string const & name) : state2Symbol_(symbols), degeneracyMap_(metaSymbolDegeneracyMap), name_(name), pImpl(new StateMapImplSymbol(symbols, metaSymbolDegeneracyMap)) {init();}
+  StateMap::StateMap(vector<symbol_t> const & symbols, boost::unordered_map<symbol_t, vector<symbol_t> > const & metaSymbolDegeneracyMap, string const & name) : name_(name), pImpl(new StateMapImplSymbol(symbols, metaSymbolDegeneracyMap)) { }
  
   /** Constructor for continuous type StateMap */
-  StateMap::StateMap( vector_t const & breakpoints, string const & name) : name_(name), isCont_(true),  breakpoints_(breakpoints), states_(vector<state_t>(breakpoints.size() + 1)), pImpl(new StateMapImplContinuous(breakpoints)) { initCont(); };
+  StateMap::StateMap( vector_t const & breakpoints, string const & name) : name_(name), pImpl(new StateMapImplContinuous(breakpoints)) { }
 
   StateMap::StateMap(StateMap const & staMap, unsigned n, string const & explicitName) : name_(explicitName), pImpl( new StateMapImplSymbol(staMap, n) )
   {
-    state2Symbol_ = mkMultiStateSymbols(staMap, n);
-    boost::unordered_map<symbol_t, vector<symbol_t> > degMap;
-    for (unsigned i = staMap.stateCount(); i < staMap.metaStateCount(); i++) {
-      symbol_t sym = staMap.state2Symbol(i);
-      degMap[sym] = staMap.degeneracyVector(sym);
-    }
-    degeneracyMap_ = mkMultiStateSymbolDegeneracyMap(degMap, staMap, n);
-
-    //mk name
     if (name_.size() == 0)
       if ( staMap.name().size() )
 	name_ = toString(n) + "-" + staMap.name();
-
-    init();
   }
 
   vector<symbol_t> const StateMap::state2Symbol(vector<state_t> v) const
@@ -277,39 +236,6 @@ namespace phy {
       u.push_back( symbol2State(v[i]) );
     }
     return u;
-  }
-
-  void StateMap::init()
-  {
-    isCont_ = false; //TODO Remove if interface is implemented
-    stateCount_ = state2Symbol_.size();
-    // add basic symbols to degeneracy map
-    BOOST_FOREACH(symbol_t const & sym,  state2Symbol_)
-      degeneracyMap_[sym] = vector<symbol_t>(1, sym);
-    // add (only) metaSymbols to state2Symbols_
-    symbol_t sym;
-    vector<symbol_t> degSymVec;
-    BOOST_FOREACH(boost::tie(sym, degSymVec), degeneracyMap_)
-      if ( find(state2Symbol_.begin(), state2Symbol_.end(), sym) == state2Symbol_.end() ) // not found
-	state2Symbol_.push_back(sym);
-    metaStateCount_ = state2Symbol_.size();
-    // symbol2State
-    for (unsigned i = 0; i < metaStateCount_; i++)
-      symbol2State_[ state2Symbol_[i] ] = i;
-    // symbolSize
-    symbolSize_= (stateCount_ > 0) ? state2Symbol_[0].size() : 0;
-  }
-
-  void StateMap::initCont()
-  {
-    stateCount_ = states_.size();
-    metaStateCount_ = states_.size();
-    for(int i = 0; i < states_.size(); ++i){
-      states_.at(i) = i;
-    }
-
-    for(int i = 0; i < states_.size(); ++i)
-      state2Symbol_.push_back("h");
   }
 
   string mkMultiStateSymbol(unsigned state, StateMap const & sm, unsigned n)
@@ -433,33 +359,9 @@ namespace phy {
 
 
   StateMaskMap::StateMaskMap(StateMap const & staMap)
-    : isCont_(staMap.isContinuous() ),
-      metaState2StateMask_( staMap.metaStateCount() , stateMask_t(staMap.stateCount(), false) )      
+    : metaState2StateMask_( staMap.metaStateCount() , stateMask_t(staMap.stateCount(), false) )      
   {
     staMap.setMetaState2StateMask(metaState2StateMask_);
-    /*
-    if(!isCont_){
-      unsigned metaCount = staMap.metaStateCount();
-    
-      for (unsigned i = 0; i < metaCount; i++) {
-	symbol_t sym = staMap.state2Symbol(i);
-	vector<symbol_t> const & v = staMap.degeneracyVector(sym);
-	for (vector<symbol_t>::const_iterator it = v.begin(); it < v.end(); it++) {
-	  state_t j = staMap.symbol2State(*it);
-	  if (j >= staMap.stateCount())
-	    errorAbort("StateMaskMap::StateMaskMap: Degenerate symbol '" + sym + "' is defined in terms of another meta-symbol '" + *it + "'.");
-	  metaState2StateMask_[i][j] = true;
-	}
-      }
-    }
-    else{
-      if( ! (staMap.metaStateCount() == staMap.stateCount() ) ) 
-	errorAbort("Continuous factor should have metaStateCount == stateCount" ) ;
-      for(int i = 0 ; i < staMap.stateCount() ; ++i ){
-	metaState2StateMask_[i][i] = true;
-      }
-    }
-    */
   }
 
 
