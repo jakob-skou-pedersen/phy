@@ -1,0 +1,10 @@
+# Specification of factor potentials and potentially pseudo counts for training
+# name must be unique
+
+NAME:		mix
+TYPE:		discCont
+BREAKPOINTS:	201
+MIN:		-1.0
+MAX:		2.0
+STATES:		2
+

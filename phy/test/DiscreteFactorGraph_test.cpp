@@ -460,7 +460,7 @@ BOOST_AUTO_TEST_CASE(readDfgInfo_2){
 
   //Check readStateMapFile
   map<string, StateMapPtr_t> smMap = readStateMapFile( inPrefix + stateMapsFile );
-  BOOST_CHECK( smMap["realMap"]->stateCount_ == 12);
+  BOOST_CHECK( smMap["realMap"]->stateCount() == 12);
 
   //Check readFactorFile
   map<string, AbsBasFacPtr_t> facMap = readFactorFile( inPrefix + factorPotentialsFile);
@@ -479,12 +479,8 @@ BOOST_AUTO_TEST_CASE(readDfgInfo_2){
   BOOST_CHECK( stateMapVec.size() == 1) ;
   BOOST_CHECK( stateMapVec.at(0)->name_ == "realMap");
 
-  std::cout << stateMapVec[0] << std::endl;
-
   StateMaskMapPtr_t smm_ptr = StateMaskMapPtr_t( new StateMaskMap(*stateMapVec[0]) );
   StateMaskMapSet stateMaksMapSet( stateMapVec);
-
-  
 }
 
 

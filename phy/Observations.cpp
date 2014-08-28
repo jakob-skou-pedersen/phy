@@ -147,6 +147,9 @@ namespace phy {
       sym = boost::lexical_cast<double>(s);
     }
     catch( boost::bad_lexical_cast &){
+      if( s == "NA" ){
+	errorAbort("TODO: Implement NA for continuous observations");
+      }
       errorAbort("Statemap::symbol2State: Symbol '" + s + "' could not be converted to double");
     }
     //TODO Binary search?

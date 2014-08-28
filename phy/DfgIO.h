@@ -38,6 +38,8 @@ namespace phy {
     vector<StateMapPtr_t> stateMapVec; // stateMap for each variable
     StateMaskMapSet stateMaskMapSet;   // defines mapping between symbols and stateMasks for all variables
     DFG dfg;                           // Discrete factor graph
+
+    void writeInfo( ostream & str );
   };
 
 

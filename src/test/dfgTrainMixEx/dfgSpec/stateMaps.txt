@@ -1,0 +1,11 @@
+# Specification of state maps
+
+NAME:		realMap
+REAL:		TRUE
+BREAKPOINTS:	201
+MIN:		-1.0
+MAX:		2.0
+
+NAME:		twoState
+SYMBOLS:	a b
+META_SYMBOLS:	*=a b; .=a b

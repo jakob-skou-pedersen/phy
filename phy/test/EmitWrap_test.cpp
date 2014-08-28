@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(EmiWrap_EmitWrapDfg_1)
   BOOST_CHECK_CLOSE(toNumber( matEmit[0](12,16) ), 0.05, EPS);  // P(".T")=0.225
 
   // stack
-  cout << matEmit[1] << endl;
+  // cout << matEmit[1] << endl;
   BOOST_CHECK_CLOSE(toNumber( matEmit[1](0,0) ), 0.0, EPS);     // j-i=0<minDist
   //  BOOST_CHECK_CLOSE(toNumber( matEmit[1](0,4) ), 1.0, EPS);     // j-i=5>=minDist  // this fails as stack factor potential needs adjustment so rows sum to one  - sudhakar, please fix
   //  BOOST_CHECK_CLOSE(toNumber( matEmit[1](0,14) ), 0.225, EPS);  //?? I have not done the calculation...

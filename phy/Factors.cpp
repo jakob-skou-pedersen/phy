@@ -18,6 +18,12 @@ namespace phy {
     }
   }
 
+  void AbstractFullyParameterizedFactor::serialize(ostream& os) const{
+    os << "POT_MAT:\t" << m_ << endl;
+    if ( pseudoCounts_.size1() != 0 )
+      os << "PC_MAT:\t"  << pseudoCounts_ << endl;
+  }
+
 
   int GlobalNormFactor::optimizeParametersImpl()
   {
@@ -84,6 +90,7 @@ namespace phy {
     number_t n = sum(row(counts_,0));
     mean_ = S/n;
     var_ = (USS-S*S/n)/(n-1); 
+    calcPotentials();
     return 1;
   }
 
@@ -99,16 +106,59 @@ namespace phy {
     m_(0,breakpoints_.size()) = 1-prevCdf;
   }
 
-  void NormalFactor::print()
+  void NormalFactor::serialize(ostream & os) const
   {
-    std::cout << "Mean:\t" << mean_ << std::endl;
-    std::cout << "Variance:\t" << var_ << std::endl;
-    std::cout << "Matrix m:\t" << m_ << std::endl;
-    std::cout << "Breakpoints:\t" << breakpoints_ << std::endl;
-    std::cout << "Midpoints:\t" << midpoints_ << std::endl;
-    std::cout << "Matrix counts:\t" << counts_ << std::endl;
+    //TODO
+    os << "NAME:\t" << name_ << endl;
+    os << "BREAKPOINTS:\t" << breakpoints_.size() << endl;
+    os << "MEAN:\t" << mean_ << endl;
+    os << "VAR:\t" << var_ << endl;
   }
 
+  void DiscContFactor::serialize(ostream & os) const
+  {
+    number_t lin_a = (maxv_-minv_)/bins_;
+    number_t lin_b = minv_;
+    os << "NAME:\t" << name_ << endl;
+    os << "MEANS:\t" << ( boost::numeric::ublas::scalar_vector<number_t>(states_,lin_b) + element_prod(boost::numeric::ublas::scalar_vector<number_t>(states_,lin_a),means_) ) << endl;
+    os << "VARS:\t" << element_prod(boost::numeric::ublas::scalar_vector<number_t>(states_, lin_a*lin_a),vars_) << endl;
+  }
+
+  int DiscContFactor::optimizeParametersImpl()
+  {
+    vector_t S(states_,0);
+    vector_t USS(states_,0);
+    vector_t n(states_,0);
+
+    
+    for ( matrix_t::iterator1 it1 = counts_.begin1(); it1 != counts_.end1(); ++it1){
+      for( matrix_t::iterator2 it2 = it1.begin(); it2 != it1.end(); ++it2){
+	n(it2.index1()) += (*it2);
+	S(it2.index1()) += it2.index2() * (*it2);
+	USS(it2.index1()) += it2.index2() * it2.index2() * (*it2);
+      }
+    }
+    
+    for(unsigned i = 0; i < states_; ++i){
+      means_(i) = S(i)/n(i);
+      vars_(i) = (USS(i)-S(i)*S(i)/n(i))/(n(i)-1);
+      priors_(i) = n(i); //TODO Do I need normalization?
+    }
+    
+    calcPotentials();
+    return 1;
+  }
+
+  void DiscContFactor::calcPotentials()
+  {
+    for(int i = 0; i < m_.size1(); ++i){
+      boost::math::normal norm(means_(i), sqrt(vars_(i)) );
+      for(int j = 0; j < m_.size2(); ++j ){
+	//TODO Calculate only in actual observations
+	m_(i,j) = cdf(norm, j) - cdf(norm, j-1);
+      }
+    }
+  }
 
   // return matrix defining factor idx 
   vector<matrix_t> AbstractBaseFactorSet::mkFactorVec() const

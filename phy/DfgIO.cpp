@@ -86,6 +86,11 @@ namespace phy {
     dfg( mkVarDimensions(stateMapVec), facSet.mkFactorVec(), facNeighbors ) 
   {};
 
+  void DfgInfo::writeInfo(ostream & str )
+  {
+    for(unsigned i = 0; i < facVec.size(); ++i)
+      facVec[i]->serialize(str);
+  }
 
   map<string, string> readVariables(string const & file)
   {

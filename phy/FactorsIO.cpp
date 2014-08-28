@@ -49,6 +49,25 @@ namespace phy {
 
       return AbsBasFacPtr_t(new NormalFactor(name, (max+min)/2 , ((max-min)/2/1.96)*((max-min)/2/1.96), breakpoints));
     }
+    if (type == "discCont" ){
+      int bins = 0;
+      double minv = 0;
+      double maxv = 0;
+      int states = 0;
+
+      getFeatureAndSkipLine(str, "BREAKPOINTS:", bins); bins++;
+      getFeatureAndSkipLine(str, "MIN:", minv);
+      getFeatureAndSkipLine(str, "MAX:", maxv);
+      getFeatureAndSkipLine(str, "STATES:", states);
+
+      //Initialize means and variances
+      vector_t means(states);
+      vector_t vars(states, bins*bins/1.96/1.96);
+      for(unsigned i = 0; i < states; ++i)
+	means(i) = (double)bins/states*(0.5+i);
+      
+      return AbsBasFacPtr_t(new DiscContFactor(name, means, vars, minv, maxv, states, bins) );
+    }
 
     errorAbort("From readAbstractFullyParameterizedFactor: Unknown type ('" + type + "') in specification of factor with name '" + name + "'.");
     exit(1); // to satisfy compiler
@@ -57,13 +76,8 @@ namespace phy {
 
   void writeAbstractFullyParameterizedFactor(ostream & str, AbsBasFacPtr_t const & factorPtr)
   {
-    AbstractFullyParameterizedFactor * derivedFctorPtr = dynamic_cast<AbstractFullyParameterizedFactor *>( factorPtr.get() );
-
-    str << "POT_MAT:\t" << derivedFctorPtr->m_ << endl;
-    if ( derivedFctorPtr->pseudoCounts_.size1() != 0 )
-      str << "PC_MAT:\t"  << derivedFctorPtr->pseudoCounts_ << endl;
+    factorPtr->serialize(str);
   }
-
 
   // definition of header declared functions
 
@@ -80,7 +94,7 @@ namespace phy {
     getFeatureAndSkipLine(str, "TYPE:", type);
 
     // dispatch the correct parser depending on type
-    if (type == "rowNorm" or type == "colNorm" or type == "globNorm" or type == "normal")
+    if (type == "rowNorm" or type == "colNorm" or type == "globNorm" or type == "normal" or type == "discCont")
       return pair<string, AbsBasFacPtr_t>(name, readAbstractFullyParameterizedFactor(str, type, name) );
     else {
       errorAbort("From readFactor: Unknown type ('" + type + "') in specification of factor with name '" + name + "'.");
@@ -119,7 +133,7 @@ namespace phy {
     string const type = factorPtr->type();
     str << "TYPE:\t" << type << endl;
 
-    if (type == "rowNorm" or type == "colNorm" or type == "globNorm")
+    if (type == "rowNorm" or type == "colNorm" or type == "globNorm" or type == "normal" or type == "discCont")
       writeAbstractFullyParameterizedFactor(str, factorPtr);
     else 
       errorAbort("From writeFactor: Unknown type ('" + type + "') in write request for factor with name '" + name + "'.");

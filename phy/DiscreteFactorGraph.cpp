@@ -234,7 +234,7 @@ namespace phy {
     // check factor dimension and number of neighbors
     for (unsigned i = 0; i < factors.size(); i++) 
       if (getFactorNeighbors(i).size() != getFactor(i).dimension)
-	errorAbort("Inconsitent graph. \nNumber of neighbors and potential dimenension does not match at factor:\n\n" + factorInfoStr(i) );
+	errorAbort("Inconsistent graph. \nNumber of neighbors and potential dimenension does not match at factor:\n\n" + factorInfoStr(i) );
     
     // check that factor potential dimensions equal dimension of neigboring var nodes
     for (unsigned i = 0; i < factors.size(); i++) {
@@ -243,15 +243,15 @@ namespace phy {
       if (nbCount > 0) {
 	unsigned nb = nbs[0];
 	if ( ( nbCount != 1 and getFactor(i).potential.size1() != getVariable(nb).dimension ) or (nbCount == 1 and getFactor(i).potential.size2() != getVariable(nb).dimension) ) // if ncCount equals 1 then the potential is a prior
-	    errorAbort("Inconsitent graph. \nFactor potential dimensions does not match dimension of neighboring variable node (both defined below):\n\n" + factorInfoStr(i)  + "\n" + variableInfoStr(i) );
+	  errorAbort("Inconsistent graph. \nFactor potential dimensions does not match dimension of neighboring variable node (both defined below):\n\n" + factorInfoStr(i)  + "\n" + variableInfoStr(i) + "\n\n" + "getFactor(i).potential.size1():\t" + toString(getFactor(i).potential.size1()) + "\n");
       }
       if (nbCount > 1) {
 	unsigned nb = nbs[1];
 	if (getFactor(i).potential.size2() != getVariable(nb).dimension )
-	  errorAbort("Inconsitent graph. \nFactor potential dimensions does not match dimension of neighboring variable node (both defined below):\n\n" + factorInfoStr(i)  + "\n" + variableInfoStr(i) );
+	  errorAbort("Inconsistent graph. \nFactor potential dimensions does not match dimension of neighboring variable node (both defined below):\n\n" + factorInfoStr(i)  + "\n" + variableInfoStr(i) + "getFactor(i).potential.size2():\t" + toString(getFactor(i).potential.size2()) + "\n" + "getVariable(nb).dimension:\t" + toString(getVariable(nb).dimension) + "\n" );
       }
       if (nbCount > 2)
-	  errorAbort("Inconsitent graph. \nFactor with more than two neighbors currently not supported:\n" + factorInfoStr(i) );
+	  errorAbort("Inconsistent graph. \nFactor with more than two neighbors currently not supported:\n" + factorInfoStr(i) );
     }
   }
 

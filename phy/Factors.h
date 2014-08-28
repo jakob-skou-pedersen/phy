@@ -72,6 +72,9 @@ namespace phy {
     /** returns factor name */
     string const & name() {return name_;}
 
+    /** serialization method */
+    virtual void serialize(ostream& os) const = 0;
+
   protected:
 
     /** Optimize parameters implementation. Called by optimizeParameters and must be implemented by derived classes. */
@@ -113,6 +116,8 @@ namespace phy {
 
     virtual void mkFactor(matrix_t & m) const {m = m_;}
     using AbstractBaseFactor::mkFactor; // bringing other mkFactor definition into this name space (hidden otherwise)
+
+    virtual void serialize(ostream& os) const;
 
   protected:
     matrix_t m_;
@@ -180,8 +185,8 @@ namespace phy {
     /** Calculation of potentials based on mean and var */
     void calcPotentials();
     
-    /** For debug purposes have a print method */
-    void print();
+    /** Serialize object(writes mean and variance to stream) */
+    virtual void serialize(ostream & os) const;
 
   protected:
     virtual int optimizeParametersImpl();
@@ -191,6 +196,33 @@ namespace phy {
     number_t var_; ///< Variance of Normal distribution
     vector_t breakpoints_; // Breakpoints for bins #Bins = 1+#Breakpoints
     vector_t midpoints_; // Midpoints for each bin derived from breakpoints
+  };
+
+  class DiscContFactor : public AbstractFullyParameterizedFactor {
+  public:
+    /** Constructor */
+  DiscContFactor(string const & name, vector_t const & means, vector_t const & vars, number_t const & minv, number_t const & maxv, unsigned states, unsigned bins, matrix_t const & pseudoCounts = matrix_t() ) : AbstractFullyParameterizedFactor("discCont", name, matrix_t(states,bins) , pseudoCounts), means_(means), vars_(vars), priors_(states,0), minv_(minv), maxv_(maxv), bins_(bins),states_(states) { calcPotentials();}
+
+    /** Destructor */
+    virtual ~DiscContFactor() {} ;
+
+    /** Serialize object(write means and variance to stream) */
+    virtual void serialize(ostream & os) const;
+
+    /** Calculation of potentials */
+    void calcPotentials();
+
+  protected:
+    virtual int optimizeParametersImpl();
+
+  private:
+    vector_t means_; ///< Means of normal distributions
+    vector_t vars_; ///< Variances of normal distributions
+    vector_t priors_; ///< Prior proportions
+    number_t minv_; ///< Endpoint of range of observations
+    number_t maxv_; ///< Endpoint of range of observations
+    unsigned bins_; ///< Number of bins(binning of continuous variable)
+    unsigned states_; ///< Number of states
   };
 
   class AbstractBaseFactorSet {

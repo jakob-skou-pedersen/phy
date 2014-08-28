@@ -175,14 +175,11 @@ BOOST_AUTO_TEST_CASE(NormalFactor_general_1)
   NormalFactor nf("noName", 5, 2, breakpoints);
   
   //TODO Add some data and run init
- 
-  std::cout << "Adding data" << std::endl;
   for(int i = 0; i < 11; ++i)
       nf.counts_(0,i) = -(i-3)*(i-3)+64;
  
-  std::cout << "Running init and optimization" << std::endl;
   nf.init(); 
-  nf.optimizeParametersImpl();
+  nf.optimizeParameters();
 
   /* R-code
      > bp <- c(0.6,0.7,0.9,1.1,1.3,1.5,1.7,1.9,2.1,2.3,2.4)
@@ -196,6 +193,32 @@ BOOST_AUTO_TEST_CASE(NormalFactor_general_1)
   //Test equality with some margin
   BOOST_CHECK_CLOSE( nf.mean_ , 1.347273, 0.001);
   BOOST_CHECK_CLOSE( nf.var_  , 0.290621, 0.001);
+}
+
+BOOST_AUTO_TEST_CASE(DiscContFactor_general_1){
+  unsigned bins = 10;
+  double minv = -2;
+  double maxv = 3;
+  int states = 2;
+
+  //Initialize means and variances
+  vector_t means(states);
+  vector_t vars(states, bins*bins/1.96/1.96);
+  for(unsigned i = 0; i < states; ++i)
+    means(i) = (double)bins/states*(0.5+i);
+ 
+  DiscContFactor dcf("dcf", means, vars, minv, maxv, states, bins);
+
+  matrix_t c(2, 10, 1);
+  for( int i = 0; i < 2; ++i)
+    for( int j = 0; j < 10; ++j)
+      c(i,j) = i+j+3;
+
+  dcf.submitCounts(c);
+  dcf.optimizeParameters();
+
+
+  dcf.optimizeParametersImpl();
 }
 
 
