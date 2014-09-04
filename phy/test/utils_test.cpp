@@ -69,3 +69,14 @@ BOOST_AUTO_TEST_CASE(parserUtils_1)
   BOOST_CHECK(strVal == "second.2");  
   BOOST_CHECK( not moreTags(f) );
 }
+
+BOOST_AUTO_TEST_CASE(conversionUtils_1) {
+  ConvertIndexNumber cin1(0,10,10);
+  BOOST_CHECK_CLOSE( cin1.indexToNumber( 1 ), 1.5, 0.001);
+  BOOST_CHECK_EQUAL( cin1.numberToIndex( 1.5), 1);
+
+  ConvertIndexNumber cin2(-0.10,0.10,20);
+  std::cout << "Index2Number" <<  cin2.indexToNumber( 10)  << std::endl;
+  BOOST_CHECK_CLOSE( cin2.indexToNumber( 10 ), 0.005, 0.001);
+  BOOST_CHECK_EQUAL( cin2.numberToIndex( 0.005), 10);
+}

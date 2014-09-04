@@ -73,6 +73,31 @@ namespace phy {
   inline double power(double x, double p) {return pow(x, p);}
   inline double power(double x, unsigned p) {return pow(x, static_cast<int>(p) );}
 
+  class ConvertIndexNumber {
+  public:
+    ConvertIndexNumber(number_t const & minv, number_t maxv, unsigned const & bins) : minv_(minv), maxv_(maxv), bins_(bins) { 
+      toNumberAlpha_ = (maxv_-minv_)*(1-1./bins_)/(bins_-1);
+      toNumberBeta_ = minv_+(maxv_-minv_)/2/bins_;
+    }
+
+    number_t getToNumberAlpha(){ return toNumberAlpha_;}
+    number_t getToNumberBeta(){ return toNumberBeta_;}
+    unsigned numberToIndex(number_t s) {
+      if( s < minv_ or s > maxv_ ) errorAbort("ConvertIndexNumber: NumberToIndex: Number out of range: Might change implementation return 0 if s < min and bins-1 if s > max");
+      return bins_*(s-minv_)/(maxv_-minv_);
+    }
+    number_t indexToNumber(unsigned i) {
+      return i*toNumberAlpha_+toNumberBeta_;
+    }
+
+  private:
+    number_t minv_;
+    number_t maxv_;
+    unsigned bins_;
+    number_t toNumberAlpha_;
+    number_t toNumberBeta_;
+  };
+
   /** Return accumulated log of values in v. */
   template<class V>
   number_t accLog(V const & v);
