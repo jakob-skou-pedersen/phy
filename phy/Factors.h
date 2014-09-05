@@ -164,44 +164,14 @@ namespace phy {
     virtual int optimizeParametersImpl();  
   };
 
-  /** @brief Normally distributed prior */
-  class NormalFactor : public AbstractFullyParameterizedFactor {
+  /** @brief Discrete and Continuous variable factor. Mixture of normals */
+  class DiscContFactor : public AbstractBaseFactor {
   public:
-    /** Constructor taking mean and variance */
-    NormalFactor(string const & name, number_t const & mean, number_t const & var, vector_t const & breakpoints, matrix_t const & pseudoCounts = matrix_t() )
-      : AbstractFullyParameterizedFactor("normal", name, matrix_t(1,breakpoints.size()+1), pseudoCounts), mean_(mean), var_(var), breakpoints_(breakpoints) { 
-      init();
-    };
+    /** Constructor with parameters*/
+    DiscContFactor(string const & name, vector_t const & means, vector_t const & vars, number_t const & minv, number_t const & maxv, unsigned states, unsigned bins ) : AbstractBaseFactor("discCont", name, states, bins), means_(means), vars_(vars), priors_(states,1), minv_(minv), maxv_(maxv), bins_(bins),states_(states) { }
 
-    /** Classic constructor */
-    NormalFactor(string const & name, matrix_t const & m, matrix_t const & pseudoCounts = matrix_t()) : AbstractFullyParameterizedFactor("normal", name, m, pseudoCounts) { };
-    
-    /** Destructor */
-    virtual ~NormalFactor() {} ;
-
-    /** Initialization of midpoints */
-    void init();
-    
-    /** Calculation of potentials based on mean and var */
-    void calcPotentials();
-    
-    /** Serialize object(writes mean and variance to stream) */
-    virtual void serialize(ostream & os) const;
-
-  protected:
-    virtual int optimizeParametersImpl();
-
-  private:
-    number_t mean_; ///< Mean of Normal distribution
-    number_t var_; ///< Variance of Normal distribution
-    vector_t breakpoints_; // Breakpoints for bins #Bins = 1+#Breakpoints
-    vector_t midpoints_; // Midpoints for each bin derived from breakpoints
-  };
-
-  class DiscContFactor : public AbstractFullyParameterizedFactor {
-  public:
-    /** Constructor */
-  DiscContFactor(string const & name, vector_t const & means, vector_t const & vars, number_t const & minv, number_t const & maxv, unsigned states, unsigned bins, matrix_t const & pseudoCounts = matrix_t() ) : AbstractFullyParameterizedFactor("discCont", name, matrix_t(states,bins) , pseudoCounts), means_(means), vars_(vars), priors_(states,0), minv_(minv), maxv_(maxv), bins_(bins),states_(states) { calcPotentials();}
+    /** Constructor using "default" parameters */
+    DiscContFactor(string const & name, number_t const & minv, number_t const & maxv, unsigned states, unsigned bins );
 
     /** Destructor */
     virtual ~DiscContFactor() {} ;
@@ -209,20 +179,48 @@ namespace phy {
     /** Serialize object(write means and variance to stream) */
     virtual void serialize(ostream & os) const;
 
-    /** Calculation of potentials */
-    void calcPotentials();
+    /** AbstractFullyParameterizedFactor just overwrite m_. Sets matrix ideally only where there are observations*/
+    virtual void mkFactor(matrix_t &m) const;
 
   protected:
     virtual int optimizeParametersImpl();
 
   private:
-    vector_t means_; ///< Means of normal distributions
-    vector_t vars_; ///< Variances of normal distributions
+    vector_t means_; ///< Means of normal distributions in scale of bin-numbers!
+    vector_t vars_; ///< Variances of normal distributions in scale of bin-numbers!
     vector_t priors_; ///< Prior proportions
     number_t minv_; ///< Endpoint of range of observations
     number_t maxv_; ///< Endpoint of range of observations
     unsigned bins_; ///< Number of bins(binning of continuous variable)
     unsigned states_; ///< Number of states
+  };
+
+  /** @brief Continuous-Continuous factor linear regression of second variable in first variable
+      Notice that if first variable has a normal prior, then this is effectively a 2D normal distribution */
+  class ContContFactor : public AbstractBaseFactor {
+  public:
+    /** Constructor with parameters */
+  ContContFactor(string const & name, number_t const & alpha, number_t const & beta, number_t const & var, unsigned const & bins1, unsigned const & bins2, number_t const & minv1, number_t const & maxv1, number_t const & minv2, number_t const & maxv2 ) : AbstractBaseFactor("contCont", name, bins1, bins2), alpha_(alpha), beta_(beta), var_(var), bins1_(bins1), bins2_(bins2), minv1_(minv1), maxv1_(maxv1), minv2_(minv2), maxv2_(maxv2) {}
+
+    /** Constructor without parameters(reasonable defaults are used */
+  ContContFactor(string const & name, unsigned const & bins1, unsigned const & bins2, number_t const & minv1, number_t const & maxv1, number_t const & minv2, number_t const & maxv2 ) : AbstractBaseFactor("contCont", name, bins1, bins2), alpha_(0), beta_(bins2/2), var_(bins2*bins2/1.96/1.96), bins1_(bins1), bins2_(bins2), minv1_(minv1), maxv1_(maxv1), minv2_(minv2), maxv2_(maxv2) {}
+
+    /** Destructor */
+    virtual ~ContContFactor() {} ;
+
+    /** Serialize object(write coefficients and variance to stream) */
+    virtual void serialize(ostream & os) const;
+
+    /** Overwrite m_. Ideally set matrix only where there are observations */
+    virtual void mkFactor(matrix_t &m) const;
+
+  protected:
+    virtual int optimizeParametersImpl();
+
+  private:
+    number_t alpha_, beta_, var_; ///< Regression coeffecients and variance
+    unsigned bins1_, bins2_;  ///< Number of bins in each variable
+    number_t minv1_,maxv1_, minv2_,maxv2_; ///< Range of observations
   };
 
   class AbstractBaseFactorSet {

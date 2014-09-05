@@ -460,13 +460,13 @@ BOOST_AUTO_TEST_CASE(readDfgInfo_2){
 
   //Check readStateMapFile
   map<string, StateMapPtr_t> smMap = readStateMapFile( inPrefix + stateMapsFile );
-  BOOST_CHECK( smMap["realMap"]->stateCount() == 12);
+  BOOST_CHECK( smMap["realMap"]->stateCount() == 202);
 
   //Check readFactorFile
   map<string, AbsBasFacPtr_t> facMap = readFactorFile( inPrefix + factorPotentialsFile);
-  BOOST_CHECK( facMap["norm"]->type() == "normal");
+  BOOST_CHECK( facMap["norm"]->type() == "discCont");
   BOOST_CHECK( facMap["norm"]->size1_ == 1);
-  BOOST_CHECK( facMap["norm"]->size2_ == 12);
+  BOOST_CHECK( facMap["norm"]->size2_ == 202);
 
   //Check readVariables
   map<string, string> var2smMap = readVariables( inPrefix + variablesFile);
@@ -502,18 +502,10 @@ BOOST_AUTO_TEST_CASE(VarData_1)
 
   while ( varData.next(id, data) ) {
     dataVec.push_back(data);
-    //    cout << id << "\t";
-    //    BOOST_FOREACH(string const & s, data)
-    //      cout << s << "\t";
-    //    cout << endl;
   }
 
   BOOST_CHECK(dataVec.size() == 2);
   BOOST_CHECK(dataVec[0].size() == 2);
   BOOST_CHECK(dataVec[1].size() == 2);
   BOOST_CHECK(dataVec[0][0] == "A");
-  
-  //  tie(id, data) = varData.next();
-  //  cout << id << endl;
-
 }

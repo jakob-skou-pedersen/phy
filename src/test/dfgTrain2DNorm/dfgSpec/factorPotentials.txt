@@ -7,3 +7,12 @@ BINS:		202
 MIN:		-1.0
 MAX:		2.0
 STATES:		1
+
+NAME:		multi
+TYPE:		contCont
+BINS1:		202
+BINS2:		202
+MIN1:		-1.0
+MAX1:		2.0
+MIN2:		-1.0
+MAX2:		2.0

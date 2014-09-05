@@ -12,7 +12,6 @@ namespace phy {
   // helper functions
   AbsBasFacPtr_t readAbstractFullyParameterizedFactor(istream & str, string const & type, string const & name)
   {
-    if(type == "rowNorm" or type == "colNorm" or type == "globNorm" ){
     matrix_t potMat;
     getFeatureAndSkipLine(str, "POT_MAT:", potMat);
 
@@ -21,7 +20,7 @@ namespace phy {
       getFeatureAndSkipLine(str, "PC_MAT:", pcMat);
       if ( pcMat.size1() == 0 )
 	errorAbort("From readAbstractFullyParameterizedFactor: PC_MAT must define a matrix of non-zero size or not be defined at all. Problem in specification of factor with name '" + name + "'.");
-	}
+    }
 
     if (type == "rowNorm")
       return  AbsBasFacPtr_t(new RowNormFactor(name, potMat, pcMat) );
@@ -30,49 +29,40 @@ namespace phy {
     if (type == "globNorm")
       return  AbsBasFacPtr_t(new GlobalNormFactor(name, potMat, pcMat) );
 
-    }
-    if (type == "normal"){
-      //TODO Read all sorts of tags
-      int no_bp = 0;
-      getFeatureAndSkipLine(str, "BREAKPOINTS:", no_bp);
-
-      double min = 0;
-      double max = 0;
-      getFeatureAndSkipLine(str, "MIN:", min);
-      getFeatureAndSkipLine(str, "MAX:", max);
-
-      assert(min < max );
-      vector_t breakpoints(no_bp);
-      for(int i = 0; i < no_bp; ++i)
-	breakpoints(i) = min + i* (max-min)/(no_bp-1);
-      
-
-      return AbsBasFacPtr_t(new NormalFactor(name, (max+min)/2 , ((max-min)/2/1.96)*((max-min)/2/1.96), breakpoints));
-    }
-    if (type == "discCont" ){
-      int bins = 0;
-      double minv = 0;
-      double maxv = 0;
-      int states = 0;
-
-      getFeatureAndSkipLine(str, "BREAKPOINTS:", bins); bins++;
-      getFeatureAndSkipLine(str, "MIN:", minv);
-      getFeatureAndSkipLine(str, "MAX:", maxv);
-      getFeatureAndSkipLine(str, "STATES:", states);
-
-      //Initialize means and variances
-      vector_t means(states);
-      vector_t vars(states, bins*bins/1.96/1.96);
-      for(unsigned i = 0; i < states; ++i)
-	means(i) = (double)bins/states*(0.5+i);
-      
-      return AbsBasFacPtr_t(new DiscContFactor(name, means, vars, minv, maxv, states, bins) );
-    }
-
     errorAbort("From readAbstractFullyParameterizedFactor: Unknown type ('" + type + "') in specification of factor with name '" + name + "'.");
     exit(1); // to satisfy compiler
   }
 
+  AbsBasFacPtr_t readContContFactor(istream & str, string const & name){
+    unsigned bins1, bins2;
+    number_t min1v, max1v, min2v, max2v;
+    getFeatureAndSkipLine(str, "BINS1:", bins1);
+    getFeatureAndSkipLine(str, "BINS2:", bins2);
+    getFeatureAndSkipLine(str, "MIN1:", min1v);
+    getFeatureAndSkipLine(str, "MAX1:", max1v);
+    getFeatureAndSkipLine(str, "MIN2:", min2v);
+    getFeatureAndSkipLine(str, "MAX2:", max2v);
+    
+    return AbsBasFacPtr_t(new ContContFactor(name, bins1, bins2, min1v, max1v, min2v, max2v));
+  }
+
+  AbsBasFacPtr_t readDiscContFactor(istream & str, string const & name){
+    int bins = 0;
+    double minv = 0;
+    double maxv = 0;
+    int states = 0;
+
+    getFeatureAndSkipLine(str, "BINS:", bins);
+    getFeatureAndSkipLine(str, "MIN:", minv);
+    getFeatureAndSkipLine(str, "MAX:", maxv);
+    getFeatureAndSkipLine(str, "STATES:", states);
+
+    if(maxv < minv )
+      errorAbort("readDiscContFactor: Normal factor max < min");
+
+    //Initialize means and variances
+    return AbsBasFacPtr_t(new DiscContFactor(name, minv, maxv, states, bins) );
+  }
 
   void writeAbstractFullyParameterizedFactor(ostream & str, AbsBasFacPtr_t const & factorPtr)
   {
@@ -94,8 +84,12 @@ namespace phy {
     getFeatureAndSkipLine(str, "TYPE:", type);
 
     // dispatch the correct parser depending on type
-    if (type == "rowNorm" or type == "colNorm" or type == "globNorm" or type == "normal" or type == "discCont")
+    if (type == "rowNorm" or type == "colNorm" or type == "globNorm")
       return pair<string, AbsBasFacPtr_t>(name, readAbstractFullyParameterizedFactor(str, type, name) );
+    if (type == "discCont")
+      return pair<string, AbsBasFacPtr_t>(name, readDiscContFactor(str, name) );
+    if (type == "contCont")
+      return pair<string, AbsBasFacPtr_t>(name, readContContFactor(str, name) );
     else {
       errorAbort("From readFactor: Unknown type ('" + type + "') in specification of factor with name '" + name + "'.");
       exit(1); // to satisfy compiler
@@ -133,7 +127,7 @@ namespace phy {
     string const type = factorPtr->type();
     str << "TYPE:\t" << type << endl;
 
-    if (type == "rowNorm" or type == "colNorm" or type == "globNorm" or type == "normal" or type == "discCont")
+    if (type == "rowNorm" or type == "colNorm" or type == "globNorm" or type == "discCont" or type == "contCont")
       writeAbstractFullyParameterizedFactor(str, factorPtr);
     else 
       errorAbort("From writeFactor: Unknown type ('" + type + "') in write request for factor with name '" + name + "'.");

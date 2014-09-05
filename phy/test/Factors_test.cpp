@@ -166,35 +166,32 @@ BOOST_AUTO_TEST_CASE(ColumnNormFactor_general_1)
   //  cout << n << endl;
 }
 
-BOOST_AUTO_TEST_CASE(NormalFactor_general_1)
-{
-  vector_t breakpoints(10);
-  for(int i = 0; i < 10; ++i)
-    breakpoints(i) = i*0.2+0.6;
-
-  NormalFactor nf("noName", 5, 2, breakpoints);
-  
-  //TODO Add some data and run init
-  for(int i = 0; i < 11; ++i)
-      nf.counts_(0,i) = -(i-3)*(i-3)+64;
- 
-  nf.init(); 
-  nf.optimizeParameters();
-
-  /* R-code
-     > bp <- c(0.6,0.7,0.9,1.1,1.3,1.5,1.7,1.9,2.1,2.3,2.4)
-     > counts <- c((55),(60),(63),(64),(63),(60),(55),(48),(39),(28),(15))
-     > mean(sweep(as.matrix(bp),1,counts,FUN=rep))
-     [1] 1.347273
-     > var(sweep(as.matrix(bp),1,counts,FUN=rep))
-     [1] 0.290621
-  */
-
-  //Test equality with some margin
-  BOOST_CHECK_CLOSE( nf.mean_ , 1.347273, 0.001);
-  BOOST_CHECK_CLOSE( nf.var_  , 0.290621, 0.001);
-}
-
+//BOOST_AUTO_TEST_CASE(DiscContFactor_general_1)
+//{
+//  vector_t means(1, 100);
+//  vector_t vars(1, 2500);
+//  DiscContFactor dcf("noName", means, vars, 0, 2, 1, 200);
+//  
+//  //TODO Add some data and run init
+//  //  dcf.counts_(0,i) = -(i-3)*(i-3)+64;
+// 
+//  //  nf.init(); 
+//  //  nf.optimizeParameters();
+//
+//  /* R-code
+//     > bp <- c(0.6,0.7,0.9,1.1,1.3,1.5,1.7,1.9,2.1,2.3,2.4)
+//     > counts <- c((55),(60),(63),(64),(63),(60),(55),(48),(39),(28),(15))
+//     > mean(sweep(as.matrix(bp),1,counts,FUN=rep))
+//     [1] 1.347273
+//     > var(sweep(as.matrix(bp),1,counts,FUN=rep))
+//     [1] 0.290621
+//  */
+//
+//  //Test equality with some margin
+//  //  BOOST_CHECK_CLOSE( nf.mean_ , 1.347273, 0.001);
+//  //  BOOST_CHECK_CLOSE( nf.var_  , 0.290621, 0.001);
+//}
+//
 BOOST_AUTO_TEST_CASE(DiscContFactor_general_1){
   unsigned bins = 10;
   double minv = -2;
@@ -293,6 +290,12 @@ BOOST_AUTO_TEST_CASE(readFactorFile_1)
   BOOST_CHECK_EQUAL(factorMap["inner"]->mkFactor()(1,0), 0.1);
 }
 
+BOOST_AUTO_TEST_CASE(readFactorFile_2)
+{
+  //Check DiscContFactor
+}
+
+/*
 BOOST_AUTO_TEST_CASE(readFactorFile_2) 
 {
   map<string, AbsBasFacPtr_t> factorMap = readFactorFile("./data/dfgSpec/test2Potentials.txt");
@@ -302,7 +305,7 @@ BOOST_AUTO_TEST_CASE(readFactorFile_2)
   BOOST_CHECK_EQUAL(factorMap["prior"]->mkFactor().size2(), (unsigned) 12);
   // BOOST_CHECK_EQUAL(factorMap["prior"]->mkFactor()(0,1), 0.2);
 }
-
+*/
 
 
 BOOST_AUTO_TEST_CASE(writeFactorMap_1) 

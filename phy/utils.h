@@ -75,13 +75,13 @@ namespace phy {
 
   class ConvertIndexNumber {
   public:
-    ConvertIndexNumber(number_t const & minv, number_t maxv, unsigned const & bins) : minv_(minv), maxv_(maxv), bins_(bins) { 
+    ConvertIndexNumber(number_t const & minv, number_t const & maxv, unsigned const & bins) : minv_(minv), maxv_(maxv), bins_(bins) { 
       toNumberAlpha_ = (maxv_-minv_)*(1-1./bins_)/(bins_-1);
       toNumberBeta_ = minv_+(maxv_-minv_)/2/bins_;
     }
 
-    number_t getToNumberAlpha(){ return toNumberAlpha_;}
-    number_t getToNumberBeta(){ return toNumberBeta_;}
+    number_t const & getToNumberAlpha(){ return toNumberAlpha_;}
+    number_t const & getToNumberBeta(){ return toNumberBeta_;}
     unsigned numberToIndex(number_t s) {
       if( s < minv_ or s > maxv_ ) errorAbort("ConvertIndexNumber: NumberToIndex: Number out of range: Might change implementation return 0 if s < min and bins-1 if s > max");
       return bins_*(s-minv_)/(maxv_-minv_);

@@ -115,17 +115,16 @@ BOOST_AUTO_TEST_CASE(ObservationsIO_stateMap_1)
 
 BOOST_AUTO_TEST_CASE(ObservationsIO_stateMap_2) 
 {
-  ifstream fIn("./data/dfgSpec/test2StateMaps.txt");
+  ifstream fIn("./data/testStateMaps1.txt");
   
   StateMap sm("");
   fIn >> sm;
   
-  //Testing constructor
-  BOOST_CHECK_EQUAL( sm.breakpoints_.size(), 11);
-
   //Testing Parsing
-  BOOST_CHECK_EQUAL( sm.symbol2State("0.03"), 1);
-  BOOST_CHECK_EQUAL( sm.symbol2State("0.43"), 5);
+  BOOST_CHECK_EQUAL( sm.symbol2State("0.9999"), 199);
+  BOOST_CHECK_EQUAL( sm.symbol2State("-0.9999"), 0);
+  BOOST_CHECK_EQUAL( sm.symbol2State("0.004"),100);
+  BOOST_CHECK_EQUAL( sm.symbol2State("0.014"),101);
 }
 
 

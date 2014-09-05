@@ -41,7 +41,7 @@ namespace phy {
   class StateMapImpl{
   public:
     //    virtual ~StateMapImpl();
-    virtual state_t const & symbol2State(symbol_t const & s) const = 0;
+    virtual state_t const symbol2State(symbol_t const & s) const = 0;
     virtual symbol_t const & state2Symbol(state_t i) const = 0;
     //virtual symbol_t state2Symbol(state_t i, symbol_t & s) const = 0;
 
@@ -80,9 +80,9 @@ namespace phy {
     /** Constructor of n-long multiSymbols based on a basic stateMap. If staMap has a name, and no explicit name is given, the name of the constructed StateMap will be n-name.*/
     StateMap(StateMap const & staMap, unsigned n, string const & explicitName = "");
 
-    /** Constructor for continuous type StateMap */
-    StateMap( vector_t const & breakpoints, string const & name = "");
- 
+    /** Constructor for continuous type StateMap*/
+    StateMap(unsigned bins, number_t minv, number_t maxv, string const & name = "");
+
     /** Copy assignment operator. */
     StateMap const & operator=(StateMap const &rhs);
 
@@ -91,7 +91,7 @@ namespace phy {
     vector<symbol_t> const state2Symbol(vector<state_t> v) const;
 
     /** Returns state corresponding to symbol s. Aborts on nonexisting symbols. */
-    state_t const & symbol2State(symbol_t const & s) const { return pImpl->symbol2State(s);}
+    state_t const symbol2State(symbol_t const & s) const { return pImpl->symbol2State(s);}
     vector<state_t> const symbol2State(vector<symbol_t> v) const;
 
     /** returns degeneracy vector for symbol s */

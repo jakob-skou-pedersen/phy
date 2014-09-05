@@ -49,8 +49,8 @@ namespace phy {
     string tag;
     string real;
     bool is_real = false;
-    double min;
-    double max;
+    double minv;
+    double maxv;
     int no_bp;
     str >> tag;
 
@@ -104,11 +104,11 @@ namespace phy {
 	  skipLine(str);
 	}
 	else if ( tag == "MIN:"){
-	  str >> min;
+	  str >> minv;
 	  skipLine(str);
 	}
 	else if ( tag == "MAX:"){
-	  str >> max;
+	  str >> maxv;
 	  skipLine(str);
 	}
 	else
@@ -122,10 +122,10 @@ namespace phy {
 	staMap = StateMap(symStrToSymVec(symbols), metaSymStrToMetaSymMap(metaSymbols), name);
       if(is_real){
 	//TODO Redundant code
-	vector_t breakpoints(no_bp);
-	for(int i = 0; i < no_bp; ++i)
-	  breakpoints(i) = min + i*(max-min)/(no_bp-1);
-	staMap = StateMap( breakpoints, name);
+	//	vector_t breakpoints(no_bp);
+	//	for(int i = 0; i < no_bp; ++i)
+	//	  breakpoints(i) = minv + i*(maxv-minv)/(no_bp-1);
+	staMap = StateMap( no_bp+1, minv, maxv, name);
       }
 
       // use multiplicity

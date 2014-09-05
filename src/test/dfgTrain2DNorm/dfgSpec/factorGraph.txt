@@ -1,0 +1,10 @@
+# specification of factors and thereby entire (dual) graph
+
+NAME:		O1.O2
+NB1:		O1
+NB2:		O2
+POT:		multi
+
+NAME:		O1
+NB1:		O1
+POT:		norm
