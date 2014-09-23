@@ -1,10 +1,7 @@
 # Examples training a mixture of normal distributions
-# test1VarData.tab: Class labels known
-# test2VarData.tab: Some class labels known
-# test3VarData.tab: Unknown labels
+# test1VarData.tab: Fully observed 2D normally distributed data
 
-# Simulated data 100 samples from each class 
-# class a: mean 0.2 sd 0.2(var 0.04)
-# class b: mean 1.1 sd 0.1(var 0.01)
-
+# Simulated data 100 samples 
+# O1 normally distributed with mean 0.2 and var 0.04
+# O2 normally distributed with mean O1+0.2 and var 0.04
 ../../dfgTrain --emTrain test1VarData.tab --writeInfo
