@@ -71,7 +71,7 @@ namespace phy {
   }
 
   /** Constructor without parameter values, set to reasonable defaults */
-  DiscContFactor::DiscContFactor(string const & name, number_t const & minv, number_t const & maxv, unsigned states, unsigned bins ) : AbstractBaseFactor("discCont", name, states, bins), means_(states), vars_(states, bins*bins/1.96/1.96), minv_(minv), maxv_(maxv), bins_(bins),states_(states) { 
+  DiscContFactor::DiscContFactor(string const & name, number_t const & minv, number_t const & maxv, unsigned states, unsigned bins ) : AbstractBaseFactor("discCont", name, states, bins), minv_(minv), maxv_(maxv), bins_(bins),states_(states) { 
     mixDist_ = MixPtr_t(new NormalMixture(states, minv, maxv, bins));
   }
   
@@ -103,7 +103,6 @@ namespace phy {
     ConvertIndexNumber is1(minv1_, maxv1_, bins1_);
     ConvertIndexNumber is2(minv2_, maxv2_, bins2_);
 
-    os << "NAME:\t" << name_ << endl;
     os << "ALPHA:\t" << alpha_* is2.getToNumberAlpha()/is1.getToNumberAlpha() << endl;
     os << "BETA:\t" << beta_*is2.getToNumberAlpha()+is2.getToNumberBeta()-alpha_*is2.getToNumberAlpha()*is1.getToNumberBeta()/is1.getToNumberAlpha() << endl;
     os << "VAR:\t" << var_*is2.getToNumberAlpha()*is2.getToNumberAlpha() << endl << endl;

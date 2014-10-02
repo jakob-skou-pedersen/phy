@@ -88,8 +88,10 @@ namespace phy {
 
   void DfgInfo::writeInfo(ostream & str )
   {
-    for(unsigned i = 0; i < facVec.size(); ++i)
+    for(unsigned i = 0; i < facVec.size(); ++i){
+      str << "NAME:\t" << facVec[i]->name() << endl;
       facVec[i]->serialize(str);
+    }
   }
 
   map<string, string> readVariables(string const & file)

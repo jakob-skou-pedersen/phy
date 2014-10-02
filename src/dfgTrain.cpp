@@ -105,7 +105,7 @@ int main(int argc, char * argv[])
     dfgInfo.dfg.writeDot(dotFile);
 
   if (writeInfo){
-    dfgInfo.dfg.writeInfo(cerr, dfgInfo.varNames, dfgInfo.facNames);
+    //    dfgInfo.dfg.writeInfo(cerr, dfgInfo.varNames, dfgInfo.facNames);
     dfgInfo.writeInfo(cerr);
   }
   return 0;

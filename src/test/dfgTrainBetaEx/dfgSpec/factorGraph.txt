@@ -1,0 +1,5 @@
+# specification of factors and thereby entire (dual) graph
+
+NAME:		O1
+NB1:		O1
+POT:		beta

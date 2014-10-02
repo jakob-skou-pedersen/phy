@@ -1,4 +1,4 @@
-# Examples training a mixture of normal distributions
+# Examples training a normal distributions
 # test1VarData.tab: 100 samples from normal distribution
 # mean 0.2 sd 0.3(var 0.09)
 

@@ -1,0 +1,10 @@
+# Specification of factor potentials and potentially pseudo counts for training
+# name must be unique
+
+NAME:		beta
+TYPE:		discCont
+BINS:		200
+MIN:		0
+MAX:		1
+STATES:		1
+DIST:		BETA

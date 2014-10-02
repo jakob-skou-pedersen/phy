@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/distributions/gamma.hpp>
+#include <boost/math/distributions/beta.hpp>
 #include <boost/shared_ptr.hpp>
 
 /** 
@@ -37,7 +38,7 @@ namespace phy {
     virtual ~Mixture() {};
 
     /** <Returns P( x in [i; i+1[ ) for X|S=s */
-    virtual number_t binProb(int i, int s) const = 0; 
+    //    virtual number_t binProb(int i, int s) const = 0; 
 
     virtual void serialize( std::ostream & os) const = 0;
 
@@ -111,6 +112,33 @@ namespace phy {
     vector_t alphas_;
     vector_t betas_;
     vector< boost::math::gamma_distribution<> > dists_;
+  };
+
+  class BetaMixture : public Mixture {
+  public:
+    /** Constructor with explicit parameters */
+    BetaMixture(vector_t const & alphas, vector_t const & betas, number_t const & minv, number_t const & maxv, unsigned const & bins);
+
+    /** Constructor defaults */
+    BetaMixture(unsigned states, number_t const & minv, number_t const & maxv, unsigned const & bins);
+
+    /** Constructor with inputstream */
+    BetaMixture(std::istream & str, number_t const & minv, number_t const & maxv, unsigned const & bins);
+
+    /** Dtor */
+    virtual ~BetaMixture() {} ;
+
+    virtual void serialize( std::ostream & os) const;    
+
+    virtual void mkFactor(matrix_t &m) const;
+ 
+    virtual int optimizeParameters(matrix_t & counts) ;
+
+  private:
+    void setDists();
+    vector_t alphas_;
+    vector_t betas_;
+    vector< boost::math::beta_distribution<> > dists_;
   };
   
   //IO functions

@@ -169,7 +169,7 @@ namespace phy {
   class DiscContFactor : public AbstractBaseFactor {
   public:
     /** Constructor with parameters*/
-  DiscContFactor(string const & name, vector_t const & means, vector_t const & vars, number_t const & minv, number_t const & maxv, unsigned states, unsigned bins ) : AbstractBaseFactor("discCont", name, states, bins), means_(means), vars_(vars), minv_(minv), maxv_(maxv), bins_(bins),states_(states), mixDist_(new NormalMixture(means, vars, minv, maxv, bins)) { }
+  DiscContFactor(string const & name, vector_t const & means, vector_t const & vars, number_t const & minv, number_t const & maxv, unsigned states, unsigned bins ) : AbstractBaseFactor("discCont", name, states, bins), minv_(minv), maxv_(maxv), bins_(bins),states_(states), mixDist_(new NormalMixture(means, vars, minv, maxv, bins)) { }
 
     /** Constructor using "default" parameters */
     DiscContFactor(string const & name, number_t const & minv, number_t const & maxv, unsigned states, unsigned bins );
@@ -190,8 +190,6 @@ namespace phy {
     virtual int optimizeParametersImpl();
 
   private:
-    vector_t means_; ///< Means of normal distributions in scale of bin-numbers!
-    vector_t vars_; ///< Variances of normal distributions in scale of bin-numbers!
     number_t minv_; ///< Endpoint of range of observations
     number_t maxv_; ///< Endpoint of range of observations
     unsigned bins_; ///< Number of bins(binning of continuous variable)

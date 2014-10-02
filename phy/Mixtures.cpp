@@ -20,19 +20,23 @@ namespace phy {
     setDists();
   }
 
-  NormalMixture::NormalMixture( std::istream & str, number_t const & minv, number_t const & maxv, unsigned const & bins) : Mixture(minv, maxv, bins, 0), means_(), vars_(){
+  NormalMixture::NormalMixture( std::istream & str, number_t const & minv, number_t const & maxv, unsigned const & bins) : Mixture(minv, maxv, bins, 0), means_(), vars_(), dists_(){
     //Read parameters
     ConvertIndexNumber is(minv_, maxv_, bins_);
     number_t lin_a = is.getToNumberAlpha();
     number_t lin_b = is.getToNumberBeta();
     
     getFeatureAndSkipLine(str, "MEANS:", means_);
-    states_ = means_.size();
-    means_ = element_div( means_ - boost::numeric::ublas::scalar_vector<number_t>(states_,lin_b-(maxv_-minv_)/2/bins_), boost::numeric::ublas::scalar_vector<number_t>(states_,lin_a) );
-
     getFeatureAndSkipLine(str, "VARS:", vars_);
-    vars_ = element_div(vars_, boost::numeric::ublas::scalar_vector<number_t>(states_, lin_a*lin_a));
+    if(means_.size() != vars_.size() )
+      errorAbort("NormalMixture: The two parameter vectors must have same length");
 
+    states_ = means_.size();
+
+    //Convert to index space
+    means_ = element_div( means_ - boost::numeric::ublas::scalar_vector<number_t>(states_,lin_b-(maxv_-minv_)/2/bins_), boost::numeric::ublas::scalar_vector<number_t>(states_,lin_a) );
+    vars_ = element_div(vars_, boost::numeric::ublas::scalar_vector<number_t>(states_, lin_a*lin_a));
+    
     setDists();
   }
 
@@ -160,19 +164,104 @@ namespace phy {
     return 1;
   }
 
+  BetaMixture::BetaMixture(vector_t const & alphas, vector_t const & betas, number_t const & minv, number_t const & maxv, unsigned const & bins) : Mixture(minv, maxv,bins, alphas.size()),  alphas_(alphas), betas_(betas), dists_() 
+  {
+    //Possibly do some assertions?
+    setDists();
+  }
+
+
+  BetaMixture::BetaMixture(std::istream & str, number_t const & minv, number_t const & maxv, unsigned const & bins) : Mixture(minv, maxv, bins, 0), alphas_(), betas_(), dists_(){
+    //TODO maybe assert minv=0 and maxv=1
+    getFeatureAndSkipLine(str, "ALPHAS:", alphas_);
+    getFeatureAndSkipLine(str, "BETAS:", betas_);
+    if(alphas_.size() != betas_.size() )
+      errorAbort("BetaMixture: The two parameter vectors must have same length");
+
+    states_ = alphas_.size();
+    setDists();
+  }
+
+  BetaMixture::BetaMixture(unsigned states, number_t const & minv, number_t const & maxv, unsigned const & bins) : Mixture(minv, maxv, bins, states), alphas_(states), betas_(states, 2), dists_(){
+    //Set reasonable defaults
+    for(unsigned i = 0; i < states_; ++i)
+      alphas_(i) = i+1;
+
+    setDists();
+  }
+
+  void BetaMixture::serialize(std::ostream & os) const {
+    os << "DIST:\tBETA" << std::endl;
+    os << "ALPHAS:\t" << alphas_ << std::endl;
+    os << "BETAS:\t" << betas_ << std::endl;
+  }
+
+  void BetaMixture::setDists(){
+    for(int i = 0; i < states_; ++i){
+      if( i >= dists_.size() )
+	dists_.push_back( boost::math::beta_distribution<>(alphas_(i), betas_(i) ));
+      else
+	dists_.at(i) = boost::math::beta_distribution<>(alphas_(i), betas_(i));
+    }
+  }
+
+  void BetaMixture::mkFactor(matrix_t &m) const {
+    for(int i = 0; i < m.size1(); ++i){
+      for(int j = 0; j < m.size2(); ++j){
+	m(i,j) = cdf( dists_.at(i), static_cast<double>(j+1)/bins_) - cdf( dists_.at(i), static_cast<double>(j)/bins_);
+      }
+    }
+  }
+
+  int BetaMixture::optimizeParameters(matrix_t & counts){
+    //Method of moments
+    //TODO default to MLE
+    vector_t S(states_,0);
+    vector_t USS(states_,0);
+    vector_t n(states_,0);
+    
+    for ( matrix_t::iterator1 it1 = counts.begin1(); it1 != counts.end1(); ++it1){
+      for( matrix_t::iterator2 it2 = it1.begin(); it2 != it1.end(); ++it2){
+	n(it2.index1()) += (*it2);
+	S(it2.index1()) += it2.index2() * (*it2);
+	USS(it2.index1()) += it2.index2() * it2.index2() * (*it2);
+      }
+    }
+
+    for(unsigned i = 0; i < states_; ++i){
+      //Mean
+      number_t x = S(i)/n(i)/(bins_-1); //Last factor corrects for scaling
+      //Variance
+      number_t v = (USS(i)-S(i)*S(i)/n(i))/n(i)/(bins_-1)/(bins_-1);
+      
+      alphas_(i) = x*(x*(1-x)/v-1);
+      betas_(i) = alphas_(i)*(1/x-1);
+    }
+
+  }
+
   //IO functions
   MixPtr_t readMixture(std::istream & str, string dist, number_t const & minv, number_t const & maxv, unsigned const & bins, unsigned const & states){
     if(dist == "NORMAL" or dist == "NORM"){
       if(moreTags(str))
 	return MixPtr_t( new NormalMixture(str, minv, maxv, bins) );
       else
+	//Use defaults
 	return MixPtr_t( new NormalMixture(states, minv, maxv, bins) );
     }
     else if(dist == "GAMMA"){
       if(moreTags(str))
 	return MixPtr_t( new GammaMixture(str, minv, maxv, bins) );
       else
+	//Use defaults
 	return MixPtr_t( new GammaMixture(states, minv, maxv, bins) );
+    }
+    else if(dist == "BETA"){
+      if(moreTags(str))
+	return MixPtr_t( new BetaMixture(str, minv, maxv, bins) );
+      else
+	//Use defaults
+	return MixPtr_t( new BetaMixture(states, minv, maxv, bins));
     }
     else{
       errorAbort("readMixture: Unrecognized distribution type: " + dist + "\n");
