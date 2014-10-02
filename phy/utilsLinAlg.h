@@ -30,6 +30,10 @@ namespace phy {
   template <class T>
   inline void reset(ublas::symmetric_matrix<T, ublas::upper> & m, T x = 0);
 
+  /** Reset all matrix entries to x (default is 0).*/
+  template <class T>
+  inline void reset(ublas::compressed_matrix<T> & m, T x = 0);
+
   /** reset all entries of vector */
   template <class T>
   inline void reset(vector<T> & v);
@@ -97,6 +101,12 @@ namespace phy {
     for (unsigned i = 0; i < m.size1(); i++)
       for (unsigned j = 0; j < m.size2(); j++)
 	m(i, j) = x;
+  }
+
+  /** Reset all matrix entries to x (default is 0). */
+  template <class T>
+  inline void reset(ublas::compressed_matrix<T> & m, T x ){
+    m.clear();
   }
 
   template <class T>
