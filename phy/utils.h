@@ -76,12 +76,16 @@ namespace phy {
   class ConvertIndexNumber {
   public:
     ConvertIndexNumber(number_t const & minv, number_t const & maxv, unsigned const & bins) : minv_(minv), maxv_(maxv), bins_(bins) { 
-      toNumberAlpha_ = (maxv_-minv_)*(1-1./bins_)/(bins_-1);
+      toNumberAlpha_ = (maxv_-minv_)/bins_;
       toNumberBeta_ = minv_+(maxv_-minv_)/2/bins_;
+      toIndexAlpha_ = (maxv_-minv_)/bins_;
+      toIndexBeta_ = -minv_*(maxv_-minv_)/bins_;
     }
 
     number_t const & getToNumberAlpha(){ return toNumberAlpha_;}
     number_t const & getToNumberBeta(){ return toNumberBeta_;}
+    number_t const & getToIndexAlpha(){ return toIndexAlpha_;}
+    number_t const & getToIndexBeta(){ return toIndexBeta_;}
     unsigned numberToIndex(number_t s) {
       if( s < minv_ or s > maxv_ ) errorAbort("ConvertIndexNumber: NumberToIndex: Number out of range: Might change implementation return 0 if s < min and bins-1 if s > max");
       return bins_*(s-minv_)/(maxv_-minv_);
@@ -96,6 +100,8 @@ namespace phy {
     unsigned bins_;
     number_t toNumberAlpha_;
     number_t toNumberBeta_;
+    number_t toIndexAlpha_;
+    number_t toIndexBeta_;
   };
 
   /** Return accumulated log of values in v. */

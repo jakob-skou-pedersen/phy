@@ -1,6 +1,10 @@
 # specification of factors and thereby entire (dual) graph
 
-NAME:		O2 01
+NAME:		O2.O1
 NB1:		O2
 NB2:		O1
 POT:		mix
+
+NAME:		O2
+NB1:		O2
+POT:		prior

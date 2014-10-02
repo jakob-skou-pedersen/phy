@@ -58,6 +58,9 @@ namespace phy {
     /** returns length (in chars) of symbols */
     virtual state_t symbolSize() const = 0;
 
+    /** serialize statemap */
+    virtual void serialize(ostream & os) const = 0;
+
     virtual void setMetaState2StateMask(vector<stateMask_t> & metaState2StateMask_) const = 0;
   };
 
@@ -108,6 +111,10 @@ namespace phy {
 
     /** Set metaState2StateMask for the StateMaskMap class */
     void setMetaState2StateMask(vector<stateMask_t> & metaState2StateMask) const { pImpl->setMetaState2StateMask( metaState2StateMask);}
+
+    /** Serialize statemap */
+    void serialize(ostream &os) const {return pImpl->serialize( os);}
+
 
     /** Returns StateMap name. Name is empty ("") if not a canonical
 	type. Useful in IO-functions. */

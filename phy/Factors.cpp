@@ -71,53 +71,32 @@ namespace phy {
   }
 
   /** Constructor without parameter values, set to reasonable defaults */
-  DiscContFactor::DiscContFactor(string const & name, number_t const & minv, number_t const & maxv, unsigned states, unsigned bins ) : AbstractBaseFactor("discCont", name, states, bins), means_(states), vars_(states, bins*bins/1.96/1.96), priors_(states,1), minv_(minv), maxv_(maxv), bins_(bins),states_(states) { 
-    for(unsigned i = 0; i < states_; ++i)
-      means_(i) = (double)bins_/states_*(0.5+i);
+  DiscContFactor::DiscContFactor(string const & name, number_t const & minv, number_t const & maxv, unsigned states, unsigned bins ) : AbstractBaseFactor("discCont", name, states, bins), means_(states), vars_(states, bins*bins/1.96/1.96), minv_(minv), maxv_(maxv), bins_(bins),states_(states) { 
+    mixDist_ = MixPtr_t(new NormalMixture(states, minv, maxv, bins));
+  }
+  
+  /** Constructor taking Mixture object */
+  DiscContFactor::DiscContFactor(string const & name, number_t const & minv, number_t const & maxv, unsigned states, unsigned bins, MixPtr_t mixDist ) : AbstractBaseFactor("discCont", name, states, bins), minv_(minv), maxv_(maxv), bins_(bins), states_(states), mixDist_(mixDist) {
+
   }
 
   void DiscContFactor::serialize(ostream & os) const
   {
-    ConvertIndexNumber is(minv_, maxv_, bins_);
-    number_t lin_a = is.getToNumberAlpha();
-    number_t lin_b = is.getToNumberBeta();
-    os << "NAME:\t" << name_ << endl;
-    os << "MEANS:\t" << ( boost::numeric::ublas::scalar_vector<number_t>(states_,lin_b) + element_prod(boost::numeric::ublas::scalar_vector<number_t>(states_,lin_a),means_) ) << endl;
-    os << "VARS:\t" << element_prod(boost::numeric::ublas::scalar_vector<number_t>(states_, lin_a*lin_a),vars_) << endl << endl;
+    os << "BINS:\t" << bins_ << endl;
+    os << "MIN:\t" << minv_ << endl;
+    os << "MAX:\t" << maxv_ << endl;
+    os << "STATES:\t" << states_ << endl;
+    mixDist_->serialize(os);
   }
 
   int DiscContFactor::optimizeParametersImpl()
   {
-    vector_t S(states_,0);
-    vector_t USS(states_,0);
-    vector_t n(states_,0);
-
-    for ( matrix_t::iterator1 it1 = counts_.begin1(); it1 != counts_.end1(); ++it1){
-      for( matrix_t::iterator2 it2 = it1.begin(); it2 != it1.end(); ++it2){
-	n(it2.index1()) += (*it2);
-	S(it2.index1()) += it2.index2() * (*it2);
-	USS(it2.index1()) += it2.index2() * it2.index2() * (*it2);
-      }
-    }
-    
-    for(unsigned i = 0; i < states_; ++i){
-      means_(i) = S(i)/n(i);
-      vars_(i) = (USS(i)-S(i)*S(i)/n(i))/(n(i)-1);
-      priors_(i) = n(i); //TODO Do I need normalization?
-    }
-
-    return 1;
+    mixDist_->optimizeParameters(counts_);
   }
 
   void DiscContFactor::mkFactor(matrix_t &m) const
   {
-    for(int i = 0; i < m.size1(); ++i){
-      boost::math::normal norm(means_(i), sqrt(vars_(i)) );
-      for(int j = 0; j < m.size2(); ++j ){
-	//TODO Calculate only in actual observations
-	m(i,j) = (cdf(norm, j) - cdf(norm, j-1))*priors_(i);
-      }
-    }
+    mixDist_->mkFactor(m);
   }
 
   void ContContFactor::serialize(ostream & os) const {

@@ -10,7 +10,8 @@ h_sources =  PhyDef.h GrammarDef.h NewickNode.h NewickParserBase.h		\
              DfgDataWrap.h xdoubleMod.h Factors.h FactorsIO.h			\
              RateMatrix.h ama.h SeqIO.h DataIO.h optimizexx.h Emit.h		\
              Grammar.h GrammarTrain.h GrammarWrap.h GrammarIO.h EmitWrap.h	\
-             EmitWrapIO.h EmitWrapPhylo.h EmitWrapDfg.h StatDist.h
+             EmitWrapIO.h EmitWrapPhylo.h EmitWrapDfg.h StatDist.h		\
+	     Mixtures.h
 
 ccp_sources = NewickNode.cpp NewickLexer.cpp NewickParserBase.cpp NewickParser.cpp PhyIO.cpp	\
               DiscreteFactorGraph.cpp DfgIO.cpp TRCTMCTree.cpp					\
@@ -19,7 +20,8 @@ ccp_sources = NewickNode.cpp NewickLexer.cpp NewickParserBase.cpp NewickParser.c
               ObservationsIO.cpp DfgDataWrap.cpp						\
               Factors.cpp FactorsIO.cpp RateMatrix.cpp ama.cpp SeqIO.cpp			\
               DataIO.cpp optimizexx.cpp Grammar.cpp GrammarTrain.cpp				\
-              GrammarWrap.cpp GrammarIO.cpp EmitWrap.cpp EmitWrapIO.cpp EmitWrapDfg.cpp 
+              GrammarWrap.cpp GrammarIO.cpp EmitWrap.cpp EmitWrapIO.cpp EmitWrapDfg.cpp 	\
+	      Mixtures.cpp
 
 library_includedir=$(includedir)/$(PACKAGE)-$(API_VERSION)/$(PACKAGE)
 library_include_HEADERS = $(h_sources)

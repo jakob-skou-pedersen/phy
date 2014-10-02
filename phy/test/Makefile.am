@@ -16,7 +16,7 @@ testRunner_LDADD = ../libphy.la -lboost_unit_test_framework -llapack -lntl -lopt
 testRunner_SOURCES = testRunner.cpp PhyTestDef.cpp PhyIO_test.cpp TRCTMCTree_test.cpp DiscreteFactorGraph_test.cpp	\
 	PhyloTreeIO_test.cpp Observations_test.cpp PhyDef_test.cpp							\
 	RateMatrix_test.cpp Factors_test.cpp ama_test.cpp								\
-	utils_test.cpp Grammar_test.cpp StatDist_test.cpp EmitWrap_test.cpp
+	utils_test.cpp Grammar_test.cpp StatDist_test.cpp EmitWrap_test.cpp Mixtures_test.cpp
 
 #testRunner_SOURCES = testRunner.cpp PhyTestDef.cpp Grammar_test.cpp 
 

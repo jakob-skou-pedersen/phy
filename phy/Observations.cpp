@@ -25,6 +25,7 @@ namespace phy {
     virtual state_t symbolSize() const{ return 1;}
     virtual vector<symbol_t> const degeneracyVector(symbol_t const & s) const;
     virtual void setMetaState2StateMask(vector<stateMask_t> & metaState2StateMask_) const;
+    virtual void serialize(ostream & str) const;
   private:
     unsigned bins_;
     number_t minv_;
@@ -50,7 +51,7 @@ namespace phy {
     virtual state_t symbolSize() const { return symbolSize_; } //TODO Move to StateMapImpl
     virtual vector<symbol_t> const degeneracyVector(symbol_t const & s) const;
     virtual void setMetaState2StateMask(vector<stateMask_t> & metaState2StateMask_) const;
-
+    virtual void serialize(ostream & str) const;
   private:
     void init();
 
@@ -109,6 +110,25 @@ namespace phy {
 	metaState2StateMask.at(i)(j) = true;
       }
     }
+  }
+
+  void StateMapImplSymbol::serialize(ostream & str) const {
+    // symbols
+    str << "SYMBOLS:\t";
+    for (unsigned i = 0; i < stateCount_; i++)
+      str << " " << state2Symbol(i);
+    str << endl;
+
+    // meta symbols
+    str << "META_SYMBOLS:\t";
+    for (unsigned i = stateCount_; i < metaStateCount_; i++) {
+      vector<symbol_t> degVec = degeneracyVector( state2Symbol(i) );
+      str << " " << state2Symbol(i) << " =";
+      BOOST_FOREACH(string const & s, degVec)
+	str << " " << s;
+      str << ";";
+    }
+    str << endl;
   }
 
   void StateMapImplContinuous::setMetaState2StateMask(vector<stateMask_t> & metaState2StateMask) const {
@@ -174,6 +194,13 @@ namespace phy {
     if ( it == degeneracyMap_.end() )
       errorAbort("StateMap::degeneracyVector: Symbol '" + s + "' not found in stateMap.");
     return it->second;
+  }
+
+  void StateMapImplContinuous::serialize(ostream & str) const{
+    str << "REAL:\tTRUE" << std::endl;
+    str << "BINS:\t" << bins_ << std::endl;
+    str << "MIN:\t" << minv_ << std::endl;
+    str << "MAX:\t" << maxv_ << std::endl;
   }
 
   /*****************************************

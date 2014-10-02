@@ -4,6 +4,7 @@
  * See README_license.txt for license agreement.
  *******************************************************************/
 #include "phy/FactorsIO.h"
+#include "phy/Mixtures.h"
 #include <stdio.h>
 #include <cassert>
 
@@ -51,17 +52,24 @@ namespace phy {
     double minv = 0;
     double maxv = 0;
     int states = 0;
+    string dist;
 
     getFeatureAndSkipLine(str, "BINS:", bins);
     getFeatureAndSkipLine(str, "MIN:", minv);
     getFeatureAndSkipLine(str, "MAX:", maxv);
-    getFeatureAndSkipLine(str, "STATES:", states);
-
     if(maxv < minv )
       errorAbort("readDiscContFactor: Normal factor max < min");
 
-    //Initialize means and variances
-    return AbsBasFacPtr_t(new DiscContFactor(name, minv, maxv, states, bins) );
+    getFeatureAndSkipLine(str, "STATES:", states);
+    if( moreTags(str) ){
+      getFeatureAndSkipLine(str, "DIST:", dist);
+      MixPtr_t mixDist = readMixture(str, dist, minv, maxv, bins, states);
+      return AbsBasFacPtr_t(new DiscContFactor(name, minv, maxv, states, bins, mixDist) );
+    }
+    else{
+      //Use default(normal distribution)
+      return AbsBasFacPtr_t(new DiscContFactor(name, minv, maxv, states, bins) );
+    }
   }
 
   void writeAbstractFullyParameterizedFactor(ostream & str, AbsBasFacPtr_t const & factorPtr)

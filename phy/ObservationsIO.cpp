@@ -51,7 +51,7 @@ namespace phy {
     bool is_real = false;
     double minv;
     double maxv;
-    int no_bp;
+    int bins;
     str >> tag;
 
     if (tag == "ALPHABET_NAME:") {  // use pre-defined state map
@@ -99,8 +99,8 @@ namespace phy {
 	    errorAbort("REAL: tag should be either T, TRUE, F, FALSE, note default is FALSE");
 	  skipLine(str);
 	}
-	else if ( tag == "BREAKPOINTS:" ){
-	  str >> no_bp;
+	else if ( tag == "BINS:" ){
+	  str >> bins;
 	  skipLine(str);
 	}
 	else if ( tag == "MIN:"){
@@ -125,7 +125,7 @@ namespace phy {
 	//	vector_t breakpoints(no_bp);
 	//	for(int i = 0; i < no_bp; ++i)
 	//	  breakpoints(i) = minv + i*(maxv-minv)/(no_bp-1);
-	staMap = StateMap( no_bp+1, minv, maxv, name);
+	staMap = StateMap(bins, minv, maxv, name);
       }
 
       // use multiplicity
@@ -162,23 +162,7 @@ namespace phy {
     str << "NAME:\t" << staMap.name() << endl;
 
     // symbols
-    unsigned stateCount = staMap.stateCount();
-    str << "SYMBOLS:\t";
-    for (unsigned i = 0; i < stateCount; i++)
-      str << " " << staMap.state2Symbol(i);
-    str << endl;
-
-    // meta symbols
-    unsigned metaStateCount = staMap.metaStateCount();
-    str << "META_SYMBOLS:\t";
-    for (unsigned i = stateCount; i < metaStateCount; i++) {
-      vector<symbol_t> degVec = staMap.degeneracyVector( staMap.state2Symbol(i) );
-      str << " " << staMap.state2Symbol(i) << " =";
-      BOOST_FOREACH(string const & s, degVec)
-	str << " " << s;
-      str << ";";
-    }
-    str << endl;
+    staMap.serialize(str);
   }
 
 

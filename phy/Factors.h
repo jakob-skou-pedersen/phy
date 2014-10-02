@@ -9,6 +9,7 @@
 #include "phy/PhyDef.h"
 #include "phy/utils.h"
 #include "phy/utilsLinAlg.h"
+#include "phy/Mixtures.h"
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/foreach.hpp>
 #include <boost/shared_ptr.hpp>
@@ -70,7 +71,7 @@ namespace phy {
     string const & type() {return type_;}
 
     /** returns factor name */
-    string const & name() {return name_;}
+    string const & name() const {return name_;}
 
     /** serialization method */
     virtual void serialize(ostream& os) const = 0;
@@ -168,10 +169,13 @@ namespace phy {
   class DiscContFactor : public AbstractBaseFactor {
   public:
     /** Constructor with parameters*/
-    DiscContFactor(string const & name, vector_t const & means, vector_t const & vars, number_t const & minv, number_t const & maxv, unsigned states, unsigned bins ) : AbstractBaseFactor("discCont", name, states, bins), means_(means), vars_(vars), priors_(states,1), minv_(minv), maxv_(maxv), bins_(bins),states_(states) { }
+  DiscContFactor(string const & name, vector_t const & means, vector_t const & vars, number_t const & minv, number_t const & maxv, unsigned states, unsigned bins ) : AbstractBaseFactor("discCont", name, states, bins), means_(means), vars_(vars), minv_(minv), maxv_(maxv), bins_(bins),states_(states), mixDist_(new NormalMixture(means, vars, minv, maxv, bins)) { }
 
     /** Constructor using "default" parameters */
     DiscContFactor(string const & name, number_t const & minv, number_t const & maxv, unsigned states, unsigned bins );
+
+    /** Constructor taking Mixture object */
+    DiscContFactor(string const & name, number_t const & minv, number_t const & maxv, unsigned states, unsigned bins, MixPtr_t mixDist );
 
     /** Destructor */
     virtual ~DiscContFactor() {} ;
@@ -188,11 +192,11 @@ namespace phy {
   private:
     vector_t means_; ///< Means of normal distributions in scale of bin-numbers!
     vector_t vars_; ///< Variances of normal distributions in scale of bin-numbers!
-    vector_t priors_; ///< Prior proportions
     number_t minv_; ///< Endpoint of range of observations
     number_t maxv_; ///< Endpoint of range of observations
     unsigned bins_; ///< Number of bins(binning of continuous variable)
     unsigned states_; ///< Number of states
+    MixPtr_t mixDist_; 
   };
 
   /** @brief Continuous-Continuous factor linear regression of second variable in first variable

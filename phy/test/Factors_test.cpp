@@ -17,6 +17,7 @@
 #define protected public
 #include "phy/Factors.h"
 #include "phy/FactorsIO.h"
+#include "phy/Mixtures.h"
 #undef protected
 #undef private 
 
@@ -166,32 +167,7 @@ BOOST_AUTO_TEST_CASE(ColumnNormFactor_general_1)
   //  cout << n << endl;
 }
 
-//BOOST_AUTO_TEST_CASE(DiscContFactor_general_1)
-//{
-//  vector_t means(1, 100);
-//  vector_t vars(1, 2500);
-//  DiscContFactor dcf("noName", means, vars, 0, 2, 1, 200);
-//  
-//  //TODO Add some data and run init
-//  //  dcf.counts_(0,i) = -(i-3)*(i-3)+64;
-// 
-//  //  nf.init(); 
-//  //  nf.optimizeParameters();
-//
-//  /* R-code
-//     > bp <- c(0.6,0.7,0.9,1.1,1.3,1.5,1.7,1.9,2.1,2.3,2.4)
-//     > counts <- c((55),(60),(63),(64),(63),(60),(55),(48),(39),(28),(15))
-//     > mean(sweep(as.matrix(bp),1,counts,FUN=rep))
-//     [1] 1.347273
-//     > var(sweep(as.matrix(bp),1,counts,FUN=rep))
-//     [1] 0.290621
-//  */
-//
-//  //Test equality with some margin
-//  //  BOOST_CHECK_CLOSE( nf.mean_ , 1.347273, 0.001);
-//  //  BOOST_CHECK_CLOSE( nf.var_  , 0.290621, 0.001);
-//}
-//
+
 BOOST_AUTO_TEST_CASE(DiscContFactor_general_1){
   unsigned bins = 10;
   double minv = -2;
@@ -203,7 +179,7 @@ BOOST_AUTO_TEST_CASE(DiscContFactor_general_1){
   vector_t vars(states, bins*bins/1.96/1.96);
   for(unsigned i = 0; i < states; ++i)
     means(i) = (double)bins/states*(0.5+i);
- 
+
   DiscContFactor dcf("dcf", means, vars, minv, maxv, states, bins);
 
   matrix_t c(2, 10, 1);
@@ -213,9 +189,60 @@ BOOST_AUTO_TEST_CASE(DiscContFactor_general_1){
 
   dcf.submitCounts(c);
   dcf.optimizeParameters();
+}
 
+BOOST_AUTO_TEST_CASE(DiscContFactor_general_2){
+  unsigned bins = 10;
+  double minv = 0;
+  double maxv = 10;
+  int states = 2;
 
-  dcf.optimizeParametersImpl();
+  //Initialize means and variances
+  vector_t means(states,5);
+  vector_t vars(states, 4);
+
+  MixPtr_t mixDist( new NormalMixture(means, vars, minv, maxv, bins));
+  DiscContFactor dcf( "dcf", minv, maxv, states, bins, mixDist );
+
+  //Test mk_factor
+  matrix_t m(2,10);
+  dcf.mkFactor(m);
+  BOOST_CHECK_CLOSE( m(0,4) , 0.1914625, 0.0001);
+}
+
+BOOST_AUTO_TEST_CASE(DiscContFactor_general_3)
+{
+  vector_t means(1, 7);
+  vector_t vars(1, 7);
+  DiscContFactor dcf("noName", means, vars, 0, 2, 1, 10);
+  
+  //TODO Add some data and run init
+  matrix_t counts(1,10,0);
+  for(int i = 0; i < 10; ++i)
+    counts(0,i) = -(i-3)*(i-3)+37;
+
+  //  dcf.hasChanged_ = true;
+  dcf.submitCounts( counts );
+  dcf.optimizeParameters();
+
+  /* R-code
+     > bp <- c(0.6,0.7,0.9,1.1,1.3,1.5,1.7,1.9,2.1,2.3,2.4)
+     > counts <- c((55),(60),(63),(64),(63),(60),(55),(48),(39),(28),(15))
+     > mean(sweep(as.matrix(bp),1,counts,FUN=rep))
+     [1] 1.347273
+     > var(sweep(as.matrix(bp),1,counts,FUN=rep))
+     [1] 0.290621
+  */
+
+  //Get our hands on the underlying NormalMixture
+  boost::shared_ptr<NormalMixture> nm = boost::dynamic_pointer_cast<NormalMixture>( dcf.mixDist_ );
+
+  std::cout << "MEANS:\t" << nm->means_ << std::endl;
+  std::cout << "VARS:\t" << nm->vars_ << std::endl;
+
+  //Test equality with some margin
+  BOOST_CHECK_CLOSE( nm->means_(0) , 3.56603773585, 0.001);
+  BOOST_CHECK_CLOSE( nm->vars_(0)  , 5.40566037736, 0.001);
 }
 
 
@@ -268,11 +295,6 @@ BOOST_AUTO_TEST_CASE(CompositeFactorSet_mkFactor_1)
   BOOST_CHECK(not matrixEqual(facSet.mkFactor(2), m1) );
 
   BOOST_CHECK(matrixEqual( facSet.mkFactor(2), facSet.mkFactor(0) ) );
-
-  // output factor matrices
-  // BOOST_FOREACH(matrix_t const & m, facSet.mkFactor() )
-  //   cout << m << endl << sumMatrix(m) << endl << endl;
-
 }
 
 
@@ -320,3 +342,14 @@ BOOST_AUTO_TEST_CASE(writeFactorMap_1)
   BOOST_CHECK( matrixEqual( factorMap1["prior"]->mkFactor(), factorMap2["prior"]->mkFactor() ) );
   BOOST_CHECK( matrixEqual( factorMap1["inner"]->mkFactor(), factorMap2["inner"]->mkFactor() ) );
 }
+
+BOOST_AUTO_TEST_CASE(writeFactorMap_2)
+{
+  string const fileName1 = "./data/dfgSpec/test2Potentials.txt";
+  string const fileName2 = "./output/test2Potentials.txt";
+
+  
+  //Check reflection of new continuous factors
+  //If default parameters are used the output should be with parameters
+}
+
