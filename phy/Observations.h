@@ -42,7 +42,7 @@ namespace phy {
   public:
     //    virtual ~StateMapImpl();
     virtual state_t const symbol2State(symbol_t const & s) const = 0;
-    virtual symbol_t const & state2Symbol(state_t i) const = 0;
+    virtual symbol_t state2Symbol(state_t i) const = 0;
     //virtual symbol_t state2Symbol(state_t i, symbol_t & s) const = 0;
 
 
@@ -90,7 +90,7 @@ namespace phy {
     StateMap const & operator=(StateMap const &rhs);
 
     /** Returns symbol corresponding to state i */
-    symbol_t const & state2Symbol(state_t i) const {return pImpl->state2Symbol(i);}
+    symbol_t state2Symbol(state_t i) const {return pImpl->state2Symbol(i);}
     vector<symbol_t> const state2Symbol(vector<state_t> v) const;
 
     /** Returns state corresponding to symbol s. Aborts on nonexisting symbols. */

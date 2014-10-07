@@ -82,15 +82,15 @@ namespace phy {
       toIndexBeta_ = -minv_*(maxv_-minv_)/bins_;
     }
 
-    number_t const & getToNumberAlpha(){ return toNumberAlpha_;}
-    number_t const & getToNumberBeta(){ return toNumberBeta_;}
-    number_t const & getToIndexAlpha(){ return toIndexAlpha_;}
-    number_t const & getToIndexBeta(){ return toIndexBeta_;}
-    unsigned numberToIndex(number_t s) {
+    number_t const & getToNumberAlpha() const{ return toNumberAlpha_;}
+    number_t const & getToNumberBeta() const{ return toNumberBeta_;}
+    number_t const & getToIndexAlpha() const{ return toIndexAlpha_;}
+    number_t const & getToIndexBeta() const{ return toIndexBeta_;}
+    unsigned numberToIndex(number_t s) const {
       if( s < minv_ or s > maxv_ ) errorAbort("ConvertIndexNumber: NumberToIndex: Number out of range: Might change implementation return 0 if s < min and bins-1 if s > max");
       return bins_*(s-minv_)/(maxv_-minv_);
     }
-    number_t indexToNumber(unsigned i) {
+    number_t indexToNumber(unsigned i) const {
       return i*toNumberAlpha_+toNumberBeta_;
     }
 

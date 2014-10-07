@@ -16,10 +16,10 @@ namespace phy {
   /** Implementations of StateMaps following the PIMPL idiom **/
   class StateMapImplContinuous : public StateMapImpl {
   public:
-    StateMapImplContinuous( unsigned bins, number_t minv, number_t maxv) : bins_(bins), minv_(minv), maxv_(maxv) { }
+    StateMapImplContinuous( unsigned bins, number_t minv, number_t maxv) : bins_(bins), minv_(minv), maxv_(maxv), convertIndexNumber_(minv,maxv,bins) { }
     
     virtual state_t const symbol2State(symbol_t const & s) const;
-    virtual symbol_t const & state2Symbol(state_t i) const;
+    virtual symbol_t state2Symbol(state_t i) const;
     virtual unsigned stateCount() const { return bins_; }
     virtual unsigned metaStateCount() const { return bins_; }
     virtual state_t symbolSize() const{ return 1;}
@@ -31,9 +31,7 @@ namespace phy {
     number_t minv_;
     number_t maxv_;
     vector<stateMask_t> metaState2StateMask_; //TODO make dynamic
-
-    //TODO Remove this:
-    symbol_t state2Symbol_;
+    ConvertIndexNumber convertIndexNumber_;
   };
 
 
@@ -45,7 +43,7 @@ namespace phy {
     StateMapImplSymbol(StateMap const & staMap, unsigned n);
 
     virtual state_t const symbol2State(symbol_t const & s) const;
-    virtual symbol_t const & state2Symbol(state_t i) const { return state2Symbol_[i]; }
+    virtual symbol_t state2Symbol(state_t i) const { return state2Symbol_[i]; }
     virtual unsigned stateCount() const { return stateCount_; } //Move to StateMapImpl?
     virtual unsigned metaStateCount() const { return metaStateCount_; }
     virtual state_t symbolSize() const { return symbolSize_; } //TODO Move to StateMapImpl
@@ -164,24 +162,10 @@ namespace phy {
     return bins_*(sym-minv_)/(maxv_-minv_);
   }
 
-  symbol_t const & StateMapImplContinuous::state2Symbol(state_t i) const {
-    //TODO have a function that takes a reference to a string stream. And append the following
-    /*
+  symbol_t StateMapImplContinuous::state2Symbol(state_t i) const {
     std::stringstream s;
-    s << '(';
-    if(i == 0)
-      s << '-Inf';
-    else
-      s << breakpoints_(i-1) ;
-    s << ';';
-    if(i < breakpoints_.size())
-      s << breakpoints_(i);
-    else
-      s << 'Inf';
-    s << ')';
+    s << convertIndexNumber_.indexToNumber(i);
     return s.str();
-    */
-    return state2Symbol_;
   }
 
   vector<symbol_t> const StateMapImplContinuous::degeneracyVector(symbol_t const & s) const{
