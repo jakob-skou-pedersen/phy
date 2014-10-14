@@ -128,6 +128,19 @@ BOOST_AUTO_TEST_CASE(ObservationsIO_stateMap_2)
 }
 
 
+BOOST_AUTO_TEST_CASE(ObservationsIO_stateMap_3)
+{
+  ifstream fIn("./data/testStateMaps3.txt");
+
+  StateMap sm("");
+  fIn >> sm;
+
+  //Test parsing
+  BOOST_CHECK_EQUAL( sm.symbol2State("5"), 0);
+  BOOST_CHECK_EQUAL( sm.symbol2State("7"), 2);
+  BOOST_CHECK_EQUAL( sm.symbol2State("15"), 10);
+}
+
 BOOST_AUTO_TEST_CASE(Observations_mkDiSymbol_1) 
 {
   //  inline symbol_t mkDiSymbol(unsigned const sizeLeft, unsigned const sizeRight, string const & seq, long const seqSize, long const leftStartPos, long const rightStartPos, char const missingDataChar = '.')

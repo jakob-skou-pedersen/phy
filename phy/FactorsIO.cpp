@@ -72,6 +72,18 @@ namespace phy {
     }
   }
 
+  AbsBasFacPtr_t readBinomFactor(istream & str, string const & name){
+    int minv, maxv;
+    double prob = 0;
+    int N = 0;
+    getFeatureAndSkipLine(str, "MIN:", minv);
+    getFeatureAndSkipLine(str, "MAX:", maxv);
+    getFeatureAndSkipLine(str, "PROB:", prob);
+    getFeatureAndSkipLine(str, "N:", N);
+
+    return AbsBasFacPtr_t( new BinomialFactor(name, prob, N, minv, maxv) );
+  }
+
   void writeAbstractFullyParameterizedFactor(ostream & str, AbsBasFacPtr_t const & factorPtr)
   {
     factorPtr->serialize(str);
@@ -98,6 +110,8 @@ namespace phy {
       return pair<string, AbsBasFacPtr_t>(name, readDiscContFactor(str, name) );
     if (type == "contCont")
       return pair<string, AbsBasFacPtr_t>(name, readContContFactor(str, name) );
+    if (type == "binom" or type == "binomial")
+      return pair<string, AbsBasFacPtr_t>(name, readBinomFactor(str, name) );
     else {
       errorAbort("From readFactor: Unknown type ('" + type + "') in specification of factor with name '" + name + "'.");
       exit(1); // to satisfy compiler
@@ -134,11 +148,8 @@ namespace phy {
     str << "NAME:\t" << name << endl;
     string const type = factorPtr->type();
     str << "TYPE:\t" << type << endl;
+    factorPtr->serialize(str);
 
-    if (type == "rowNorm" or type == "colNorm" or type == "globNorm" or type == "discCont" or type == "contCont")
-      writeAbstractFullyParameterizedFactor(str, factorPtr);
-    else 
-      errorAbort("From writeFactor: Unknown type ('" + type + "') in write request for factor with name '" + name + "'.");
     str << endl;
   }
 

@@ -86,6 +86,9 @@ namespace phy {
     /** Constructor for continuous type StateMap*/
     StateMap(unsigned bins, number_t minv, number_t maxv, string const & name = "");
 
+    /** Constructor for count type StateMap */
+    StateMap(unsigned minv, unsigned maxv, string const & name = "");
+
     /** Copy assignment operator. */
     StateMap const & operator=(StateMap const &rhs);
 

@@ -225,6 +225,30 @@ namespace phy {
     number_t minv1_,maxv1_, minv2_,maxv2_; ///< Range of observations
   };
 
+  class BinomialFactor : public AbstractBaseFactor {
+  public:
+    /** Constructor with fixed p */
+    BinomialFactor(string const & name, number_t const & prob, unsigned const & N, unsigned const & minv, unsigned const & maxv) : AbstractBaseFactor("binomial",name, 1, maxv-minv+1), N_(N), prob_(prob), minv_(minv), maxv_(maxv) { }
+    
+    /** Destructor */
+    virtual ~BinomialFactor() {} ;
+    
+    /** Serialize object(write coefficients and variance to stream) */
+    virtual void serialize(ostream & os) const;
+
+    /** Overwrite m_ */
+    virtual void mkFactor(matrix_t &m) const;
+
+  protected:
+    virtual int optimizeParametersImpl();
+    
+  private:
+    unsigned N_;
+    number_t prob_; //To used for single p mode
+    unsigned minv_; //min for count statemap on x
+    unsigned maxv_; //max for count statemap on x
+  };
+
   class AbstractBaseFactorSet {
 
   public:

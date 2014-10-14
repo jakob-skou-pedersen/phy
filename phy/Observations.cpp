@@ -24,7 +24,7 @@ namespace phy {
     virtual unsigned metaStateCount() const { return bins_; }
     virtual state_t symbolSize() const{ return 1;}
     virtual vector<symbol_t> const degeneracyVector(symbol_t const & s) const;
-    virtual void setMetaState2StateMask(vector<stateMask_t> & metaState2StateMask_) const;
+    virtual void setMetaState2StateMask(vector<stateMask_t> & metaState2StateMask) const;
     virtual void serialize(ostream & str) const;
   private:
     unsigned bins_;
@@ -59,6 +59,26 @@ namespace phy {
     unsigned stateCount_;
     unsigned metaStateCount_;
     unsigned symbolSize_;
+  };
+
+  class StateMapImplCount : public StateMapImpl {
+  public:
+    /** Constructor */
+    StateMapImplCount(unsigned minv, unsigned maxv) : minv_(minv), maxv_(maxv) { }
+
+    virtual state_t const symbol2State( symbol_t const & s) const;
+    virtual symbol_t state2Symbol( state_t i) const;
+    virtual unsigned stateCount() const { return maxv_-minv_+1;}
+    virtual unsigned metaStateCount() const { return maxv_-minv_+1;}
+    virtual state_t symbolSize() const{ return 1;}
+    virtual vector<symbol_t> const degeneracyVector(symbol_t const & s) const;
+    virtual void setMetaState2StateMask(vector<stateMask_t> & metaState2StateMask) const;
+    virtual void serialize(ostream & str) const;
+
+  private:
+    unsigned minv_;
+    unsigned maxv_;
+    vector<stateMask_t> metaState2StateMask_; //TODO make dynamic
   };
 
   StateMapImplSymbol::StateMapImplSymbol(StateMap const & staMap, unsigned n){
@@ -187,6 +207,47 @@ namespace phy {
     str << "MAX:\t" << maxv_ << std::endl;
   }
 
+  state_t const StateMapImplCount::symbol2State( symbol_t const & s) const{
+    int sym;
+    try{
+      sym = boost::lexical_cast<int>(s);
+    }
+    catch( boost::bad_lexical_cast &){
+      if( s == "NA")
+	errorAbort("TODO: Implement NA for count observations");
+      errorAbort("StateMapImplCount::symbol2State: Symbol '" + s + "' could not be converted to integer");
+    }
+    if(sym < minv_ or sym > maxv_)
+      errorAbort("StateMapImplCount::symbol2State: Symbol '" + s + "' out of range");
+    return sym-minv_;
+  }
+
+  symbol_t StateMapImplCount::state2Symbol( state_t i) const{
+    std::stringstream s;
+    s << (minv_ + i);
+    return s.str();
+  }
+
+  vector<symbol_t> const StateMapImplCount::degeneracyVector(symbol_t const & s) const{
+    //TODO Refactor this function away!
+    errorAbort("This function is currently unavailable or continuous statemaps. Did you try to generate a multisymbol map from a count statemap?");
+  }
+
+  void StateMapImplCount::setMetaState2StateMask(vector<stateMask_t> & metaState2StateMask) const {
+    if(metaState2StateMask.size() != stateCount())
+      errorAbort("StateMapImplCount::setMetaState2StateMask: metaState2StateMask_.size() != stateCount_");
+
+    for(int i = 0 ; i < stateCount() ; ++i )
+      metaState2StateMask.at(i)(i) = true;
+  }
+
+  void StateMapImplCount::serialize(ostream & str) const {
+    str << "REAL:\tCOUNT" << std::endl;
+    str << "MIN:\t" << minv_ << std::endl;
+    str << "MAX:\t" << maxv_ << std::endl;
+  }
+
+
   /*****************************************
      StateMap stuff
    *****************************************/
@@ -213,6 +274,9 @@ namespace phy {
 
   /** Constructor for continuous type StateMap */
   StateMap::StateMap(unsigned bins, number_t minv, number_t maxv, string const & name) : name_(name), pImpl(new StateMapImplContinuous(bins, minv, maxv)) { }
+
+  /** Constructor for count type StateMap */
+  StateMap::StateMap(unsigned minv, unsigned maxv, string const & name) : name_(name), pImpl(new StateMapImplCount(minv,maxv)) { }
 
   StateMap::StateMap(StateMap const & staMap, unsigned n, string const & explicitName) : name_(explicitName), pImpl( new StateMapImplSymbol(staMap, n) )
   {

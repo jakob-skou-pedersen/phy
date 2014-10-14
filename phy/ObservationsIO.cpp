@@ -49,6 +49,7 @@ namespace phy {
     string tag;
     string real;
     bool is_real = false;
+    bool is_count = false;
     double minv;
     double maxv;
     int bins;
@@ -95,8 +96,12 @@ namespace phy {
 	    is_real = true;
 	  else if ( real == "FALSE" or real == "F")
 	    is_real = false;
+	  else if ( real == "COUNT" ){
+	    is_real = true;
+	    is_count = true;
+	  }
 	  else
-	    errorAbort("REAL: tag should be either T, TRUE, F, FALSE, note default is FALSE");
+	    errorAbort("REAL: tag should be either T, TRUE, F, FALSE or COUNT note default is FALSE");
 	  skipLine(str);
 	}
 	else if ( tag == "BINS:" ){
@@ -122,10 +127,10 @@ namespace phy {
 	staMap = StateMap(symStrToSymVec(symbols), metaSymStrToMetaSymMap(metaSymbols), name);
       if(is_real){
 	//TODO Redundant code
-	//	vector_t breakpoints(no_bp);
-	//	for(int i = 0; i < no_bp; ++i)
-	//	  breakpoints(i) = minv + i*(maxv-minv)/(no_bp-1);
-	staMap = StateMap(bins, minv, maxv, name);
+	if(is_count)
+	  staMap = StateMap( static_cast<int>(minv), static_cast<int>(maxv), name);
+	else
+	  staMap = StateMap(bins, minv, maxv, name);
       }
 
       // use multiplicity

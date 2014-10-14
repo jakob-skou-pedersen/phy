@@ -245,6 +245,25 @@ BOOST_AUTO_TEST_CASE(DiscContFactor_general_3)
   BOOST_CHECK_CLOSE( nm->vars_(0)  , 5.40566037736, 0.001);
 }
 
+BOOST_AUTO_TEST_CASE(BinomialFactor_1)
+{
+  BinomialFactor bf("noname", 0.4, 5, 0, 5);
+  matrix_t m(1,6);
+  bf.mkFactor(m);
+
+  //Test equalities
+  BOOST_CHECK_CLOSE( m(0,0), 0.07776, 0.001);
+  BOOST_CHECK_CLOSE( m(0,2), 0.34560, 0.001);
+
+  //Test optimization
+  matrix_t counts(1,6,0);
+  counts(0,1) = 2;
+  counts(0,2) = 2;
+  bf.submitCounts( counts);
+  bf.optimizeParameters();
+
+  BOOST_CHECK_CLOSE( bf.prob_ , 6./20 , 0.001);
+}
 
 BOOST_AUTO_TEST_CASE(CompositeFactorSet_mkFactor_1) 
 {
@@ -315,6 +334,24 @@ BOOST_AUTO_TEST_CASE(readFactorFile_1)
 BOOST_AUTO_TEST_CASE(readFactorFile_2)
 {
   //Check DiscContFactor
+}
+
+BOOST_AUTO_TEST_CASE(readFactorFile_3)
+{
+  //Check BinomialFactor
+  map<string, AbsBasFacPtr_t> factorMap = readFactorFile("./data/dfgSpecBinom/factorPotentials.txt");
+
+  //Check Existence
+  BOOST_CHECK(factorMap["binomial"] != NULL);
+
+  //Check dimensions
+  BOOST_CHECK_EQUAL(factorMap["binomial"]->mkFactor().size1(), (unsigned) 1);
+  BOOST_CHECK_EQUAL(factorMap["binomial"]->mkFactor().size2(), (unsigned) 6);
+
+  //Check entries
+  BOOST_CHECK_CLOSE(factorMap["binomial"]->mkFactor()(0,0), 0.07776, 0.000001);
+  BOOST_CHECK_CLOSE(factorMap["binomial"]->mkFactor()(0,1), 0.2592, 0.000001);
+  BOOST_CHECK_CLOSE(factorMap["binomial"]->mkFactor()(0,2), 0.3456, 0.000001);
 }
 
 /*

@@ -6,6 +6,7 @@
 #include "phy/Factors.h"
 #include "phy/utils.h"
 #include <boost/math/distributions/normal.hpp>
+#include <boost/math/distributions/binomial.hpp>
 #include <boost/numeric/ublas/io.hpp> /* Used in print function mostly used for debugging could be removed later */
 
 namespace phy {
@@ -138,6 +139,34 @@ namespace phy {
     beta_ = (S_y-S_x*alpha_)/N;
     var_ = (SSD_y - SPD_xy*SPD_xy/SSD_x)/N;
 
+    return 1;
+  }
+
+  void BinomialFactor::serialize(ostream & os) const {
+    os << "MIN:\t" << minv_ << std::endl;
+    os << "MAX:\t" << maxv_ << std::endl;
+    os << "PROB:\t" << prob_ << std::endl;
+    os << "N:\t" << N_ << std::endl;
+  }
+
+  void BinomialFactor::mkFactor(matrix_t &m) const{
+    boost::math::binomial binom(N_, prob_);
+    //Return vector with probabilities over x
+    for(int j = 0; j < m.size2(); ++j)
+      m(0,j) = pdf( binom, j+minv_);
+  }
+
+  int BinomialFactor::optimizeParametersImpl(){
+    double n = 0;
+    double sum = 0;
+    for(matrix_t::iterator1 it1 = counts_.begin1(); it1 != counts_.end1(); ++it1){
+      for(matrix_t::iterator2 it2 = it1.begin(); it2 != it1.end(); ++it2){
+	n += (*it2);
+	sum += it2.index2() * (*it2);
+      }
+    }    
+    sum += n*minv_;
+    prob_ = sum/n/N_;
     return 1;
   }
 
