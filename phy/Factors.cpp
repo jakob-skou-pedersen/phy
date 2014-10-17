@@ -7,7 +7,8 @@
 #include "phy/utils.h"
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/distributions/binomial.hpp>
-#include <boost/numeric/ublas/io.hpp> /* Used in print function mostly used for debugging could be removed later */
+#include <boost/numeric/ublas/io.hpp>
+#include <boost/lexical_cast.hpp>
 
 namespace phy {
 
@@ -152,8 +153,12 @@ namespace phy {
   void BinomialFactor::mkFactor(matrix_t &m) const{
     boost::math::binomial binom(N_, prob_);
     //Return vector with probabilities over x
-    for(int j = 0; j < m.size2(); ++j)
-      m(0,j) = pdf( binom, j+minv_);
+    for(int j = 0; j < m.size2(); ++j){
+      if( j > N_)
+	m(0,j) = 0;
+      else
+	m(0,j) = pdf( binom, j+minv_);
+    }
   }
 
   int BinomialFactor::optimizeParametersImpl(){
@@ -168,6 +173,41 @@ namespace phy {
     sum += n*minv_;
     prob_ = sum/n/N_;
     return 1;
+  }
+
+  void BinomialFactor::update(vector<symbol_t>& var){
+    if(updateType_ == 1 && var.size() > 0){
+      //Update N_
+      try{
+	N_ = boost::lexical_cast<int>(var.at(0));
+      }
+      catch(boost::bad_lexical_cast &){
+	std::cerr << "BinomialFactor::update Warning: Variable '" << var.at(0) << "' could not be converted to int" << std::endl;
+      }
+      return;
+    }
+    if(updateType_ == 2 && var.size() > 0){
+      //Update prob_
+      try{
+	prob_ = boost::lexical_cast<double>(var.at(0));
+      }
+      catch(boost::bad_lexical_cast &){
+	std::cerr << "BinomialFactor::update Warning: Variable '" << var.at(0) << "'could not be converted to double" << std::endl;
+      }
+      return;
+    }
+    if(updateType_ == 12 && var.size() > 1){
+      //Update both N_ and prob_ in that order
+      try{
+	N_ = boost::lexical_cast<int>(var.at(0));
+	prob_ = boost::lexical_cast<double>(var.at(1));
+      }
+      catch(boost::bad_lexical_cast &){
+	std::cerr << "BinomialFactor::update Warning: Variables '" << var.at(0) << "' and '" << var.at(1) << "'could not be converted to int and double respectively" << std::endl;
+      }
+      return;
+    }
+    std::cout << "BinomialFactor::update Warning: no update performed" << std::endl;
   }
 
   // return matrix defining factor idx 

@@ -113,6 +113,7 @@ BOOST_AUTO_TEST_CASE(Mixture_Beta_1)
   alphas <<= 2,3,4;
   betas <<= 3,3,3;
 
+  //Test potential
   BetaMixture bm( alphas, betas, 0, 1, 10);
   matrix_t m(3,10,0);
   bm.mkFactor(m);
@@ -122,4 +123,13 @@ BOOST_AUTO_TEST_CASE(Mixture_Beta_1)
   BOOST_CHECK_CLOSE( m(0,1), 0.1285, 0.0001);
   //R: > pbeta(0.1,3,3)-pbeta(0,3,3)
   BOOST_CHECK_CLOSE( m(1,0), 0.00856, 0.0001);
+
+  //Test update function
+  vector<string> obs;
+  obs.push_back( "10" );
+  obs.push_back( "4" );
+  bm.update( obs);
+  BOOST_CHECK_CLOSE( bm.alphas_(0), 5, 0.0001);
+  BOOST_CHECK_CLOSE( bm.betas_(0), 7, 0.0001);
 }
+

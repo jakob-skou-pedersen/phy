@@ -37,20 +37,26 @@ namespace phy {
 
     virtual ~Mixture() {};
 
-    /** <Returns P( x in [i; i+1[ ) for X|S=s */
-    //    virtual number_t binProb(int i, int s) const = 0; 
-
     virtual void serialize( std::ostream & os) const = 0;
 
     virtual void mkFactor(matrix_t &m) const = 0;
 
     virtual int optimizeParameters(matrix_t & counts) = 0;
+    
+    virtual void update(vector<symbol_t>& var){
+      std::cout << "Mixture::update Warning: This particular mixture does not implement update" << std::endl;
+    }
+
+    virtual void setUpdateType(int t){
+      updateType_ = t;
+    }
 
   protected:
     number_t minv_;
     number_t maxv_;
     unsigned bins_;
     unsigned states_;
+    int updateType_;
   };
 
   class NormalMixture : public Mixture {
@@ -134,10 +140,13 @@ namespace phy {
  
     virtual int optimizeParameters(matrix_t & counts) ;
 
+    virtual void update(vector<symbol_t>& var);
+
   private:
     void setDists();
     vector_t alphas_;
     vector_t betas_;
+
     vector< boost::math::beta_distribution<> > dists_;
   };
   

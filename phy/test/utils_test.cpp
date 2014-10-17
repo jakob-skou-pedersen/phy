@@ -13,6 +13,8 @@
 
 // input/output not included by above
 #include <iostream>
+#include <string>
+#include <vector>
 
 // other stuff
 #include <boost/foreach.hpp>
@@ -84,4 +86,19 @@ BOOST_AUTO_TEST_CASE(conversionUtils_1) {
   BOOST_CHECK_EQUAL( cin2.numberToIndex( 0.005), 10);
 
   ConvertIndexNumber cin3(-1, 2, 201);
+}
+
+BOOST_AUTO_TEST_CASE(maps_1)
+{
+  int tmpFrom[] = {5,1,2,3};
+  int tmpTo[]   = {4,3,2,1};
+  vector<int> from(tmpFrom, tmpFrom+4);
+  vector<int> to(tmpTo, tmpTo+4);
+
+  vector<unsigned> map = mkMap( to, from);
+
+  BOOST_CHECK_EQUAL( map.at(0), -1);
+  BOOST_CHECK_EQUAL( map.at(1), 3);
+  BOOST_CHECK_EQUAL( map.at(2), 2);
+  BOOST_CHECK_EQUAL( map.at(3), 1);
 }

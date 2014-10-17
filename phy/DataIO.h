@@ -90,6 +90,9 @@ namespace phy {
     /** Returns the mapping of the input variables to the allNames vector given in the constructor */
     vector<unsigned> const & map() const {return map_;}
 
+    /** Returns inverse map i.e. which index i in allNames what is the corresponding entry in names, returns -1 if not in names */
+    vector<unsigned> const & invMap() const {return invMap_;}
+
     /** Returns name count */
     unsigned const & count() const {return count_;}
 
@@ -106,6 +109,7 @@ namespace phy {
     // data
     vector<string> names_;
     vector<unsigned> map_;
+    vector<unsigned> invMap_;
     unsigned count_;
 
     // input fstream
@@ -210,18 +214,20 @@ namespace phy {
   template <typename T> 
   void NamedData<T>::init(vector<string> const & allNames)
   {
-    names_ = parseElemNameLine();    
-    map_   = mkSubsetMap(allNames, names_);
-    count_ = names_.size();
+    names_  = parseElemNameLine();    
+    map_    = mkSubsetMap(allNames, names_);
+    invMap_ = mkMap(names_, allNames);
+    count_  = names_.size();
   }
 
 
   template <typename T> 
   void NamedData<T>::init()
   {
-    names_ = parseElemNameLine();    
-    map_   = mkSubsetMap(names_, names_);
-    count_ = names_.size();
+    names_  = parseElemNameLine();    
+    map_    = mkSubsetMap(names_, names_);
+    invMap_ = mkMap(names_, names_);
+    count_  = names_.size();
   }
 
 

@@ -5,6 +5,7 @@
  *******************************************************************/
 #include "phy/FactorsIO.h"
 #include "phy/Mixtures.h"
+#include "boost/lexical_cast.hpp"
 #include <stdio.h>
 #include <cassert>
 
@@ -74,14 +75,50 @@ namespace phy {
 
   AbsBasFacPtr_t readBinomFactor(istream & str, string const & name){
     int minv, maxv;
+    string sProb, sN;
+    bool probSubscribe, NSubscribe; 
     double prob = 0;
     int N = 0;
     getFeatureAndSkipLine(str, "MIN:", minv);
     getFeatureAndSkipLine(str, "MAX:", maxv);
-    getFeatureAndSkipLine(str, "PROB:", prob);
-    getFeatureAndSkipLine(str, "N:", N);
+    getFeatureAndSkipLine(str, "PROB:", sProb);
+    getFeatureAndSkipLine(str, "N:", sN);
 
-    return AbsBasFacPtr_t( new BinomialFactor(name, prob, N, minv, maxv) );
+    //Check if prob and N are references to variables and set factor subscriptions
+    try{
+      prob = boost::lexical_cast<double>( sProb);
+      probSubscribe = false;
+    }
+    catch(boost::bad_lexical_cast &){
+      prob = 0.5;
+      probSubscribe = true;
+    }
+
+    try{
+      N = boost::lexical_cast<int>( sN);
+      NSubscribe = false;
+    }
+    catch(boost::bad_lexical_cast &){
+      N = 1;
+      NSubscribe = true;
+    }
+    
+    AbsBasFacPtr_t bf(new BinomialFactor(name, prob, N, minv, maxv));
+    if( probSubscribe && NSubscribe){
+      bf->setUpdateType(12);
+      bf->addSubscription( sN );
+      bf->addSubscription( sProb );      
+    }
+    else if( NSubscribe){
+      bf->setUpdateType(1);
+      bf->addSubscription( sN );
+    }
+    else if( probSubscribe){
+      bf->setUpdateType(2);
+      bf->addSubscription( sProb );
+    }
+
+    return bf;
   }
 
   void writeAbstractFullyParameterizedFactor(ostream & str, AbsBasFacPtr_t const & factorPtr)

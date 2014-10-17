@@ -84,7 +84,28 @@ namespace phy {
     stateMapVec( mkStateMapVec(varNames, var2smMap, smMap) ), 
     stateMaskMapSet(stateMapVec),
     dfg( mkVarDimensions(stateMapVec), facSet.mkFactorVec(), facNeighbors ) 
-  {};
+  {
+    //Add subscribed variables to subNames
+    for(int facIdx = 0; facIdx < facVec.size(); ++facIdx){
+      vector<string> sn = facVec.at(facIdx)->getSubscriptions();
+      if( sn.size() == 0 )
+	continue;
+
+      // List of factors that subscribe to at least one variable
+      subscriptionFacs.push_back(facIdx);
+      subscribedVars.push_back( vector<unsigned>());
+      
+      //For each element in sn check if already present otherwise insert
+      for(int subIdx = 0; subIdx < sn.size(); ++subIdx){
+	vector<string>::iterator it = std::find( subNames.begin(), subNames.end(), sn.at(subIdx));
+	subscribedVars.back().push_back( it - subNames.begin() );
+	if( it == subNames.end() )
+	  subNames.push_back( sn.at(subIdx));
+      }
+
+    }
+
+  };
 
   void DfgInfo::writeInfo(ostream & str )
   {
@@ -92,6 +113,21 @@ namespace phy {
       str << "NAME:\t" << facVec[i]->name() << endl;
       facVec[i]->serialize(str);
     }
+  }
+
+  void DfgInfo::updateFactors(vector<symbol_t> const & varVec, vector<unsigned> const & varMap){
+    vector<matrix_t> facPot( subscriptionFacs.size() );
+    for(int f = 0; f < subscriptionFacs.size(); ++f){
+      //Call update with correct variables
+      vector<string> vars;
+      //Fill the correct variables into vars 
+      for(int i = 0; i < subscribedVars.at(f).size(); ++i){
+	vars.push_back( varVec.at( varMap.at(subscribedVars.at(f).at(i) ) ) );
+      }
+      facVec.at(f)->update(vars);
+      facPot.at(f) = facVec.at(f)->mkFactor();
+    }
+    dfg.resetFactorPotentials( facPot, subscriptionFacs );
   }
 
   map<string, string> readVariables(string const & file)

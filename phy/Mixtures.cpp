@@ -11,6 +11,7 @@
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
+#include <boost/lexical_cast.hpp>
 #include <cmath>
 
 namespace phy {
@@ -238,6 +239,22 @@ namespace phy {
       betas_(i) = alphas_(i)*(1/x-1);
     }
 
+  }
+
+  void BetaMixture::update(vector<symbol_t>& var){
+    //For now only implement posterior from binomial type update
+    //If p is Beta(alpha, beta) distributed
+    //And we observe X ~ Binomial(N, p)
+    //the post. dist. of p ~ Beta(alpha+X, beta+N-X)
+    if(alphas_.size() > 1)
+      std::cout << "BetaMixture::update Warning:: only first component is updated" << std::endl;
+    if(var.size() > 1){
+      int N = boost::lexical_cast<int>(var.at(0));
+      int X = boost::lexical_cast<int>(var.at(1));
+      alphas_(0) = 1 + X;
+      betas_(0) = 1 + N - X;
+    }
+    setDists();
   }
 
   //IO functions

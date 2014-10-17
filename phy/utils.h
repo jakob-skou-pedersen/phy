@@ -316,6 +316,21 @@ namespace phy {
     return subsetMap;
   }
 
+  template <class T>
+  vector<unsigned> mkMap(vector<T> const & toSet, vector<T> const & fromSet)
+  {
+    vector<unsigned> map( fromSet.size() );
+    for (unsigned i = 0; i < fromSet.size(); i++) {
+      const & element = fromSet[i];
+      typename vector<T>::const_iterator result = find(toSet.begin(), toSet.end(), element);
+      if (result == toSet.end() )
+	map[i] = -1;
+      else
+	map[i] = result - toSet.begin();
+    }
+    return map;
+  }
+
 
   template <class T>
   void mkSubset(vector<T> const & v, vector<unsigned> const & subSetMap, vector<T> & subSet)

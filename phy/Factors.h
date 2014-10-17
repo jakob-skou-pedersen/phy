@@ -76,6 +76,25 @@ namespace phy {
     /** serialization method */
     virtual void serialize(ostream& os) const = 0;
 
+    /** generic update method to change parameters at each observation. The factor maintains it self an update type that specifies how to parse the input and update parameters */
+    virtual void update(vector<symbol_t>& var){
+      std::cout << "AbstractBaseFactor::update: Warning: update has not been implemented for your factor" << std::endl;
+    }
+    
+    /** get vector of variables names that the factor subscribes to */
+    vector<string> getSubscriptions() const{
+      return subscriptions;
+    }
+
+    /** add a variable name that the factor subscribes to */
+    void addSubscription(string & s){
+      subscriptions.push_back(s);
+    }
+
+    void setUpdateType(int t){
+      updateType_ = t;
+    }
+
   protected:
 
     /** Optimize parameters implementation. Called by optimizeParameters and must be implemented by derived classes. */
@@ -99,6 +118,12 @@ namespace phy {
 
     /** Name string */
     string const name_;
+
+    /** Variables that the factor use to update parameters at each observation */
+    vector<string> subscriptions;
+
+    /** Identify which update should be performed when subscribing to variables */
+    int updateType_;
   };
 
 
@@ -186,6 +211,11 @@ namespace phy {
     /** AbstractFullyParameterizedFactor just overwrite m_. Sets matrix ideally only where there are observations*/
     virtual void mkFactor(matrix_t &m) const;
 
+    /** Pass update to Mixture */
+    virtual void update( vector<symbol_t>& var){
+      mixDist_->update( var);
+    }
+
   protected:
     virtual int optimizeParametersImpl();
 
@@ -227,7 +257,7 @@ namespace phy {
 
   class BinomialFactor : public AbstractBaseFactor {
   public:
-    /** Constructor with fixed p */
+    /** Constructor minv and maxv are the ranges of the corresponding countbased statemap */
     BinomialFactor(string const & name, number_t const & prob, unsigned const & N, unsigned const & minv, unsigned const & maxv) : AbstractBaseFactor("binomial",name, 1, maxv-minv+1), N_(N), prob_(prob), minv_(minv), maxv_(maxv) { }
     
     /** Destructor */
@@ -238,6 +268,9 @@ namespace phy {
 
     /** Overwrite m_ */
     virtual void mkFactor(matrix_t &m) const;
+
+    /** Update parameters with new values. Useful if parameter is directly observed but is sample specific*/
+    virtual void update( vector<symbol_t>& var);
 
   protected:
     virtual int optimizeParametersImpl();

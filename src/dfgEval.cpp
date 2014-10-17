@@ -63,6 +63,15 @@ void resetFactorPotential(FacData * facDataPtr, string const id, unsigned const 
   }
 }
 
+void updateFactorPotentials(VarData * subVarDataPtr, string const id, unsigned const lineCount, DfgInfo & dfgInfo){
+  if ( subVarDataPtr != NULL){
+    vector<symbol_t> subVarVec( subVarDataPtr->count() );
+    string idSubVar;
+    subVarDataPtr->next(idSubVar, subVarVec);
+    checkIds(id, idSubVar, lineCount);
+    dfgInfo.updateFactors( subVarVec, subVarDataPtr->invMap() );
+  }
+}
 
 // generate 2D vector of state symbols according to vector of stateMaps
 vector< vector<string> > mkStateSymbolTable(vector<StateMapPtr_t> stateMapVec)
@@ -133,7 +142,7 @@ int main(int argc, char * argv[])
 {
   // option and argument variables
   string dfgSpecPrefix, stateMapsFile, factorPotentialsFile, variablesFile, factorGraphFile;  // specification files
-  string varFile, facFile, postProbFile, normConstFile, maxProbStateFile; // input / ouput files
+  string varFile, facFile, subVarFile, postProbFile, normConstFile, maxProbStateFile; // input / ouput files
   string mpsVarVecStr, ppVarVecStr; // other options
   unsigned prec;
   bool minusLogarithm, ppSumOther;
@@ -163,7 +172,8 @@ int main(int argc, char * argv[])
     ("factorGraphFile", po::value<string>(& factorGraphFile)->default_value("factorGraph.txt"), "Specification of the factor graph structure.")
     ("variablesFile", po::value<string>(& variablesFile)->default_value("variables.txt"), "Specification of the state map used by each variable.")
     ("stateMapFile", po::value<string>(& stateMapsFile)->default_value("stateMaps.txt"), "Specification of state maps.")
-    ("facPotFile", po::value<string>(& factorPotentialsFile)->default_value("factorPotentials.txt"), "Specification of factor potentials.");
+    ("facPotFile", po::value<string>(& factorPotentialsFile)->default_value("factorPotentials.txt"), "Specification of factor potentials.")
+    ("subVarFile", po::value<string>(& subVarFile), "Input subscribed variables file in named data format. Must use same identifiers in same order as varFile");
   
   // setting up options parser
   po::options_description cmdline_options;
@@ -221,8 +231,15 @@ int main(int argc, char * argv[])
   // setup input data structures
   VarData varData(varFile, dfgInfo.varNames);
   FacData * facDataPtr = NULL;
+  VarData * subVarDataPtr = NULL;
   if (facFile.size() != 0) {
     facDataPtr = new FacData(facFile, dfgInfo.facNames);
+  }
+  if (subVarFile.size() != 0){
+    subVarDataPtr = new VarData(subVarFile, dfgInfo.subNames);
+  }
+  else if( dfgInfo.subNames.size() > 0 ){
+    errorAbort("dfgEval.cpp::main There are subscribed factors but no subscribed variable file were provided");
   }
 
   // open output streams
@@ -306,6 +323,7 @@ int main(int argc, char * argv[])
   while ( varData.next(idVar, varVec) ) {
     // read and reset factor potentials
     resetFactorPotential(facDataPtr, idVar, lineCount, dfgInfo.dfg);
+    updateFactorPotentials(subVarDataPtr, idVar, lineCount, dfgInfo);
     dfgInfo.stateMaskMapSet.symbols2StateMasks(stateMasks, varVec, varData.map());
 
     if (calcMps) {

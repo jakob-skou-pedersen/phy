@@ -483,7 +483,40 @@ BOOST_AUTO_TEST_CASE(readDfgInfo_2){
   StateMaskMapSet stateMaksMapSet( stateMapVec);
 }
 
+BOOST_AUTO_TEST_CASE(readDfgInfo_3)
+{
+  //Test subscribed variables
+  //Test subscription factors
+  string const inPrefix = "./data/dfgSpecSubscribe/";
+  string const stateMapsFile           = "stateMaps.txt";
+  string const factorPotentialsFile    = "factorPotentials.txt";
+  string const variablesFile           = "variables.txt";
+  string const factorGraphFile         = "factorGraph.txt";
 
+  vector<string> varNames;
+  vector<string> facNames;
+  vector<string> potNames; 
+  vector<vector<unsigned> > facNeighbors;
+
+  //Read dfgInfo
+  DfgInfo dfgInfo = readDfgInfo(inPrefix + stateMapsFile, inPrefix + factorPotentialsFile, inPrefix + variablesFile, inPrefix + factorGraphFile);
+
+  //Check variables
+  BOOST_CHECK_EQUAL( dfgInfo.varNames.at(0), "O1");
+  BOOST_CHECK_EQUAL( dfgInfo.varNames.at(1), "O2");
+
+  //Check factors
+  BOOST_CHECK( dfgInfo.facNames.at(0) == "O1Prior");
+  BOOST_CHECK( dfgInfo.facNames.at(1) == "O2Prior");
+
+  //Check subscriptions
+  BOOST_CHECK( dfgInfo.subNames.at( dfgInfo.subscribedVars.at(0).at(0) ) == "N");
+  BOOST_CHECK( dfgInfo.subNames.at( dfgInfo.subscribedVars.at(0).at(1) ) == "P1");
+  BOOST_CHECK( dfgInfo.subNames.at( dfgInfo.subscribedVars.at(1).at(0) ) == "N");
+  BOOST_CHECK( dfgInfo.subNames.at( dfgInfo.subscribedVars.at(1).at(1) ) == "P2");
+  BOOST_CHECK( dfgInfo.subNames.size() == 3);
+
+}
 
 BOOST_AUTO_TEST_CASE(VarData_1) 
 {
