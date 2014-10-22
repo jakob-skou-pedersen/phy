@@ -82,7 +82,7 @@ namespace phy {
     }
     
     /** get vector of variables names that the factor subscribes to */
-    vector<string> getSubscriptions() const{
+    virtual vector<string> getSubscriptions() const{
       return subscriptions;
     }
 
@@ -215,6 +215,9 @@ namespace phy {
     virtual void update( vector<symbol_t>& var){
       mixDist_->update( var);
     }
+
+    /** Get subscriptions from Mixture */
+    virtual vector<string> getSubscriptions() const;
 
   protected:
     virtual int optimizeParametersImpl();

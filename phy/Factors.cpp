@@ -101,6 +101,11 @@ namespace phy {
     mixDist_->mkFactor(m);
   }
 
+  vector<string> DiscContFactor::getSubscriptions() const
+  {
+    return mixDist_->getSubscriptions();
+  }
+
   void ContContFactor::serialize(ostream & os) const {
     ConvertIndexNumber is1(minv1_, maxv1_, bins1_);
     ConvertIndexNumber is2(minv2_, maxv2_, bins2_);

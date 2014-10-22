@@ -1,0 +1,4 @@
+# Specification of variables
+
+STATE_MAP_NAME:	countMap
+VAR_NAMES:	O1 O2

@@ -321,7 +321,7 @@ namespace phy {
   {
     vector<unsigned> map( fromSet.size() );
     for (unsigned i = 0; i < fromSet.size(); i++) {
-      const & element = fromSet[i];
+      T const & element = fromSet[i];
       typename vector<T>::const_iterator result = find(toSet.begin(), toSet.end(), element);
       if (result == toSet.end() )
 	map[i] = -1;
@@ -383,6 +383,17 @@ namespace phy {
     getFeature(str, tag, val);
     skipLine(str);
   }
+
+  // Get a tag and corresponding value as string
+  // To be used if multiple tags can be used for instance when we have different parameterizations
+  inline void getTagFeatureAndSkipLine(istream & str, string & tag, string & val)
+  {
+    str >> tag;
+    str >> val;
+    skipLine(str);
+  }
+
+  
 
   inline void openInFile(ifstream & f, string const & fileName)
   {

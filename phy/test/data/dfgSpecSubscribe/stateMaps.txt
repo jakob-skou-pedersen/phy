@@ -1,0 +1,6 @@
+# Specification of state maps
+
+NAME:		countMap
+REAL:		COUNT
+MIN:		0
+MAX:		5

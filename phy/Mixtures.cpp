@@ -174,10 +174,29 @@ namespace phy {
 
   BetaMixture::BetaMixture(std::istream & str, number_t const & minv, number_t const & maxv, unsigned const & bins) : Mixture(minv, maxv, bins, 0), alphas_(), betas_(), dists_(){
     //TODO maybe assert minv=0 and maxv=1
-    getFeatureAndSkipLine(str, "ALPHAS:", alphas_);
-    getFeatureAndSkipLine(str, "BETAS:", betas_);
-    if(alphas_.size() != betas_.size() )
-      errorAbort("BetaMixture: The two parameter vectors must have same length");
+    string tag1,tag2,val1,val2;
+    getTagFeatureAndSkipLine(str, tag1, val1);
+    getTagFeatureAndSkipLine(str, tag2, val2);
+
+    if(tag1 == "ALPHAS:" and tag2 == "BETAS:"){
+      std::stringstream val1ss(val1);
+      std::stringstream val2ss(val2);
+      val1ss >> alphas_;
+      val2ss >> betas_;
+
+      if(alphas_.size() != betas_.size() )
+	errorAbort("BetaMixture: The two parameter vectors must have same length");
+    }
+    else if(tag1 == "N:" and tag2 == "X:"){
+      alphas_ = vector_t(1,1);
+      betas_ = vector_t(1,1);
+
+      subscriptions_.push_back(val1);
+      subscriptions_.push_back(val2);
+    }
+    else{
+      errorAbort("BetaMixture: Specify either ALPHAS and BETAS or N and X");
+    }
 
     states_ = alphas_.size();
     setDists();
@@ -209,7 +228,8 @@ namespace phy {
   void BetaMixture::mkFactor(matrix_t &m) const {
     for(int i = 0; i < m.size1(); ++i){
       for(int j = 0; j < m.size2(); ++j){
-	m(i,j) = cdf( dists_.at(i), static_cast<double>(j+1)/bins_) - cdf( dists_.at(i), static_cast<double>(j)/bins_);
+	//We do not assume that minv=0 and maxv=1
+	m(i,j) = cdf( dists_.at(i), static_cast<double>(j+1)/(maxv_-minv_)/bins_+minv_) - cdf( dists_.at(i), static_cast<double>(j)/(maxv_-minv_)/bins_+minv_);
       }
     }
   }

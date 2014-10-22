@@ -266,7 +266,6 @@ BOOST_AUTO_TEST_CASE(DiscContFactor_update_1)
   BOOST_CHECK_CLOSE( m(0,2), 0.1598950429, 0.0001);
 }
 
-
 BOOST_AUTO_TEST_CASE(BinomialFactor_1)
 {
   BinomialFactor bf("noname", 0.4, 5, 0, 5);
@@ -367,6 +366,13 @@ BOOST_AUTO_TEST_CASE(readFactorFile_1)
 BOOST_AUTO_TEST_CASE(readFactorFile_2)
 {
   //Check DiscContFactor
+  map<string, AbsBasFacPtr_t> factorMap = readFactorFile("./data/dfgSpecBeta/factorPotentials.txt");
+  
+  BOOST_CHECK(factorMap["beta"] != NULL);
+
+  //Check update
+  BOOST_CHECK_EQUAL( factorMap["beta"]->getSubscriptions().at(0), "N1");
+  BOOST_CHECK_EQUAL( factorMap["beta"]->getSubscriptions().at(1), "X1");
 }
 
 BOOST_AUTO_TEST_CASE(readFactorFile_3)
@@ -424,19 +430,6 @@ BOOST_AUTO_TEST_CASE(readFactorFile_5)
   BOOST_CHECK_EQUAL(factorMap["binomial2"]->getSubscriptions().at(1), "P2");
 }
 
-/*
-BOOST_AUTO_TEST_CASE(readFactorFile_2) 
-{
-  map<string, AbsBasFacPtr_t> factorMap = readFactorFile("./data/dfgSpec/test2Potentials.txt");
-
-  BOOST_CHECK(factorMap["prior"] != NULL);
-  BOOST_CHECK_EQUAL(factorMap["prior"]->mkFactor().size1(), (unsigned) 1);
-  BOOST_CHECK_EQUAL(factorMap["prior"]->mkFactor().size2(), (unsigned) 12);
-  // BOOST_CHECK_EQUAL(factorMap["prior"]->mkFactor()(0,1), 0.2);
-}
-*/
-
-
 BOOST_AUTO_TEST_CASE(writeFactorMap_1) 
 {
   string const fileName1 = "./data/dfgSpec/test1Potentials.txt";
@@ -452,10 +445,6 @@ BOOST_AUTO_TEST_CASE(writeFactorMap_1)
 
 BOOST_AUTO_TEST_CASE(writeFactorMap_2)
 {
-  string const fileName1 = "./data/dfgSpec/test2Potentials.txt";
-  string const fileName2 = "./output/test2Potentials.txt";
-
-  
   //Check reflection of new continuous factors
   //If default parameters are used the output should be with parameters
 }

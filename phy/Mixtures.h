@@ -51,12 +51,17 @@ namespace phy {
       updateType_ = t;
     }
 
+    virtual vector<string> getSubscriptions() const{
+      return subscriptions_;
+    }
+
   protected:
     number_t minv_;
     number_t maxv_;
     unsigned bins_;
     unsigned states_;
     int updateType_;
+    vector<string> subscriptions_;
   };
 
   class NormalMixture : public Mixture {
@@ -146,7 +151,6 @@ namespace phy {
     void setDists();
     vector_t alphas_;
     vector_t betas_;
-
     vector< boost::math::beta_distribution<> > dists_;
   };
   

@@ -1,0 +1,22 @@
+NAME:		binomial1
+TYPE:		binom
+MIN:		0
+MAX:		5
+PROB:		P1
+N:		N
+
+NAME:		binomial2
+TYPE:		binom
+MIN:		0
+MAX:		5
+PROB:		P2
+N:		N
+
+NAME:		flat
+TYPE:		rowNorm
+POT_MAT:	[6, 6] ((1, 1, 1, 1, 1, 1),
+		        (1, 1, 1, 1, 1, 1),
+			(1, 1, 1, 1, 1, 1),
+			(1, 1, 1, 1, 1, 1),
+			(1, 1, 1, 1, 1, 1),
+			(1, 1, 1, 1, 1, 1))

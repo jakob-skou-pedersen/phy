@@ -1,0 +1,6 @@
+# specification of factors and thereby entire (dual) graph
+
+NAME:		O1Prior
+NB1:		O1
+POT:		binomial1
+
