@@ -237,9 +237,6 @@ BOOST_AUTO_TEST_CASE(DiscContFactor_general_3)
   //Get our hands on the underlying NormalMixture
   boost::shared_ptr<NormalMixture> nm = boost::dynamic_pointer_cast<NormalMixture>( dcf.mixDist_ );
 
-  std::cout << "MEANS:\t" << nm->means_ << std::endl;
-  std::cout << "VARS:\t" << nm->vars_ << std::endl;
-
   //Test equality with some margin
   BOOST_CHECK_CLOSE( nm->means_(0) , 3.56603773585, 0.001);
   BOOST_CHECK_CLOSE( nm->vars_(0)  , 5.40566037736, 0.001);
@@ -396,14 +393,14 @@ BOOST_AUTO_TEST_CASE(readFactorFile_3)
 BOOST_AUTO_TEST_CASE(readFactorFile_4)
 {
   //Check BinomialFactor
-  map<string, AbsBasFacPtr_t> factorMap = readFactorFile("./data/test4FactorPotentials.txt");
+  map<string, AbsBasFacPtr_t> factorMap = readFactorFile("./data/dfgSpecBinom2/factorPotentials.txt");
 
   //Check Existence
   BOOST_CHECK(factorMap["binomial"] != NULL);
 
   //Check dimensions
   BOOST_CHECK_EQUAL(factorMap["binomial"]->mkFactor().size1(), (unsigned) 1);
-  BOOST_CHECK_EQUAL(factorMap["binomial"]->mkFactor().size2(), (unsigned) 6);
+  BOOST_CHECK_EQUAL(factorMap["binomial"]->mkFactor().size2(), (unsigned) 11);
 
   //Check subscriptions
   BOOST_CHECK_EQUAL(factorMap["binomial"]->getSubscriptions().at(0), "Ns");

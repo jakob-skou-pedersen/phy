@@ -8,3 +8,8 @@
 # class b: mean 1.1 sd 0.1(var 0.01)
 
 ../../dfgTrain --emTrain test1VarData.tab --writeInfo
+
+# Get most probabable hidden state
+mkdir dfgTrainOut
+../../dfgTrain --emTrain --outSpecPrefix dfgTrainout/ test3VarData.tab --writeInfo
+../../dfgEval --dfgSpecPrefix ./dfgTrainOut/ --mpsVars O2 --mpsFile - test3VarData.tab

@@ -74,6 +74,8 @@ BOOST_AUTO_TEST_CASE(ObservationsIO_overloadedInputOperator_1)
 
 BOOST_AUTO_TEST_CASE(ObservationsIO_stateMap_1) 
 {
+  //Discrete type statemap
+
   ifstream fIn("./data/dfgSpec/test1StateMaps.txt");
   //  ofstream fOut("./output/metaNuc.txt");
 
@@ -115,7 +117,8 @@ BOOST_AUTO_TEST_CASE(ObservationsIO_stateMap_1)
 
 BOOST_AUTO_TEST_CASE(ObservationsIO_stateMap_2) 
 {
-  ifstream fIn("./data/testStateMaps1.txt");
+  //Continuous type statemap
+  ifstream fIn("./data/dfgSpecNorm2/stateMaps.txt");
   
   StateMap sm("");
   fIn >> sm;
@@ -130,7 +133,8 @@ BOOST_AUTO_TEST_CASE(ObservationsIO_stateMap_2)
 
 BOOST_AUTO_TEST_CASE(ObservationsIO_stateMap_3)
 {
-  ifstream fIn("./data/testStateMaps3.txt");
+  //Count type statemap
+  ifstream fIn("./data/dfgSpecBinom2/stateMaps.txt");
 
   StateMap sm("");
   fIn >> sm;

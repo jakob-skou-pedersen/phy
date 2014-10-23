@@ -159,7 +159,7 @@ namespace phy {
     boost::math::binomial binom(N_, prob_);
     //Return vector with probabilities over x
     for(int j = 0; j < m.size2(); ++j){
-      if( j > N_)
+      if( j+minv_ > N_)
 	m(0,j) = 0;
       else
 	m(0,j) = pdf( binom, j+minv_);

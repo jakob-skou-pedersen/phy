@@ -129,7 +129,7 @@ am__objects_2 = NewickNode.lo NewickLexer.lo NewickParserBase.lo \
 	Factors.lo FactorsIO.lo RateMatrix.lo ama.lo SeqIO.lo \
 	DataIO.lo optimizexx.lo Grammar.lo GrammarTrain.lo \
 	GrammarWrap.lo GrammarIO.lo EmitWrap.lo EmitWrapIO.lo \
-	EmitWrapDfg.lo
+	EmitWrapDfg.lo Mixtures.lo
 am_libphy_la_OBJECTS = $(am__objects_1) $(am__objects_2)
 libphy_la_OBJECTS = $(am_libphy_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -393,7 +393,8 @@ h_sources = PhyDef.h GrammarDef.h NewickNode.h NewickParserBase.h		\
              DfgDataWrap.h xdoubleMod.h Factors.h FactorsIO.h			\
              RateMatrix.h ama.h SeqIO.h DataIO.h optimizexx.h Emit.h		\
              Grammar.h GrammarTrain.h GrammarWrap.h GrammarIO.h EmitWrap.h	\
-             EmitWrapIO.h EmitWrapPhylo.h EmitWrapDfg.h StatDist.h
+             EmitWrapIO.h EmitWrapPhylo.h EmitWrapDfg.h StatDist.h		\
+	     Mixtures.h
 
 ccp_sources = NewickNode.cpp NewickLexer.cpp NewickParserBase.cpp NewickParser.cpp PhyIO.cpp	\
               DiscreteFactorGraph.cpp DfgIO.cpp TRCTMCTree.cpp					\
@@ -402,7 +403,8 @@ ccp_sources = NewickNode.cpp NewickLexer.cpp NewickParserBase.cpp NewickParser.c
               ObservationsIO.cpp DfgDataWrap.cpp						\
               Factors.cpp FactorsIO.cpp RateMatrix.cpp ama.cpp SeqIO.cpp			\
               DataIO.cpp optimizexx.cpp Grammar.cpp GrammarTrain.cpp				\
-              GrammarWrap.cpp GrammarIO.cpp EmitWrap.cpp EmitWrapIO.cpp EmitWrapDfg.cpp 
+              GrammarWrap.cpp GrammarIO.cpp EmitWrap.cpp EmitWrapIO.cpp EmitWrapDfg.cpp 	\
+	      Mixtures.cpp
 
 library_includedir = $(includedir)/$(PACKAGE)-$(API_VERSION)/$(PACKAGE)
 library_include_HEADERS = $(h_sources)
@@ -507,6 +509,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GrammarIO.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GrammarTrain.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GrammarWrap.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Mixtures.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NewickLexer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NewickNode.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NewickParser.Plo@am__quote@

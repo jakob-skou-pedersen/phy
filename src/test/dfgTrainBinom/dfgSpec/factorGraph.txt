@@ -2,3 +2,6 @@ NAME:		BinomO1
 NB1:		O1
 POT:		O1
 
+NAME:		BinomO2
+NB1:		O2
+POT:		O1

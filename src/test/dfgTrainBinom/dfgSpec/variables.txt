@@ -1,4 +1,4 @@
 # Specification of variables' stateMap usage
 
 STATE_MAP_NAME:	countMap
-VAR_NAMES:	O1
+VAR_NAMES:	O1 O2

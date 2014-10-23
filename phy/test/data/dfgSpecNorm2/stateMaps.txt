@@ -1,5 +1,5 @@
 NAME:		realMap
 REAL:		TRUE
-BREAKPOINTS:	11
-MIN:		0.0
+BINS:		200
+MIN:		-1.0
 MAX:		1.0

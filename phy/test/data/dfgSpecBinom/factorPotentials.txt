@@ -1,0 +1,6 @@
+NAME:		binomial
+TYPE:		binom
+MIN:		0
+MAX:		5
+PROB:		0.4
+N:		5

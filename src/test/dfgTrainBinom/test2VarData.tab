@@ -2,6 +2,10 @@
 # note that 'NAME:' is a keyword
 # symbols are separated by whitespace 
 # comment lines starting with '#' are allowed
-NAME:	    O1	O2
-data1_id    A	A
-data2_id    B	A
+NAME:	  O1	O2
+id_1	  0	0
+id_2	  1	0
+id_3	  2	1
+id_4	  0	0
+id_5	  3	1
+id_6	  2	0

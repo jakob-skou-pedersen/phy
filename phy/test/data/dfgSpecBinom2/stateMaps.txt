@@ -1,0 +1,4 @@
+NAME:		countMap
+REAL:		COUNT
+MIN:		5
+MAX:		15

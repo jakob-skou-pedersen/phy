@@ -102,7 +102,8 @@ am_testRunner_OBJECTS = testRunner.$(OBJEXT) PhyTestDef.$(OBJEXT) \
 	Observations_test.$(OBJEXT) PhyDef_test.$(OBJEXT) \
 	RateMatrix_test.$(OBJEXT) Factors_test.$(OBJEXT) \
 	ama_test.$(OBJEXT) utils_test.$(OBJEXT) Grammar_test.$(OBJEXT) \
-	StatDist_test.$(OBJEXT) EmitWrap_test.$(OBJEXT)
+	StatDist_test.$(OBJEXT) EmitWrap_test.$(OBJEXT) \
+	Mixtures_test.$(OBJEXT)
 testRunner_OBJECTS = $(am_testRunner_OBJECTS)
 testRunner_DEPENDENCIES = ../libphy.la
 AM_V_P = $(am__v_P_@AM_V@)
@@ -507,7 +508,7 @@ testRunner_LDADD = ../libphy.la -lboost_unit_test_framework -llapack -lntl -lopt
 testRunner_SOURCES = testRunner.cpp PhyTestDef.cpp PhyIO_test.cpp TRCTMCTree_test.cpp DiscreteFactorGraph_test.cpp	\
 	PhyloTreeIO_test.cpp Observations_test.cpp PhyDef_test.cpp							\
 	RateMatrix_test.cpp Factors_test.cpp ama_test.cpp								\
-	utils_test.cpp Grammar_test.cpp StatDist_test.cpp EmitWrap_test.cpp
+	utils_test.cpp Grammar_test.cpp StatDist_test.cpp EmitWrap_test.cpp Mixtures_test.cpp
 
 
 #testRunner_SOURCES = testRunner.cpp PhyTestDef.cpp Grammar_test.cpp 
@@ -575,6 +576,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/EmitWrap_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Factors_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Grammar_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Mixtures_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Observations_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PhyDef_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PhyIO_test.Po@am__quote@
