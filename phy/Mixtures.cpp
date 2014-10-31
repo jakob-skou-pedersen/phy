@@ -229,7 +229,7 @@ namespace phy {
     for(int i = 0; i < m.size1(); ++i){
       for(int j = 0; j < m.size2(); ++j){
 	//We do not assume that minv=0 and maxv=1
-	m(i,j) = cdf( dists_.at(i), static_cast<double>(j+1)/(maxv_-minv_)/bins_+minv_) - cdf( dists_.at(i), static_cast<double>(j)/(maxv_-minv_)/bins_+minv_);
+	m(i,j) = cdf( dists_.at(i), (maxv_-minv_)*(j+1)/bins_+minv_) - cdf( dists_.at(i), (maxv_-minv_)*j/bins_+minv_);
       }
     }
   }
@@ -237,6 +237,9 @@ namespace phy {
   int BetaMixture::optimizeParameters(matrix_t & counts){
     //Method of moments
     //TODO default to MLE
+    if(getSubscriptions().size() > 0)
+      return 1;
+
     vector_t S(states_,0);
     vector_t USS(states_,0);
     vector_t n(states_,0);
@@ -258,7 +261,7 @@ namespace phy {
       alphas_(i) = x*(x*(1-x)/v-1);
       betas_(i) = alphas_(i)*(1/x-1);
     }
-
+    return 1;
   }
 
   void BetaMixture::update(vector<symbol_t>& var){

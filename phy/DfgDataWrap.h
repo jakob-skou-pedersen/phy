@@ -59,7 +59,10 @@ namespace phy {
   void dfgEm(DfgInfo & dfgInfo, string const & varDataFile, string const & facDataFile, number_t minDeltaLogLik, unsigned maxIter, string const & logFile);
   void dfgEm(DfgInfo & dfgInfo, string const & varDataFile, string const & facDataFile, number_t minDeltaLogLik, unsigned maxIter, 
 	     string const & logStateMapsFile, string const & logFactorPotentialsFile, string const & logVariablesFile, string const & logFactorGraphFile, string const & logFile = "");
-
+  /** Subvar data can now be submitted. The other dfgEm's are wrappers for this one for backward compatibility */
+  void dfgEm(DfgInfo & dfgInfo, string const & varDataFile, string const & facDatafile, string const & subVarDataFile, number_t minDeltaLogLik, unsigned maxIter, string const & logFile);
+  void dfgEm(DfgInfo & dfgInfo, string const & varDataFile, string const & facDataFile, string const & subVarDataFile, number_t minDeltaLogLik, unsigned maxIter, 
+	     string const & logStateMapsFile, string const & logFactorPotentialsFile, string const & logVariablesFile, string const & logFactorGraphFile, string const & logFile);
 
 } // end namespace phy
 

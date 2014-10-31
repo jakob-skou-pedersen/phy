@@ -14,7 +14,7 @@ int main(int argc, char * argv[])
 {
   // option and argument variables
   string dfgSpecPrefix, stateMapsFile, factorPotentialsFile, variablesFile, factorGraphFile;  // specification files
-  string varFile, facFile, logFile, outSpecPrefix, tmpSpecPrefix, dotFile; // input / ouput files
+  string varFile, facFile, subVarFile, logFile, outSpecPrefix, tmpSpecPrefix, dotFile; // input / ouput files
   unsigned prec, maxIter;
   number_t minDeltaLogLik;
   bool emTrain, writeInfo;
@@ -45,6 +45,7 @@ int main(int argc, char * argv[])
     ("variablesFile", po::value<string>(& variablesFile)->default_value("variables.txt"), "Specification of the state map used by each variable.")
     ("stateMapFile", po::value<string>(& stateMapsFile)->default_value("stateMaps.txt"), "Specification of state maps.")
     ("facPotFile", po::value<string>(& factorPotentialsFile)->default_value("factorPotentials.txt"), "Specification of factor potentials.")
+    ("subVarFile", po::value<string>(& subVarFile), "Input subscribed variables file in named data format. Must use same identifiers in same order as varFile")
     ("writeInfo", po::bool_switch(& writeInfo)->default_value(false), "Print factor graph info. Useful for debugging factor graph specification.");
 
   // setting up options parser
@@ -78,14 +79,14 @@ int main(int argc, char * argv[])
   // evaluate and output according to options
   if ( emTrain ) {
     if ( tmpSpecPrefix.size() )
-	dfgEm(dfgInfo, varFile, facFile, minDeltaLogLik, maxIter, 
+      dfgEm(dfgInfo, varFile, facFile, subVarFile, minDeltaLogLik, maxIter, 
 	      tmpSpecPrefix + stateMapsFile, 
 	      tmpSpecPrefix + factorPotentialsFile, 
 	      tmpSpecPrefix + variablesFile, 
 	      tmpSpecPrefix + factorGraphFile, 
 	      logFile);
     else
-      dfgEm(dfgInfo, varFile, facFile, minDeltaLogLik, maxIter, logFile);
+      dfgEm(dfgInfo, varFile, facFile, subVarFile, minDeltaLogLik, maxIter, logFile);
 
     // write final dfg version0
     writeDfgInfo(dfgInfo,

@@ -133,3 +133,23 @@ BOOST_AUTO_TEST_CASE(Mixture_Beta_1)
   BOOST_CHECK_CLOSE( bm.betas_(0), 7, 0.0001);
 }
 
+BOOST_AUTO_TEST_CASE(Mixture_Beta_2)
+{
+  //Ensure correct scaling
+  vector_t alphas(3);
+  vector_t betas(3);
+  
+  alphas <<= 2,3,4;
+  betas <<= 3,3,3;
+
+  //Test potential
+  BetaMixture bm( alphas, betas, 0, 0.1, 10);
+  matrix_t m(3,10,0);
+  bm.mkFactor(m);
+  //R: > pbeta(0.01,2,3)-pbeta(0,2,3)
+  BOOST_CHECK_CLOSE( m(0,0), 0.00059203, 0.0001);
+  //R: > pbeta(0.02,2,3)-pbeta(0.01,2,3)
+  BOOST_CHECK_CLOSE( m(0,1), 0.00174445, 0.0001);
+  //R: > pbeta(0.03,3,3)-pbeta(0.02,3,3)
+  BOOST_CHECK_CLOSE( m(1,3), 0.0003442186, 0.0001);
+}

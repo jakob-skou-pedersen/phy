@@ -111,13 +111,35 @@ namespace phy {
     }
   }
 
+  void updateFactorPotentials(VarData * subVarDataPtr, string const id, unsigned const lineCount, DfgInfo & dfgInfo){
+    if ( subVarDataPtr != NULL){
+      vector<symbol_t> subVarVec( subVarDataPtr->count() );
+      string idSubVar;
+      subVarDataPtr->next(idSubVar, subVarVec);
+      checkIds(id, idSubVar, lineCount);
+      dfgInfo.updateFactors( subVarVec, subVarDataPtr->invMap() );
+    }
+  }
+
+
 
   void dfgEm(DfgInfo & dfgInfo, string const & varDataFile, string const & facDataFile, number_t minDeltaLogLik, unsigned maxIter, string const & logFile)
   {
     dfgEm(dfgInfo, varDataFile, facDataFile, minDeltaLogLik, maxIter, "", "", "", "", logFile);
   }
 
+  void dfgEm(DfgInfo & dfgInfo, string const & varDataFile, string const & facDataFile, string const & subVarDataFile, number_t minDeltaLogLik, unsigned maxIter, string const & logFile)
+  {
+    dfgEm(dfgInfo, varDataFile, facDataFile, subVarDataFile, minDeltaLogLik, maxIter, "", "", "", "", logFile);
+  }
+
   void dfgEm(DfgInfo & dfgInfo, string const & varDataFile, string const & facDataFile, number_t minDeltaLogLik, unsigned maxIter, 
+	     string const & logStateMapsFile, string const & logFactorPotentialsFile, string const & logVariablesFile, string const & logFactorGraphFile, string const & logFile)
+  {
+    dfgEm(dfgInfo, varDataFile, facDataFile, "", minDeltaLogLik, maxIter, logStateMapsFile, logFactorPotentialsFile, logVariablesFile, logFactorGraphFile, logFile);
+  }
+  
+  void dfgEm(DfgInfo & dfgInfo, string const & varDataFile, string const & facDataFile, string const & subVarDataFile, number_t minDeltaLogLik, unsigned maxIter, 
 	     string const & logStateMapsFile, string const & logFactorPotentialsFile, string const & logVariablesFile, string const & logFactorGraphFile, string const & logFile)
   {
     DFG & dfg = dfgInfo.dfg;     // convenient
@@ -131,8 +153,15 @@ namespace phy {
     // setup input data structures
     VarData varData(varDataFile, dfgInfo.varNames);
     FacData * facDataPtr = NULL;
+    VarData * subVarDataPtr = NULL;
     if (facDataFile.size() != 0) {
       facDataPtr = new FacData(facDataFile, dfgInfo.facNames);
+    }
+    if (subVarDataFile.size() != 0) {
+      subVarDataPtr = new VarData(subVarDataFile, dfgInfo.subNames);
+    }
+    else if( dfgInfo.subNames.size() > 0 ){
+      errorAbort("DfgDataWrap.cpp::164::main There are subscribed factors but no subscribed variable file were provided");
     }
 
     // init variables
@@ -169,11 +198,14 @@ namespace phy {
       if (facDataFile.size() != 0) {
 	facDataPtr->reset(facDataFile, dfgInfo.facNames);
       }
-
+      if (subVarDataFile.size() != 0) {
+	subVarDataPtr->reset(subVarDataFile, dfgInfo.subNames);
+      }
       unsigned lineCount = 0;
       while ( varData.next(idVar, varVec) ) {
 	lineCount++;
 	resetFactorPotential(facDataPtr, idVar, lineCount, dfgInfo.dfg);
+	updateFactorPotentials(subVarDataPtr, idVar, lineCount, dfgInfo);
 	dfgInfo.stateMaskMapSet.symbols2StateMasks( stateMaskVec, varVec, varData.map() );
 
 	//	//debug begin

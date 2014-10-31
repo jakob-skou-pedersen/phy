@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(DFGNode_3)
 {
   // test 2D-factor properties
   unsigned size = 4;
-  matrix_t potential(size, size);
+  matrix_t potential(size, size,0);
 
   DFGNode varNode(potential);
   
