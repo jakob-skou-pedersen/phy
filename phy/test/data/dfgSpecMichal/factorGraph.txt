@@ -1,0 +1,21 @@
+NAME:	POST_prob
+NB1:	prob
+POT:	beta
+
+NAME:	prob.M_p
+NB1:	prob
+NB2:	M_p
+POT:	lin_reg_p
+
+NAME:	prob.M_gb
+NB1:	prob
+NB2:	M_gb
+POT:	lin_reg_gb
+
+NAME:	POST_M_p
+NB1:	M_p
+POT:	MethylP
+
+NAME:	POST_M_gb
+NB1:	M_gb
+POT:	MethylGb

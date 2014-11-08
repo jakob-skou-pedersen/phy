@@ -518,6 +518,40 @@ BOOST_AUTO_TEST_CASE(readDfgInfo_3)
 
 }
 
+BOOST_AUTO_TEST_CASE(readDfgInfo_4){
+  //Test subscribed variables
+  //Test subscription factors
+  string const inPrefix = "./data/dfgSpecMichal/";
+  string const stateMapsFile           = "stateMaps.txt";
+  string const factorPotentialsFile    = "factorPotentials.txt";
+  string const variablesFile           = "variables.txt";
+  string const factorGraphFile         = "factorGraph.txt";
+
+  vector<string> varNames;
+  vector<string> facNames;
+  vector<string> potNames; 
+  vector<vector<unsigned> > facNeighbors;
+
+  //Read dfgInfo
+  DfgInfo dfgInfo = readDfgInfo(inPrefix + stateMapsFile, inPrefix + factorPotentialsFile, inPrefix + variablesFile, inPrefix + factorGraphFile);
+
+  //Check variables(order may be irrelevant)
+  BOOST_CHECK_EQUAL( dfgInfo.varNames.at(0), "prob");
+  BOOST_CHECK_EQUAL( dfgInfo.varNames.at(1), "M_p");
+  BOOST_CHECK_EQUAL( dfgInfo.varNames.at(2), "M_gb");
+
+  //Check factors(order may be irrelevant)
+  BOOST_CHECK( dfgInfo.facNames.at(0) == "POST_prob");
+  BOOST_CHECK( dfgInfo.facNames.at(1) == "prob.M_p");
+  BOOST_CHECK( dfgInfo.facNames.at(2) == "prob.M_gb");
+  BOOST_CHECK( dfgInfo.facNames.at(3) == "POST_M_p");
+  BOOST_CHECK( dfgInfo.facNames.at(4) == "POST_M_gb");
+
+  //Check Subscriptions(order may irrelevant)
+  BOOST_CHECK( dfgInfo.subNames.size() == 11);
+
+}
+
 BOOST_AUTO_TEST_CASE(VarData_1) 
 {
   vector<string> varNames;

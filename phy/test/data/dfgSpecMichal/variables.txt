@@ -1,0 +1,5 @@
+STATE_MAP_NAME: methylMap
+VAR_NAMES:	M_p M_gb
+
+STATE_MAP_NAME:	probMap
+VAR_NAMES:	prob

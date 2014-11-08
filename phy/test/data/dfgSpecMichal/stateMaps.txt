@@ -1,0 +1,11 @@
+NAME:	methylMap
+REAL:	TRUE
+BINS:	200
+MIN:	0
+MAX:	15
+
+NAME:	probMap
+REAL:	TRUE
+BINS:	200
+MIN:	0
+MAX:	0.1

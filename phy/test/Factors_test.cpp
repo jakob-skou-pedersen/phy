@@ -263,6 +263,50 @@ BOOST_AUTO_TEST_CASE(DiscContFactor_update_1)
   BOOST_CHECK_CLOSE( m(0,2), 0.1598950429, 0.0001);
 }
 
+BOOST_AUTO_TEST_CASE(ContContFactor_general_1)
+{
+  number_t alpha = 1;
+  number_t beta = 0;
+  number_t var = 1;
+  unsigned bins = 10;
+  number_t minv = 0;
+  number_t maxv = 10;
+  ContContFactor ccf("ccf", alpha, beta, var, bins, bins, minv, maxv, minv, maxv);
+
+  matrix_t m = ccf.AbstractBaseFactor::mkFactor();
+  BOOST_CHECK_CLOSE( m(4,4), 0.3413447, 0.0001);
+  BOOST_CHECK_CLOSE( m(4,5), 0.3413447, 0.0001);
+  
+}
+
+BOOST_AUTO_TEST_CASE(ContContFactor_reflection_1)
+{
+  map<string, AbsBasFacPtr_t> factorMap1 = readFactorFile("./data/dfgSpecFiles/factorPotentials.txt");
+  writeFactorMap("./output/out.factorPotentials.txt", factorMap1);
+  map<string, AbsBasFacPtr_t> factorMap2 = readFactorFile("./output/out.factorPotentials.txt");
+  
+  BOOST_CHECK( factorMap1["lin_reg"] != NULL);
+  BOOST_CHECK( factorMap2["lin_reg"] != NULL);
+
+  boost::shared_ptr<ContContFactor> ccf1 = boost::dynamic_pointer_cast<ContContFactor>( factorMap1["lin_reg"] );
+  boost::shared_ptr<ContContFactor> ccf2 = boost::dynamic_pointer_cast<ContContFactor>( factorMap2["lin_reg"] );
+  
+  
+  BOOST_CHECK_CLOSE( ccf1->alpha_, ccf2->alpha_, 0.0001);
+  BOOST_CHECK_CLOSE( ccf1->beta_, ccf2->beta_, 0.0001);
+  BOOST_CHECK_CLOSE( ccf1->var_, ccf2->var_, 0.0001);
+
+  matrix_t pot1 = factorMap1["lin_reg"]->mkFactor();
+  matrix_t pot2 = factorMap2["lin_reg"]->mkFactor();
+  BOOST_CHECK_EQUAL( pot1.size1(), pot2.size1());
+  BOOST_CHECK_EQUAL( pot1.size2(), pot2.size2());
+
+  //Commented out for flooding output
+  //for(int i = 0; i < pot1.size1(); ++i)
+  //    for(int j = 0; j < pot1.size2(); ++j)
+  //      BOOST_CHECK_CLOSE(pot1(i,j), pot2(i,j), 0.0001);
+}
+
 BOOST_AUTO_TEST_CASE(BinomialFactor_1)
 {
   BinomialFactor bf("noname", 0.4, 5, 0, 5);
@@ -292,6 +336,52 @@ BOOST_AUTO_TEST_CASE(BinomialFactor_1)
 
   BOOST_CHECK_CLOSE( m(0,1), 0.268435456, 0.001);
   BOOST_CHECK_CLOSE( m(0,2), 0.301989888, 0.001);
+}
+
+BOOST_AUTO_TEST_CASE(NormalMeanPostFactor_1)
+{
+  //Construct
+  number_t var = 2;
+  number_t minv = -5;
+  number_t maxv = 5;
+  unsigned bins = 100;
+  vector<string> subs;
+  subs.push_back("X1");
+  subs.push_back("X3");
+  NormalMeanPostFactor nmpf("", var, minv, maxv, bins, subs);
+  
+  //Check subscriptions
+  BOOST_CHECK_EQUAL( nmpf.getSubscriptions().size(), 2);
+  BOOST_CHECK_EQUAL( nmpf.getSubscriptions().at(0), "X1");
+  BOOST_CHECK_EQUAL( nmpf.getSubscriptions().at(1), "X3");
+
+  //Submit variables
+  vector<string> vars;
+  vars.push_back("2.4");
+  vars.push_back("1.8");
+  nmpf.update( vars);
+  BOOST_CHECK_CLOSE( nmpf.postmean_, 2.1, 0.0001);
+  BOOST_CHECK_CLOSE( nmpf.postvar_, 1.0, 0.0001);
+
+  //Check mkFactor
+  matrix_t m(1,100);
+  nmpf.mkFactor(m);
+  //R> pnorm(0.1,2.1)-pnorm(0,2.1)
+  BOOST_CHECK_CLOSE( m(0,50), 0.004885711, 0.0001);
+  //R> pnorm(0.2,2.1)-pnorm(0.1,2.1)
+  BOOST_CHECK_CLOSE( m(0,51), 0.005966428, 0.0001);
+
+  //Resubmit variables
+  vars.at(0) = "1.3";
+  vars.at(1) = "0.9";
+  nmpf.update(vars);
+
+  //Check mkFactor again
+  nmpf.mkFactor(m);
+  //R> pnorm(0.1,1.1)-pnorm(0,1.1)
+  BOOST_CHECK_CLOSE( m(0,50), 0.02298919, 0.0001);
+  //R> pnorm(0.2,1.1)-pnorm(0.1,1.1)
+  BOOST_CHECK_CLOSE( m(0,51), 0.02540487, 0.0001);
 }
 
 BOOST_AUTO_TEST_CASE(CompositeFactorSet_mkFactor_1) 
@@ -425,6 +515,28 @@ BOOST_AUTO_TEST_CASE(readFactorFile_5)
   BOOST_CHECK_EQUAL(factorMap["binomial1"]->getSubscriptions().at(1), "P1");
   BOOST_CHECK_EQUAL(factorMap["binomial2"]->getSubscriptions().at(0), "N");
   BOOST_CHECK_EQUAL(factorMap["binomial2"]->getSubscriptions().at(1), "P2");
+}
+
+BOOST_AUTO_TEST_CASE(readFactorFile_6){
+  //Check NormalPostMeanFactor
+  map<string, AbsBasFacPtr_t> factorMap = readFactorFile("./data/dfgSpecNormObs/factorPotentials.txt");
+
+  //Check Existence
+  BOOST_CHECK(factorMap["normObs"] != NULL);
+
+  //Check dimensions
+  BOOST_CHECK_EQUAL(factorMap["normObs"]->mkFactor().size1(), (unsigned) 1);
+  BOOST_CHECK_EQUAL(factorMap["normObs"]->mkFactor().size2(), (unsigned) 100);
+
+  //Check subscriptions
+  BOOST_CHECK_EQUAL(factorMap["normObs"]->getSubscriptions().at(0), "X1");
+  BOOST_CHECK_EQUAL(factorMap["normObs"]->getSubscriptions().at(1), "X3");
+}
+
+BOOST_AUTO_TEST_CASE(readFactorFile_7)
+{
+  //Check ContContFactor
+
 }
 
 BOOST_AUTO_TEST_CASE(writeFactorMap_1) 

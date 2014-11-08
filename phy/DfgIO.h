@@ -32,18 +32,18 @@ namespace phy {
 	    map<string, string> const & var2smMap);
 
     /* Data **/
-    vector<string> varNames;           // defines enumeration of random variables
-    vector<string> facNames;           // defines enumeration of factors
-    vector<string> subNames;           // defines enumeration of subscribed variables
-    vector<AbsBasFacPtr_t> facVec;     // factor potential (pointer) for each factor. Each factor also holds the potential name
-    CompositeFactorSet facSet;         // data structure for holding and optimizing factor potentials
-    vector<StateMapPtr_t> stateMapVec; // stateMap for each variable
-    StateMaskMapSet stateMaskMapSet;   // defines mapping between symbols and stateMasks for all variables
-    DFG dfg;                           // Discrete factor graph
+    vector<string> varNames;           ///< defines enumeration of random variables
+    vector<string> facNames;           ///< defines enumeration of factors
+    vector<string> subNames;           ///< defines enumeration of subscribed variables
+    vector<AbsBasFacPtr_t> facVec;     ///< factor potential (pointer) for each factor. Each factor also holds the potential name
+    CompositeFactorSet facSet;         ///< data structure for holding and optimizing factor potentials
+    vector<StateMapPtr_t> stateMapVec; ///< stateMap for each variable
+    StateMaskMapSet stateMaskMapSet;   ///< defines mapping between symbols and stateMasks for all variables
+    DFG dfg;                           ///< Discrete factor graph
     
     // For subscriptions
-    vector<unsigned> subscriptionFacs;  // subset of facVec that subscribes to variables
-    vector< vector<unsigned> > subscribedVars; // the variables that the subscriptionFactors subscribe to
+    vector<unsigned> subscriptionFacs;  ///< subset of facVec that subscribes to variables
+    vector< vector<unsigned> > subscribedVars; ///< the variables that the subscriptionFactors subscribe to
 
     void writeInfo( ostream & str );
 

@@ -1,0 +1,43 @@
+NAME:	beta
+TYPE:	discCont
+BINS:	200
+MIN:	0
+MAX:	0.1
+STATES:	1
+DIST:	BETA
+N:	lib_size
+X:	read_count
+
+NAME:	lin_reg_p
+TYPE:	contCont
+BINS1:	200
+BINS2:	200
+MIN1:	0
+MAX1:	0.1
+MIN2:	0
+MAX2:	15
+
+NAME:	lin_reg_gb
+TYPE:	contCont
+BINS1:	200
+BINS2:	200
+MIN1:	0
+MAX1:	0.1
+MIN2:	0
+MAX2:	15
+
+NAME:	MethylP
+TYPE:	normalMeanPost
+BINS:	200
+MIN:	0
+MAX:	15
+VAR:	2
+X:	Mp1 Mp2 Mp3 Mp4 Mp5
+
+NAME:	MethylGb
+TYPE:	normalMeanPost
+BINS:	200
+MIN:	0
+MAX:	15
+VAR:	2
+X:	Mgb1 Mgb2 Mgb3 Mgb4

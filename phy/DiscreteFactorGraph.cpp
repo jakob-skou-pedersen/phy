@@ -61,8 +61,10 @@ namespace phy {
   void DFG::resetFactorPotential(xmatrix_t const & pot, unsigned facId)
   {
     DFGNode & nd = nodes[ convFacToNode(facId) ];
-    assert( nd.potential.size1() == pot.size1() );
-    assert( nd.potential.size2() == pot.size2() );
+    if( nd.potential.size1() != pot.size1() )
+      errorAbort("DFG::resetFactorPotential: nd.potential.size1()="+toString(nd.potential.size1())+" does not match pot.size1()="+toString(pot.size1()) );
+    if( nd.potential.size2() != pot.size2() )
+      errorAbort("DFG::resetFactorPotential: nd.potential.size2()="+toString(nd.potential.size2())+" does not match pot.size2()="+toString(pot.size2()) );
     nd.potential = pot;
   }
 

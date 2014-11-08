@@ -110,6 +110,12 @@ namespace phy {
     ConvertIndexNumber is1(minv1_, maxv1_, bins1_);
     ConvertIndexNumber is2(minv2_, maxv2_, bins2_);
 
+    os << "BINS1:\t" << bins1_ << endl;
+    os << "BINS2:\t" << bins2_ << endl;
+    os << "MIN1:\t" << minv1_ << endl;
+    os << "MAX1:\t" << maxv1_ << endl;
+    os << "MIN2:\t" << minv2_ << endl;
+    os << "MAX2:\t" << maxv2_ << endl;
     os << "ALPHA:\t" << alpha_* is2.getToNumberAlpha()/is1.getToNumberAlpha() << endl;
     os << "BETA:\t" << beta_*is2.getToNumberAlpha()+is2.getToNumberBeta()-alpha_*is2.getToNumberAlpha()*is1.getToNumberBeta()/is1.getToNumberAlpha() << endl;
     os << "VAR:\t" << var_*is2.getToNumberAlpha()*is2.getToNumberAlpha() << endl << endl;
@@ -144,7 +150,9 @@ namespace phy {
     alpha_ = SPD_xy/SSD_x;
     beta_ = (S_y-S_x*alpha_)/N;
     var_ = (SSD_y - SPD_xy*SPD_xy/SSD_x)/N;
-
+    if(var_ <= 0)
+      errorAbort("ContContFactor::optimizeParametersImpl: variance 0 or less");
+    
     return 1;
   }
 
@@ -213,6 +221,50 @@ namespace phy {
       return;
     }
     std::cout << "BinomialFactor::update Warning: no update performed" << std::endl;
+  }
+
+  NormalMeanPostFactor::NormalMeanPostFactor(string const & name, number_t const & var, number_t const & minv, number_t const & maxv, unsigned bins, vector<string> subs) : AbstractBaseFactor("normalMeanPost", name, 1, bins), var_(var), minv_(minv), maxv_(maxv), bins_(bins)
+  { 
+    subscriptions = subs;
+    postvar_ = 1;
+    postmean_ = 0;
+  }
+
+  void NormalMeanPostFactor::serialize(ostream & os) const{
+    //write out subscription factors to reflect input
+    os << "BINS:\t" << bins_ << std::endl;
+    os << "MIN:\t" << minv_ << std::endl;
+    os << "MAX:\t" << maxv_ << std::endl;
+    os << "VAR:\t" << var_ << std::endl;
+    os << "X:\t";
+    copy(subscriptions.begin(), subscriptions.end(), ostream_iterator<symbol_t>(os, "\t") );
+    os << std::endl << std::endl;
+  }
+
+  void NormalMeanPostFactor::mkFactor(matrix_t &m) const{
+    //Remember to convert to index space
+    boost::math::normal dist( (postmean_-minv_)*bins_/(maxv_-minv_), 
+			      std::sqrt(postvar_)*bins_/(maxv_-minv_) );
+    for(int i = 0; i < m.size2(); ++i){
+      m(0,i) = cdf(dist, i+1)-cdf(dist,i);
+    }
+  }
+
+  void NormalMeanPostFactor::update(vector<symbol_t> & variables){
+    //convert to double
+    unsigned k = variables.size();
+    number_t sum = 0;
+    for(vector<symbol_t>::iterator it = variables.begin(); it != variables.end(); ++it){
+      sum += boost::lexical_cast<double>( *it );
+    }
+
+    //find posterior mean and variance
+    postmean_ = sum / k;
+    postvar_ = var_ / k;
+  }
+
+  int NormalMeanPostFactor::optimizeParametersImpl(){
+    return 1;
   }
 
   // return matrix defining factor idx 

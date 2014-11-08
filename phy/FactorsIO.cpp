@@ -8,6 +8,7 @@
 #include "boost/lexical_cast.hpp"
 #include <stdio.h>
 #include <cassert>
+#include <sstream>
 
 namespace phy {
 
@@ -37,15 +38,30 @@ namespace phy {
 
   AbsBasFacPtr_t readContContFactor(istream & str, string const & name){
     unsigned bins1, bins2;
-    number_t min1v, max1v, min2v, max2v;
+    number_t minv1, maxv1, minv2, maxv2;
+    number_t alpha, beta, var;
     getFeatureAndSkipLine(str, "BINS1:", bins1);
     getFeatureAndSkipLine(str, "BINS2:", bins2);
-    getFeatureAndSkipLine(str, "MIN1:", min1v);
-    getFeatureAndSkipLine(str, "MAX1:", max1v);
-    getFeatureAndSkipLine(str, "MIN2:", min2v);
-    getFeatureAndSkipLine(str, "MAX2:", max2v);
+    getFeatureAndSkipLine(str, "MIN1:", minv1);
+    getFeatureAndSkipLine(str, "MAX1:", maxv1);
+    getFeatureAndSkipLine(str, "MIN2:", minv2);
+    getFeatureAndSkipLine(str, "MAX2:", maxv2);
     
-    return AbsBasFacPtr_t(new ContContFactor(name, bins1, bins2, min1v, max1v, min2v, max2v));
+    if( moreTags(str)){
+      getFeatureAndSkipLine(str, "ALPHA:", alpha);
+      getFeatureAndSkipLine(str, "BETA:", beta);
+      getFeatureAndSkipLine(str, "VAR:", var);
+      
+      //Convert alphas and beta to "index-space"
+      //Reflection: See serialize method in ContContFactor
+      ConvertIndexNumber is1(minv1, maxv1, bins1);
+      ConvertIndexNumber is2(minv2, maxv2, bins2);
+      alpha = alpha*is1.getToNumberAlpha()/is2.getToNumberAlpha();
+      beta =  (beta - is2.getToNumberBeta() + alpha*is2.getToNumberAlpha()*is1.getToNumberBeta()/is1.getToNumberAlpha())/is2.getToNumberAlpha();
+      var = var/is2.getToNumberAlpha()/is2.getToNumberAlpha();
+      return AbsBasFacPtr_t(new ContContFactor(name, alpha, beta, var, bins1, bins2, minv1, maxv1, minv2, maxv2));
+    }
+    return AbsBasFacPtr_t(new ContContFactor(name, bins1, bins2, minv1, maxv1, minv2, maxv2));
   }
 
   AbsBasFacPtr_t readDiscContFactor(istream & str, string const & name){
@@ -121,6 +137,32 @@ namespace phy {
     return bf;
   }
 
+  AbsBasFacPtr_t readNormalMeanPostFactor(istream & str, string const & name){
+    number_t minv, maxv;
+    number_t var;
+    unsigned bins;
+    vector<string> subs;
+
+    getFeatureAndSkipLine(str, "BINS:", bins);
+    getFeatureAndSkipLine(str, "MIN:", minv);
+    getFeatureAndSkipLine(str, "MAX:", maxv);
+    getFeatureAndSkipLine(str, "VAR:", var);
+    
+    string tag;
+    str >> tag;
+    if(tag != "X:")
+      errorAbort("FactorsIO.cpp::readNormalMeanPostFactor: Next tag should be X:");
+    
+    string sub_string;
+    getline(str, sub_string);
+    std::stringstream ss(sub_string);
+    istream_iterator<string> begin(ss);
+    istream_iterator<string> end;
+    subs = vector<string>(begin,end);
+
+    return AbsBasFacPtr_t(new NormalMeanPostFactor(name, var, minv, maxv, bins, subs));
+  }
+
   void writeAbstractFullyParameterizedFactor(ostream & str, AbsBasFacPtr_t const & factorPtr)
   {
     factorPtr->serialize(str);
@@ -149,6 +191,8 @@ namespace phy {
       return pair<string, AbsBasFacPtr_t>(name, readContContFactor(str, name) );
     if (type == "binom" or type == "binomial")
       return pair<string, AbsBasFacPtr_t>(name, readBinomFactor(str, name) );
+    if (type == "normalMeanPost")
+      return pair<string, AbsBasFacPtr_t>(name, readNormalMeanPostFactor(str, name) );
     else {
       errorAbort("From readFactor: Unknown type ('" + type + "') in specification of factor with name '" + name + "'.");
       exit(1); // to satisfy compiler

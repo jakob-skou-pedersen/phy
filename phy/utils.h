@@ -326,7 +326,7 @@ namespace phy {
       if (result == toSet.end() )
 	map[i] = -1;
       else
-	map[i] = result - toSet.begin();
+	map[i] = std::distance(toSet.begin(),result);
     }
     return map;
   }

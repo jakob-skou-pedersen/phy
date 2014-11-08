@@ -120,12 +120,28 @@ namespace phy {
     for(int f = 0; f < subscriptionFacs.size(); ++f){
       //Call update with correct variables
       vector<string> vars;
+
       //Fill the correct variables into vars 
       for(int i = 0; i < subscribedVars.at(f).size(); ++i){
-	vars.push_back( varVec.at( varMap.at(subscribedVars.at(f).at(i) ) ) );
+	unsigned varPos;
+	symbol_t var;
+	try{
+	  varPos = varMap.at(subscribedVars.at(f).at(i));
+	}
+	catch(const std::out_of_range& e){
+	  errorAbort("Out of range  DfgIO updateFactors 1");
+	}
+	try{
+	  var = varVec.at(varPos);
+	}
+	catch(const std::out_of_range& e){
+	  std::cout << "Following varpos was not found in vector: " << varMap.at(subscribedVars.at(f).at(i)) << std::endl;
+	  errorAbort("Out of range  DfgIO updateFactors 2");
+	}
+	vars.push_back( var); 			  
       }
-      facVec.at(f)->update(vars);
-      facPot.at(f) = facVec.at(f)->mkFactor();
+      facVec.at(subscriptionFacs.at(f))->update(vars);
+      facPot.at(f) = facVec.at(subscriptionFacs.at(f))->mkFactor();
     }
     dfg.resetFactorPotentials( facPot, subscriptionFacs );
   }

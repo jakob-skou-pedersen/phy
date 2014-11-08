@@ -1,0 +1,10 @@
+# Specification of factor potentials and potentially pseudo counts for training
+# name must be unique
+
+NAME:  	    normObs
+TYPE:	    normalMeanPost
+BINS:	    100
+MIN:	    -5
+MAX:	    5
+VAR:	    2
+X:	    X1 X3

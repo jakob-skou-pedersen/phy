@@ -230,6 +230,30 @@ namespace phy {
     MixPtr_t mixDist_; 
   };
 
+  class NormalMeanPostFactor : public AbstractBaseFactor {
+  public:
+    NormalMeanPostFactor(string const & name, number_t const & var, number_t const & minv, number_t const & maxv_, unsigned bins, vector<string> subscriptions);
+
+    virtual ~NormalMeanPostFactor() {} ;
+
+    virtual void serialize(ostream & os) const;
+
+    virtual void mkFactor(matrix_t &m) const;
+
+    virtual void update( vector<symbol_t> & var);
+
+  protected:
+    virtual int optimizeParametersImpl();
+
+  private:
+    number_t var_;
+    number_t minv_, maxv_;
+    unsigned bins_;
+
+    number_t postvar_;//Posterior variance
+    number_t postmean_;//Posterior mean
+  };
+
   /** @brief Continuous-Continuous factor linear regression of second variable in first variable
       Notice that if first variable has a normal prior, then this is effectively a 2D normal distribution */
   class ContContFactor : public AbstractBaseFactor {

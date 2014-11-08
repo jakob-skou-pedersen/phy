@@ -1,0 +1,7 @@
+# Specification of state maps
+
+NAME:		realMap
+REAL:		TRUE
+BINS:		100
+MIN:		-5
+MAX:		5

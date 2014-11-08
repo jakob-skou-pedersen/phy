@@ -1,0 +1,9 @@
+NAME:	lin_reg
+TYPE:	contCont
+BINS1:	200
+BINS2:	200
+MIN1:	0
+MAX1:	0.1
+MIN2:	0
+MAX2:	15
+

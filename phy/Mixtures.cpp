@@ -212,8 +212,14 @@ namespace phy {
 
   void BetaMixture::serialize(std::ostream & os) const {
     os << "DIST:\tBETA" << std::endl;
-    os << "ALPHAS:\t" << alphas_ << std::endl;
-    os << "BETAS:\t" << betas_ << std::endl;
+    if(subscriptions_.size() > 1){
+      os << "N:\t" << subscriptions_.at(0) << std::endl;
+      os << "X:\t" << subscriptions_.at(1) << std::endl << std::endl;
+    }
+    else{
+      os << "ALPHAS:\t" << alphas_ << std::endl;
+      os << "BETAS:\t" << betas_ << std::endl << std::endl;
+    }
   }
 
   void BetaMixture::setDists(){
