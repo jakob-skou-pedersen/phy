@@ -64,6 +64,9 @@ namespace phy {
     matrix_t mkFactor() const {matrix_t m(size1_, size2_); mkFactor(m); return m;}
     virtual void mkFactor(matrix_t & m) const = 0;
 
+    virtual matrix_t mkFunA() const {matrix_t m(0,0); return m;}
+    virtual matrix_t mkFunB() const {matrix_t m(0,0); return m;}
+
     /** clear all submitted expectation counts */
     void clearCounts() {reset(counts_);}
 
@@ -140,14 +143,21 @@ namespace phy {
 	to the submitted counts before optimization. */
     AbstractFullyParameterizedFactor(string const & type, string const & name, matrix_t const & m, matrix_t const & pseudoCounts = matrix_t() );
 
+    AbstractFullyParameterizedFactor(string const & type, string const & name, matrix_t const & m, matrix_t const & pseudoCounts, matrix_t const & funBMat );
+
     virtual void mkFactor(matrix_t & m) const {m = m_;}
     using AbstractBaseFactor::mkFactor; // bringing other mkFactor definition into this name space (hidden otherwise)
+
+    virtual matrix_t mkFunA() const { return funAMat_;}
+    virtual matrix_t mkFunB() const { return funBMat_;}
 
     virtual void serialize(ostream& os) const;
 
   protected:
     matrix_t m_;
     matrix_t const pseudoCounts_;
+    matrix_t funAMat_;
+    matrix_t funBMat_;
     friend   void writeAbstractFullyParameterizedFactor(ostream & str, AbsBasFacPtr_t const & factorPtr);
   };
 
@@ -160,6 +170,8 @@ namespace phy {
     /** Constructor for fully parametrized factor matrices. The matrix values will be stored internally as floatParameters. */
     GlobalNormFactor(string const & name, matrix_t const & m, matrix_t const & pseudoCounts = matrix_t()) : AbstractFullyParameterizedFactor("globNorm", name, m, pseudoCounts) {};
 
+    GlobalNormFactor(string const & name, matrix_t const & m, matrix_t const & pseudoCounts, matrix_t const & funBMat) : AbstractFullyParameterizedFactor("globNorm", name, m, pseudoCounts, funBMat) {};
+
   protected:
     virtual int optimizeParametersImpl();  
   };
@@ -171,6 +183,9 @@ namespace phy {
 
     /** Constructor for fully parametrized factor matrices. The matrix values will be stored internally as floatParameters. */
     ColumnNormFactor(string const & name, matrix_t const & m, matrix_t const & pseudoCounts = matrix_t()) : AbstractFullyParameterizedFactor("colNorm", name, m, pseudoCounts) {};
+
+  ColumnNormFactor(string const & name, matrix_t const & m, matrix_t const & pseudoCounts, matrix_t const & funBMat) : AbstractFullyParameterizedFactor("colNorm", name, m, pseudoCounts, funBMat) {};
+    
     virtual ~ColumnNormFactor() {};
 
   protected:
@@ -184,6 +199,9 @@ namespace phy {
 
     /** Constructor for fully parametrized factor matrices. The matrix values will be stored internally as floatParameters. */
     RowNormFactor(string const & name, matrix_t const & m, matrix_t const & pseudoCounts = matrix_t()) : AbstractFullyParameterizedFactor("rowNorm", name, m, pseudoCounts) {};
+
+  RowNormFactor(string const & name, matrix_t const & m, matrix_t const & pseudoCounts, matrix_t const & funBMat) : AbstractFullyParameterizedFactor("rowNorm", name, m, pseudoCounts, funBMat) {};
+
     virtual ~RowNormFactor() {};
 
   protected:
@@ -326,10 +344,15 @@ namespace phy {
     /** return or set matrix defining factor idx  */
     virtual matrix_t mkFactor(unsigned idx) const = 0; 
     virtual void mkFactor(matrix_t & m, unsigned idx) const = 0;
+    virtual matrix_t mkFunA(unsigned idx) const = 0;
+    virtual matrix_t mkFunB(unsigned idx) const = 0;
 
     /** return or set vector of all factor matrices */
     virtual vector<matrix_t> mkFactorVec() const;
     virtual void mkFactorVec(vector<matrix_t> & v) const;
+
+    virtual vector<matrix_t> mkFunAVec() const;
+    virtual vector<matrix_t> mkFunBVec() const;
 
     /**     clear all submitted expectation counts */
     virtual void clearCounts() = 0;
@@ -359,6 +382,8 @@ namespace phy {
     /** return or set matrix defining factor idx  */
     virtual matrix_t mkFactor(unsigned idx) const {return factorPtrs_[idx]->mkFactor();}
     virtual void mkFactor(matrix_t & m, unsigned idx) const  {return factorPtrs_[idx]->mkFactor(m);}
+    virtual matrix_t mkFunA(unsigned idx) const {return factorPtrs_[idx]->mkFunA();}
+    virtual matrix_t mkFunB(unsigned idx) const {return factorPtrs_[idx]->mkFunB();}
 
     using AbstractBaseFactorSet::mkFactor; // bringing other mkFactor definition into this name space (hidden otherwise)
 

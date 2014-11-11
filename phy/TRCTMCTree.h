@@ -73,6 +73,8 @@ namespace phy {
     /** return or set matrix defining factor idx  */
     virtual matrix_t mkFactor(unsigned idx) const; 
     virtual void mkFactor(matrix_t & m, unsigned idx) const;
+    virtual matrix_t mkFunA(unsigned idx) const { matrix_t m(0,0); return m;}
+    virtual matrix_t mkFunB(unsigned idx) const { matrix_t m(0,0); return m;}
 
     /**     clear all submitted expectation counts */
     virtual void clearCounts();

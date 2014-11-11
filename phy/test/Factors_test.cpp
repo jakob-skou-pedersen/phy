@@ -146,6 +146,16 @@ BOOST_AUTO_TEST_CASE(RowNormFactor_general_1)
     BOOST_CHECK_CLOSE(sum( row(n,i) ), 1.0, EPS);
 }
 
+BOOST_AUTO_TEST_CASE(RowNormExpect_1)
+{
+  //Read rowNorm factor with FunBMatrix
+  map<string, AbsBasFacPtr_t> factorMap = readFactorFile("./data/dfgSpecExpect/factorPotentials.txt");
+
+  BOOST_CHECK(factorMap["inner2"] != NULL);
+  BOOST_CHECK_EQUAL(factorMap["inner2"]->mkFunB().size1(), (unsigned) 2);
+  BOOST_CHECK_EQUAL(factorMap["inner2"]->mkFunB().size2(), (unsigned) 4);
+  }
+
 
 BOOST_AUTO_TEST_CASE(ColumnNormFactor_general_1) 
 {

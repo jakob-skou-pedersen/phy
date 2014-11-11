@@ -21,6 +21,19 @@ namespace phy {
     }
   }
 
+  AbstractFullyParameterizedFactor::AbstractFullyParameterizedFactor(string const & type, string const & id, matrix_t const & m, matrix_t const & pseudoCounts, matrix_t const & funBMat) 
+    : AbstractBaseFactor(type, id, m.size1(), m.size2()), m_(m), pseudoCounts_(pseudoCounts), funBMat_(funBMat)
+  {
+    if (pseudoCounts.size1() != 0) {
+      assert(pseudoCounts.size1() == size1_); 
+      assert(pseudoCounts.size2() == size2_); 
+    }
+    if (funBMat.size1() != 0) {
+      assert(funBMat.size1() == size1_); 
+      assert(funBMat.size2() == size2_); 
+    }
+  }
+
   void AbstractFullyParameterizedFactor::serialize(ostream& os) const{
     os << "POT_MAT:\t" << m_ << endl;
     if ( pseudoCounts_.size1() != 0 )
@@ -283,6 +296,23 @@ namespace phy {
     for (unsigned i = 0; i < facCount_; i++) 
       mkFactor(v[i], i);
   }
-  
+
+  vector<matrix_t> AbstractBaseFactorSet::mkFunAVec() const
+  {
+    vector<matrix_t> v;
+    for(unsigned i = 0; i < facCount_; ++i){
+      v.push_back(mkFunA(i));
+    }
+    return v;
+  }
+
+  vector<matrix_t> AbstractBaseFactorSet::mkFunBVec() const
+  {
+    vector<matrix_t> v;
+    for(unsigned i = 0; i < facCount_; ++i){
+      v.push_back(mkFunB(i));
+    }
+    return v;
+  }
 
 } // end namespace phy

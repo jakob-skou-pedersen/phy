@@ -31,9 +31,14 @@ using namespace std;
     /**Factor node constructor*/
     DFGNode(xmatrix_t const & potential);
 
+    /**Factor node with exp*/
+    DFGNode(xmatrix_t const & potential, xmatrix_t const & fun_a_init, xmatrix_t const & fun_b_init);
+
     bool isFactor;      // true if factor node, false if variable node
     unsigned dimension; // dimension of variable or dimension of potential
     xmatrix_t potential; // n * m dimensional matrix defining factor potential. If n == 1, then the potential is treated as one-dimensional. n = m = 0 for variable nodes.
+    xmatrix_t fun_a; //See sumproduct note
+    xmatrix_t fun_b; // Expectancies 
   };
 
   class DFG 
@@ -55,12 +60,23 @@ using namespace std;
     // potential matrix is a 1xn matrix, where n is the dimension of
     // the nbs[0] node). This is checked by consistencyCheck(), which is
     // called by the constructor.
+    DFG(vector<unsigned> const & varDimensions,
+	vector<xmatrix_t> const & facPotentials,
+	vector<vector<unsigned> > const & facNeighbors,
+	vector<xmatrix_t> const & facFunA,
+	vector<xmatrix_t> const & facFunB);
     
 #ifndef XNUMBER_IS_NUMBER
     // same as above but allows factor potentials to be defined as matrix_t types.
     DFG(vector<unsigned> const & varDimensions, // dimensions of random variables. Their enumeration is implicit
 	vector<matrix_t> const & facPotentials, // factor potentials (see definition in DFGNode)
 	vector<vector<unsigned> > const & facNeighbors);  // see below
+
+    DFG(vector<unsigned> const & varDimensions,
+	vector<matrix_t> const & facPotentials,
+	vector<vector<unsigned> > const & facNeighbors,
+	vector<matrix_t> const & facFunA,
+	vector<matrix_t> const & facFunB);
 #endif
 
     /** The copy constructor is defined explicitly to ensure the
@@ -125,6 +141,9 @@ using namespace std;
     xnumber_t runMaxSum(stateMaskVec_t const & stateMasks, vector<unsigned> & maxVariables);
     xnumber_t runMaxSum(stateMaskVec_t const & stateMasks, vector<unsigned> & maxVariables, vector<vector<xvector_t const *> > & inMessages, vector<vector<xvector_t> > & outMessages, vector<vector<vector<unsigned> > > & maxNeighborStates) const; 
 
+    /** Precondition: runSumProduct has been called */
+    xnumber_t calcExpect();
+
     /** write factor graph in dot format (convert to ps using: cat out.dot | dot -Tps -o out.ps ) */
     void writeDot(string const & fileName);
 
@@ -160,6 +179,8 @@ using namespace std;
 
     // initialization called by constructors
     void init(vector<unsigned> const & varDimensions, vector<xmatrix_t> const & facPotentials, vector<vector<unsigned> > const & facNeighbors);
+
+    void init(vector<unsigned> const & varDimensions, vector<xmatrix_t> const & facPotentials, vector<vector<unsigned> > const & facNeighbors, vector<xmatrix_t> const & facFunA, vector<xmatrix_t> const & facFunB);
 
     // return string with info on factor i
     string factorInfoStr( unsigned const i, vector<string> varNames = vector<string>(), vector<string> facNames = vector<string>() );

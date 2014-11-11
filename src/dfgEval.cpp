@@ -211,7 +211,7 @@ int main(int argc, char * argv[])
   bool calcMps =  maxProbStateFile.size() ? true : false;
   bool calcNc  =  normConstFile.size() ? true : false;
   bool calcPp  =  postProbFile.size() ? true : false;
-
+  bool calcExpect = true;
 //  // debug
 //  cout << endl << endl;
 //  cout << "calcMps\t" << calcMps << endl;
@@ -352,6 +352,14 @@ int main(int argc, char * argv[])
 	transformByOptions(ppVec, minusLogarithm, ppSumOther, idVar);
 	writeNamedData(ppStr, idVar + "\t" + ppVarNames[i], mkSubset(toStdVector(ppVec), ppVarStateMap[i]), prec);
       }
+    }
+
+    if ( calcExpect ){
+      //Start with function_a equal to potentials
+      dfgInfo.dfg.runSumProduct(stateMasks);
+      xnumber_t expect = dfgInfo.dfg.calcExpect();
+      std::cout << idVar << "\tExpect:\t" << toString(expect, prec) << std::endl;
+      //Use counts at each node
     }
 
     lineCount++;

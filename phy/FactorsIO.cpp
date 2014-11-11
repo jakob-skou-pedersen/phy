@@ -25,12 +25,19 @@ namespace phy {
 	errorAbort("From readAbstractFullyParameterizedFactor: PC_MAT must define a matrix of non-zero size or not be defined at all. Problem in specification of factor with name '" + name + "'.");
     }
 
+    matrix_t funBMat;
+    if ( moreTags(str) ){
+      getFeatureAndSkipLine(str, "FUNB_MAT:", funBMat);
+      if( funBMat.size1() == 0)
+	errorAbort("From readAbstractFullyParameterizedFactor: FUNB_MAT must define a matrix of non-zero size or not be defined at all. Problem in specification of factor with name '" + name + "'.");
+    }
+
     if (type == "rowNorm")
-      return  AbsBasFacPtr_t(new RowNormFactor(name, potMat, pcMat) );
+      return  AbsBasFacPtr_t(new RowNormFactor(name, potMat, pcMat, funBMat) );
     if (type == "colNorm") 
-      return  AbsBasFacPtr_t(new ColumnNormFactor(name, potMat, pcMat) );
+      return  AbsBasFacPtr_t(new ColumnNormFactor(name, potMat, pcMat, funBMat) );
     if (type == "globNorm")
-      return  AbsBasFacPtr_t(new GlobalNormFactor(name, potMat, pcMat) );
+      return  AbsBasFacPtr_t(new GlobalNormFactor(name, potMat, pcMat, funBMat) );
 
     errorAbort("From readAbstractFullyParameterizedFactor: Unknown type ('" + type + "') in specification of factor with name '" + name + "'.");
     exit(1); // to satisfy compiler

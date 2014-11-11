@@ -83,7 +83,7 @@ namespace phy {
     facSet(facVec),
     stateMapVec( mkStateMapVec(varNames, var2smMap, smMap) ), 
     stateMaskMapSet(stateMapVec),
-    dfg( mkVarDimensions(stateMapVec), facSet.mkFactorVec(), facNeighbors ) 
+    dfg( mkVarDimensions(stateMapVec), facSet.mkFactorVec(), facNeighbors, facSet.mkFunAVec(), facSet.mkFunBVec() )
   {
     //Add subscribed variables to subNames
     for(int facIdx = 0; facIdx < facVec.size(); ++facIdx){

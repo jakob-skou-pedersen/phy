@@ -5,6 +5,10 @@
  *******************************************************************/
 #include "DiscreteFactorGraph.h"
 
+#include "boost/tuple/tuple.hpp"
+#include <boost/iterator/zip_iterator.hpp>
+#include <boost/range/iterator_range.hpp>
+
 namespace phy {
 
   DFGNode::DFGNode(unsigned dimension) : 
@@ -12,13 +16,25 @@ namespace phy {
 
 
   DFGNode::DFGNode(xmatrix_t const & potential) : 
-    isFactor(true), potential(potential)
+    isFactor(true), potential(potential), fun_a(potential)
+    {
+      fun_b = xmatrix_t(potential.size1(), potential.size2(),1);
+      
+      if (potential.size1() == 1)
+	dimension = 1;
+      else
+	dimension = 2;
+    }
+
+  DFGNode::DFGNode(xmatrix_t const & potential, xmatrix_t const & fun_a_init, xmatrix_t const & fun_b_init) : 
+    isFactor(true), potential(potential), fun_a(fun_a_init), fun_b(fun_b_init)
     {
       if (potential.size1() == 1)
 	dimension = 1;
       else
 	dimension = 2;
     }
+  
 
   // The graph is defined in terms of the factor neighbors. We want
   // links to be represented both ways, i.e., also from var nodes to
@@ -44,6 +60,14 @@ namespace phy {
     init(varDimensions, facPotentials, facNeighbors);
   }
 
+  DFG::DFG(vector<unsigned> const & varDimensions,
+	vector<xmatrix_t> const & facPotentials,
+	vector<vector<unsigned> > const & facNeighbors,
+	vector<xmatrix_t> const & facFunA,
+	vector<xmatrix_t> const & facFunB)
+  {
+    init(varDimensions, facPotentials, facNeighbors);//, facFunA, facFunB);
+  }
 
 #ifndef XNUMBER_IS_NUMBER
   DFG::DFG(vector<unsigned> const & varDimensions, 
@@ -54,6 +78,27 @@ namespace phy {
     BOOST_FOREACH(matrix_t const & m, facPotentials)
       v.push_back( toXNumber(m) );
     init(varDimensions, v, facNeighbors);
+  }
+
+  DFG::DFG(vector<unsigned> const & varDimensions,
+	vector<matrix_t> const & facPotentials,
+	vector<vector<unsigned> > const & facNeighbors,
+	vector<matrix_t> const & facFunA,
+	vector<matrix_t> const & facFunB)
+  {
+    vector<xmatrix_t> facPotXMatrix;
+    BOOST_FOREACH(matrix_t const & m, facPotentials)
+      facPotXMatrix.push_back( toXNumber(m) );
+
+    vector<xmatrix_t> facFunAXMatrix;
+    BOOST_FOREACH(matrix_t const & m, facFunA)
+      facFunAXMatrix.push_back( toXNumber(m) );
+
+    vector<xmatrix_t> facFunBXMatrix;
+    BOOST_FOREACH(matrix_t const & m, facFunB)
+      facFunBXMatrix.push_back( toXNumber(m) );
+
+    init(varDimensions, facPotXMatrix, facNeighbors, facFunAXMatrix, facFunBXMatrix);
   }
 #endif
 
@@ -695,7 +740,64 @@ namespace phy {
     consistencyCheck();
   }
 
+  void DFG::init(vector<unsigned> const & varDimensions, vector<xmatrix_t> const & facPotentials, vector<vector<unsigned> > const & facNeighbors, vector<xmatrix_t> const & facFunA, vector<xmatrix_t> const & facFunB)
+  {
+    // reserve memory
+    nodes.reserve( varDimensions.size() + facPotentials.size() ); 
+    neighbors.reserve( varDimensions.size() + facPotentials.size() ); 
+    variables.reserve( varDimensions.size() );
+    factors.reserve( facPotentials.size() );
 
+    // define variable nodes
+    unsigned idx = 0;
+    BOOST_FOREACH(unsigned dim, varDimensions) {
+      nodes.push_back( DFGNode(dim) );
+      variables.push_back(idx);
+      idx++;
+    }
+
+    // define factor nodes
+    bool funAisPot = (facFunA.size() == 0);
+    if(facPotentials.size() != facFunA.size() and !funAisPot)
+      errorAbort("DiscreteFactorGraph.cpp::init facPotentials.size() != facFunA.size()");
+    if(facPotentials.size() != facFunB.size())
+      errorAbort("DiscreteFactorGraph.cpp::init facPotentials.size() != facFunB.size()");
+    for(int i = 0; i < facPotentials.size(); ++i){
+      if(funAisPot)
+	nodes.push_back(DFGNode(facPotentials.at(i), facPotentials.at(i), facFunB.at(i) ));
+      else
+	nodes.push_back(DFGNode(facPotentials.at(i), facFunA.at(i), facFunB.at(i) ));
+      factors.push_back(idx);
+      ++idx;
+    }
+    neighbors.resize( variables.size() ); // placeholder for var neighbors
+    neighbors.insert(neighbors.end(), facNeighbors.begin(), facNeighbors.end());  // all facNeighbors refer to variables, which have not changed indices
+    addTwoWayLinks(neighbors); // now add the var neighbors
+
+    consistencyCheck();
+  }
+
+  //Calculate expectancies
+  xnumber_t DFG::calcExpect(){
+    xnumber_t res = 0;
+    //Use dfg.calcFactorMarginals
+    vector<xmatrix_t> tmpFacMar;
+    initFactorMarginals(tmpFacMar);
+    calcFactorMarginals(tmpFacMar);
+
+    //loop over factors 
+    //find out where to put "function_b"-"potentials"
+    for (unsigned facId = 0; facId < factors.size(); ++facId){
+      unsigned ndId = convFacToNode(facId);
+      if(nodes[ndId].fun_b.size1() == 0)
+	continue;
+      //TODO: Check dimensions?
+      xmatrix_t exp = element_prod(tmpFacMar[facId], nodes[ndId].fun_b);
+      res += sumMatrix( exp);
+    }
+
+    return res;
+  }
 
   void calcNormConsMultObs(vector<xnumber_t> & result, stateMask2DVec_t const & stateMask2DVec, DFG & dfg)
   {
