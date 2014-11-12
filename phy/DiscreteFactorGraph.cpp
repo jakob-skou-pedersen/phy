@@ -799,6 +799,141 @@ namespace phy {
     return res;
   }
 
+  //Calculate expectancies using message parsing
+  xnumber_t DFG::calcExpect2(stateMaskVec_t const & stateMasks){
+    //Initialize messages
+    if (inMessages2_.size() == 0)
+      initMessages(inMessages2_, outMessages2_);
+
+    //calc inward recursion
+    unsigned root = 0;
+    runExpectInwardsRec(root, root, stateMasks, inMessages2_, outMessages2_);
+
+    //use incoming messages to root to calculate expectancy
+    xnumber_t res = 0;
+    if(!nodes[root].isFactor){
+      vector<unsigned> const & nbs = neighbors[root];
+      
+      for(unsigned k = 0; k < nodes[root].dimension; ++k){
+	for(unsigned i = 0; i < nbs.size(); ++i){
+	  xnumber_t add = (*inMessages2_[root][i])[k];
+	  for(unsigned j = 0; j < nbs.size(); ++j){
+	    if(i == j)
+	      continue;
+	    add *= (*inMessages_[root][j])[k];
+	  }
+	  res += add;
+	}
+      }
+    }
+    return res/calcNormConst2(stateMasks);
+  }
+
+  void DFG::runExpectInwardsRec(unsigned current, unsigned sender, stateMaskVec_t const & stateMasks, vector<vector<xvector_t const *> > & inMessages2, vector<vector<xvector_t> > & outMessages2) const {
+    vector<unsigned> const & nbs = neighbors[current];
+    // recursively call all nodes
+    for(unsigned i = 0; i < nbs.size(); ++i){
+      unsigned nb = nbs[i];
+      if (nb != sender)
+	runExpectInwardsRec(nb, current, stateMasks, inMessages2, outMessages2);
+    }
+
+    if ( current == sender) // this is root so does not send anything inwards
+      return;
+    calcExpectMessage(current, sender, stateMasks, inMessages2, outMessages2);
+  }
+
+  void DFG::calcExpectMessageFactor(unsigned current, unsigned receiver, vector<vector<xvector_t const *> > & inMessages2, vector<vector<xvector_t> > & outMessages2) const{
+    vector<unsigned> const & nbs = neighbors[current];
+    xvector_t & outMes2 = outMessages2[current][ getIndex( nbs, receiver) ]; //identify message
+    vector< xvector_t const *> const & inMes( inMessages_[current] );
+    vector< xvector_t const *> const & inMes2( inMessages2[current] );
+
+    calcExpectMessageFactor(current, receiver, inMes2, outMes2, inMes);
+  }
+  
+  void DFG::calcExpectMessageFactor(unsigned current, unsigned receiver, vector<xvector_t const *> const & inMes2, xvector_t & outMes2, vector<xvector_t const *> const & inMes) const {
+    vector<unsigned> const & nbs = neighbors[current];
+    DFGNode const & nd = nodes[current];
+
+    
+    //one neighbor
+
+    if(nd.dimension == 1){
+      for( unsigned i = 0; i < nd.potential.size2(); ++i)
+	if(nd.fun_b.size1() != 0)
+	  outMes2[i] = nd.potential(0,i)*nd.fun_b(0,i);
+	else
+	  outMes2[i] = 0;
+    }
+    
+
+
+    if(nd.dimension == 2){
+      if(nbs[0] == receiver){
+	//rows is receiver
+	for(unsigned i = 0; i < nd.potential.size1(); ++i){
+	  outMes2[i] = 0;
+	  for(unsigned j = 0; j < nd.potential.size2(); ++j){
+	    if(nd.fun_b.size1() != 0)
+	      outMes2[i] += nd.potential(i,j)*nd.fun_b(i,j)*(*inMes[1])[j];
+	    outMes2[i] += nd.potential(i,j)*(*inMes2[1])[j];
+	  }
+	}
+      }
+      else{
+	for(unsigned j = 0; j < nd.potential.size2(); ++j){
+	  outMes2[j] = 0;
+	  for(unsigned i = 0; i < nd.potential.size1(); ++i){
+	    if(nd.fun_b.size1() != 0)
+	      outMes2[i] += nd.potential(i,j)*nd.fun_b(i,j)*(*inMes[0])[i];
+	    outMes2[j] += nd.potential(i,j)*(*inMes2[0])[i];
+	  }
+	}
+      }
+    }
+    
+  }
+
+  void DFG::calcExpectMessageVariable(unsigned current, unsigned receiver, stateMaskVec_t const & stateMasks, vector<vector<xvector_t const *> > & inMessages2, vector<vector<xvector_t> > & outMessages2) const {
+    vector<unsigned> const & nbs = neighbors[current];
+    xvector_t & outMes2 = outMessages2[current][ getIndex( nbs, receiver) ];
+    vector< xvector_t const *> const & inMes2( inMessages2[current]);
+    vector< xvector_t const *> const & inMes( inMessages_[current]); //Relies on precondition, possibly do assertion
+    stateMask_t const * stateMask = stateMasks[ convNodeToVar(current) ];
+
+    calcExpectMessageVariable(current, receiver, stateMask, inMes2, outMes2, inMes);
+  }
+
+  void DFG::calcExpectMessageVariable(unsigned current, unsigned receiver, stateMask_t const * stateMask, vector<xvector_t const *> const & inMes2, xvector_t & outMes2, vector< xvector_t const *> const & inMes) const {
+    vector<unsigned> const & nbs = neighbors[current];
+    for( unsigned i = 0; i < outMes2.size(); ++i){
+      outMes2[i] = 0;
+    }
+
+    for(unsigned k = 0; k < outMes2.size(); ++k){
+      for(unsigned i = 0; i < nbs.size(); ++i){
+	if(nbs[i] == receiver)
+	  continue;
+	xnumber_t add = (*inMes[i])[k];
+	for(unsigned j = 0; j < nbs.size(); ++j){
+	  if(j==i or nbs[j] == receiver)
+	    continue;
+	  add *= (*inMes2[j])[k];
+	}
+	outMes2[k] += add;
+      }
+    }
+  }
+
+  void DFG::calcExpectMessage(unsigned current, unsigned receiver, stateMaskVec_t const & stateMasks, vector<vector<xvector_t const *> > & inMessages2, vector<vector<xvector_t> > & outMessages2) const {
+    if(nodes[current].isFactor)
+      calcExpectMessageFactor(current, receiver, inMessages2, outMessages2);
+    else
+      calcExpectMessageVariable(current, receiver, stateMasks, inMessages2, outMessages2);
+  }
+
+
   void calcNormConsMultObs(vector<xnumber_t> & result, stateMask2DVec_t const & stateMask2DVec, DFG & dfg)
   {
     for (unsigned i = 0; i < stateMask2DVec.size(); i++)

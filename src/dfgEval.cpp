@@ -358,7 +358,8 @@ int main(int argc, char * argv[])
       //Start with function_a equal to potentials
       dfgInfo.dfg.runSumProduct(stateMasks);
       xnumber_t expect = dfgInfo.dfg.calcExpect();
-      std::cout << idVar << "\tExpect:\t" << toString(expect, prec) << std::endl;
+      xnumber_t expect2 = dfgInfo.dfg.calcExpect2(stateMasks);
+      std::cout << idVar << "\tExpect:\t" << toString(expect, prec) << "\tExpect2:\t" << toString(expect2, prec) << std::endl;
       //Use counts at each node
     }
 

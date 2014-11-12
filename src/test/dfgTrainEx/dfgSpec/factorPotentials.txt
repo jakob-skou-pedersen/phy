@@ -47,6 +47,7 @@ NAME:		prior
 TYPE:		rowNorm
 POT_MAT:	[1, 2] ((0.8, 0.2))
 PC_MAT:		[1, 2] ((0.0, 0.0))
+FUNB_MAT:	[1, 2] ((1, 2))
 
 NAME:		inner
 TYPE:		rowNorm
@@ -54,6 +55,8 @@ POT_MAT:        [2, 2] ((0.5, 0.5),
                         (0.1, 0.9))
 PC_MAT:         [2, 2] ((0.0, 0.0),
                         (0.0, 0.0))
+FUNB_MAT:	[2, 2] ((4, 2),
+		        (3, 1))
 
 NAME:		inner2
 TYPE:		rowNorm

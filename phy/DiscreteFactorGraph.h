@@ -142,7 +142,8 @@ using namespace std;
     xnumber_t runMaxSum(stateMaskVec_t const & stateMasks, vector<unsigned> & maxVariables, vector<vector<xvector_t const *> > & inMessages, vector<vector<xvector_t> > & outMessages, vector<vector<vector<unsigned> > > & maxNeighborStates) const; 
 
     /** Precondition: runSumProduct has been called */
-    xnumber_t calcExpect();
+    xnumber_t calcExpect(); ///< Using naive algorithm
+    xnumber_t calcExpect2(stateMaskVec_t const & stateMasks); ///< Using (if implemented correctly) memory efficient algorithm
 
     /** write factor graph in dot format (convert to ps using: cat out.dot | dot -Tps -o out.ps ) */
     void writeDot(string const & fileName);
@@ -204,6 +205,14 @@ using namespace std;
     void calcMaxSumMessageFactor(unsigned current, unsigned receiver, vector<xvector_t const *> const & inMes, xvector_t & outMes, vector<vector<unsigned> > & maxNBStates) const;
     void backtrackMaxSumOutwardsRec(vector<unsigned> & maxVariables, unsigned current, unsigned sender, unsigned maxState, vector<vector<vector<unsigned> > > & maxNeighborStates) const;
 
+    //helper functions for calcExpect2
+     void runExpectInwardsRec(unsigned current, unsigned sender, stateMaskVec_t const & stateMasks, vector<vector<xvector_t const *> > & inMessages2, vector<vector<xvector_t> > & outMessages2) const;
+    void calcExpectMessageFactor(unsigned current, unsigned receiver, vector<vector<xvector_t const *> > & inMessages2, vector<vector<xvector_t> > & outMessages2) const;
+    void calcExpectMessageFactor(unsigned current, unsigned receiver, vector<xvector_t const *> const & inMes, xvector_t & outMes2, vector<xvector_t const *> const & inMes2) const;
+    void calcExpectMessageVariable(unsigned current, unsigned receiver, stateMaskVec_t const & stateMasks, vector<vector<xvector_t const *> > & inMessages2, vector<vector<xvector_t> > & outMessages2) const;
+    void calcExpectMessageVariable(unsigned current, unsigned receiver, stateMask_t const * stateMask, vector<xvector_t const *> const & inMes2, xvector_t & outMes2, vector<xvector_t const *> const & inMes) const;
+    void calcExpectMessage(unsigned current, unsigned receiver, stateMaskVec_t const & stateMasks, vector<vector<xvector_t const *> > & inMessages2, vector<vector<xvector_t> > & outMessages2) const;
+
     /** Convert to boost factor graph (only captures graph structure */ 
     boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS> mkBoostGraph();
 
@@ -219,6 +228,9 @@ using namespace std;
     vector<vector<xvector_t const *> > inMessages_;
     vector<vector<xvector_t> > outMessages_;
     vector<vector<vector<unsigned> > > maxNeighborStates_;
+
+    vector<vector<xvector_t const *> > inMessages2_; //For messages of the second type
+    vector<vector<xvector_t> > outMessages2_;
   };
 
   // free functions for dealing vith a vector of observation sets
