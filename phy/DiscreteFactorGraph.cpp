@@ -810,6 +810,8 @@ namespace phy {
     runExpectInwardsRec(root, root, stateMasks, inMessages2_, outMessages2_);
 
     //use incoming messages to root to calculate expectancy
+    stateMask_t const * stateMask = stateMasks[ convNodeToVar(root) ];
+
     xnumber_t res = 0;
     if(!nodes[root].isFactor){
       vector<unsigned> const & nbs = neighbors[root];
@@ -817,6 +819,9 @@ namespace phy {
       for(unsigned k = 0; k < nodes[root].dimension; ++k){
 	for(unsigned i = 0; i < nbs.size(); ++i){
 	  xnumber_t add = (*inMessages2_[root][i])[k];
+	  if( stateMask){
+	    add *= (*stateMask)[k];
+	  }
 	  for(unsigned j = 0; j < nbs.size(); ++j){
 	    if(i == j)
 	      continue;
@@ -841,6 +846,19 @@ namespace phy {
     if ( current == sender) // this is root so does not send anything inwards
       return;
     calcExpectMessage(current, sender, stateMasks, inMessages2, outMessages2);
+  }
+
+  // send messages from root outwards to leaves. Preconditon: DFG::runExpectInwardsRec must have been run
+  void DFG::runExpectOutwardsRec(unsigned current, unsigned sender, stateMaskVec_t const & stateMasks, vector<vector<xvector_t const *> > & inMessages2, vector<vector<xvector_t> > & outMessages2) const {
+    vector<unsigned> const & nbs = neighbors[current];
+    // recursively call all nodes
+    for(unsigned i = 0; i < nbs.size(); ++i){
+      unsigned nb = nbs[i];
+      if(nb != sender){
+	calcExpectMessage(current, nb, stateMasks, inMessages2, outMessages2);
+	runExpectOutwardsRec(nb, current, stateMasks, inMessages2, outMessages2);
+      }
+    }
   }
 
   void DFG::calcExpectMessageFactor(unsigned current, unsigned receiver, vector<vector<xvector_t const *> > & inMessages2, vector<vector<xvector_t> > & outMessages2) const{
@@ -886,7 +904,7 @@ namespace phy {
 	  outMes2[j] = 0;
 	  for(unsigned i = 0; i < nd.potential.size1(); ++i){
 	    if(nd.fun_b.size1() != 0)
-	      outMes2[i] += nd.potential(i,j)*nd.fun_b(i,j)*(*inMes[0])[i];
+	      outMes2[j] += nd.potential(i,j)*nd.fun_b(i,j)*(*inMes[0])[i];
 	    outMes2[j] += nd.potential(i,j)*(*inMes2[0])[i];
 	  }
 	}
@@ -915,14 +933,18 @@ namespace phy {
       for(unsigned i = 0; i < nbs.size(); ++i){
 	if(nbs[i] == receiver)
 	  continue;
-	xnumber_t add = (*inMes[i])[k];
+	xnumber_t add = (*inMes2[i])[k];
 	for(unsigned j = 0; j < nbs.size(); ++j){
 	  if(j==i or nbs[j] == receiver)
 	    continue;
-	  add *= (*inMes2[j])[k];
+	  add *= (*inMes[j])[k];
 	}
 	outMes2[k] += add;
       }
+    }
+    if(stateMask){//observed variable
+      for(unsigned i = 0; i < outMes2.size(); ++i)
+	outMes2[i] *= (*stateMask)[i];
     }
   }
 
