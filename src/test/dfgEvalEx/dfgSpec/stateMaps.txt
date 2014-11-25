@@ -1,0 +1,5 @@
+# Specification of state maps
+
+NAME:		twoState
+SYMBOLS:	a b
+META_SYMBOLS:	*=a b; .=a b

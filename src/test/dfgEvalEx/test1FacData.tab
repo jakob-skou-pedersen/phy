@@ -1,0 +1,12 @@
+# Example of factor potential data specification 
+# Note that 'NAME:' is a keyword.
+# Potentials are specified in boost::ublas matrix notation separated
+# by whitespace.
+# Comment lines starting with '#' are allowed
+NAME:	  H.prior
+id_1	  [1,2]((0.8,0.2))
+id_2	  [1,2]((0.999,0.001))
+id_3	  [1,2]((0.5,0.5))
+id_4	  [1,2]((0.8,0.2))
+id_5	  [1,2]((0.999,0.001))
+id_6	  [1,2]((0.5,0.5))
