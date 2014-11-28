@@ -36,7 +36,7 @@ using namespace std;
 
 
 
-BOOST_AUTO_TEST_CASE(EmiWrap_EmitWrapDfg_1) 
+BOOST_AUTO_TEST_CASE(EmitWrap_EmitWrapDfg_1) 
 {
   EmitWrappers ew = readEmitWrappers("./data/grammarStacking/grammarStackingEmitModels.txt");
   BOOST_CHECK( ew.vecWrapNames()[0] == "single" );
@@ -68,8 +68,38 @@ BOOST_AUTO_TEST_CASE(EmiWrap_EmitWrapDfg_1)
   //  BOOST_CHECK_CLOSE(toNumber( matEmit[1](0,4) ), 1.0, EPS);     // j-i=5>=minDist  // this fails as stack factor potential needs adjustment so rows sum to one  - sudhakar, please fix
   //  BOOST_CHECK_CLOSE(toNumber( matEmit[1](0,14) ), 0.225, EPS);  //?? I have not done the calculation...
   //  BOOST_CHECK_CLOSE(toNumber( matEmit[1](12,16) ), 0.05, EPS);  
+}
 
+BOOST_AUTO_TEST_CASE(EmitWrap_EmitWrapDfg_2)
+{
+  //Read discrete factor graph
+  string const inPrefix = "./data/probfold/dfgSpec/singleEmit/";
+  
+  string const stateMapsFile           = "stateMaps.txt";
+  string const factorPotentialsFile    = "factorPotentials.txt";
+  string const variablesFile           = "variables.txt";
+  string const factorGraphFile         = "factorGraph.txt";
+    
+  DfgInfo dfgInfo = readDfgInfo(inPrefix + stateMapsFile, inPrefix + factorPotentialsFile, inPrefix + variablesFile, inPrefix + factorGraphFile);
 
+  //Make some seq data
+  SeqData seqData;
+  seqData.addSeq("X_1", "00020,00015,00001");
+  seqData.addSeq("N_1", "00050,00025,00003");
+  seqData.addSeq("P_1", "0.305,0.508,0.305");
+
+  //Read stv
+  string const stvFile = "seqToVarSymbol.txt";
+  vector<SeqToVarSymbol> stvVec = readSeqToVarSymbols(inPrefix + stvFile);
+
+  xvector_t res = calcLikelihoodVector(seqData, dfgInfo, stvVec, '.');
+
+  //R:> pbeta(0.310,21,31)-pbeta(0.305,21,31)
+  BOOST_CHECK_CLOSE( 0.01120509, toNumber(res(0)) , 0.0001);
+  //R:> pbeta(0.510,16,11)-pbeta(0.505,16,11)
+  BOOST_CHECK_CLOSE( 0.01361204, toNumber(res(1)), 0.0001);
+  //R:> pbeta(0.310,2,3)-pbeta(0.305,2,3)
+  BOOST_CHECK_CLOSE( 0.008847678, toNumber(res(2)), 0.0001);
 }
 
 

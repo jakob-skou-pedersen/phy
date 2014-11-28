@@ -115,6 +115,9 @@ namespace phy {
     }
   }
 
+  // subNames enumerates subscription variables
+  // varVec contains symbols for each subscription variable
+  // varMap[i] gives the index in varVec corresponding to subNames[i] (can be obtained using invMap in NamedData)
   void DfgInfo::updateFactors(vector<symbol_t> const & varVec, vector<unsigned> const & varMap){
     vector<matrix_t> facPot( subscriptionFacs.size() );
     for(int f = 0; f < subscriptionFacs.size(); ++f){

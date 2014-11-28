@@ -243,8 +243,10 @@ namespace phy {
     int symbolOffset = DEFAULT_VALUE_INT;
     int indexOffset = 0;
     bool optional = false;
+    bool subscription = false; //A subscription variable can never be optional
     int rSize = DEFAULT_VALUE_UNSIGNED;
     int rIndexOffset = DEFAULT_VALUE_INT;
+    
 
     skipWhiteSpaceAndComments(str);
     while ( moreTags(str) ) {
@@ -282,13 +284,23 @@ namespace phy {
 	str >> rIndexOffset;
 	skipLine(str); // skip rest of line
       }
+      else if (tag == "SUBSCRIPTION:"){
+	string value;
+	str >> value;
+	if(value == "TRUE")
+	  subscription = true;
+	else if(value == "FALSE")
+	  subscription = false;
+	else
+	  errorAbort("From operator>> for seqToVarSymbol: SUBSCRIPTION can take value TRUE or FALSE not '" + value + "'");
+      }
       else
 	errorAbort("From operator>> for seqToVarSymbol: use of undefined tag '" + tag + "' for entry with VAR_NAME '" + varName + "'.");
     }
     if (varName.size() == 0 or seqName.size() == 0)
       errorAbort("From operator>> for seqToVarSymbol: Incomplete specification of seqToVarSymbol entry with varName '" + varName + "' and seqName '" + seqName + "'.");
     
-    seqToVarSym = SeqToVarSymbol(varName, seqName, size, symbolOffset, indexOffset, optional, rSize, rIndexOffset);
+    seqToVarSym = SeqToVarSymbol(varName, seqName, size, symbolOffset, indexOffset, optional, rSize, rIndexOffset, subscription);
     return str;
   }
 

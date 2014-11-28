@@ -243,7 +243,8 @@ namespace phy {
 		   int indexOffset = 0, 
 		   bool optional = false, 
 		   unsigned rSize = numeric_limits<unsigned>::max(), 
-		   int rIndexOffset = numeric_limits<int>::max() );
+		   int rIndexOffset = numeric_limits<int>::max(),
+		   bool subscription = false);
 
     string varName;   //name of random variable
     string seqName;   // name of input sequence
@@ -253,6 +254,7 @@ namespace phy {
     bool optional;         // if false (default), symbol must always be made for the given random variable, i.e., the named sequence must be available
     unsigned rSize;        // length of right part of di-symbol (in which case "size" then defines left part)
     int rIndexOffset; // index offset for right part of di-symbol (in which case "indexOffset" defines offset for left part)
+    bool subscription; // inidcates that the variable is to be handled as a subscription variable
   };
 
   /** Defines mapping from stvVec to seqNames. stvVec[i].seqName =
@@ -390,6 +392,8 @@ namespace phy {
   /** Define mapping from vector of seqToVarSymbol data structures to an indexing of variables given by varNames. */
   vector<unsigned> mkStvToVarMap(vector<SeqToVarSymbol> const & stvVec, vector<string> const & varNames);
 
+  /** Define mapping from varNames to the indexing of data given by seqToVarSymbol data */
+  vector<unsigned> mkStvToVarInvMap(vector<SeqToVarSymbol> const & stvVec, vector<string> const & varNames);
 
   /** stvToSeqMap[i] = -1 if the sequence name defined in SeqToVarSymbol[i] is missing from the input. This functions checks that only optional sequences are missing. It will abort otherwise. */
   bool onlyOptionalSeqMissingOrAbort(vector<SeqToVarSymbol> const & stvVec, vector<int> const & stvToSeqMap, string const & seqDataEntryId);

@@ -497,12 +497,15 @@ namespace phy {
   }
 
 
-  SeqToVarSymbol::SeqToVarSymbol(string varName, string seqName, unsigned size, int symbolOffset, int indexOffset, bool optional, unsigned rSize, int rIndexOffset)
-    : varName(varName), seqName(seqName), size(size), symbolOffset(symbolOffset), indexOffset(indexOffset), optional(optional), rSize(rSize), rIndexOffset(rIndexOffset)
+  SeqToVarSymbol::SeqToVarSymbol(string varName, string seqName, unsigned size, int symbolOffset, int indexOffset, bool optional, unsigned rSize, int rIndexOffset, bool subscription)
+    : varName(varName), seqName(seqName), size(size), symbolOffset(symbolOffset), indexOffset(indexOffset), optional(optional), rSize(rSize), rIndexOffset(rIndexOffset), subscription(subscription)
   {
     assert(varName.size() != 0);
     assert(seqName.size() != 0);
     
+    if(optional && subscription)
+      errorAbort("Observations.cpp::SeqToVarSymbol: Sequence cannot both be of type subscription and optional");
+
     unsigned DEFAULT_VALUE_UNSIGNED = numeric_limits<unsigned>::max();
     int DEFAULT_VALUE_INT = numeric_limits<int>::max();
 
@@ -708,10 +711,21 @@ namespace phy {
     for (unsigned i = 0; i < stvCount; i++)
       stvVarNames[i] = stvVec[i].varName;
 
-    // map from the observed randome variables / stv to total set of random variables 
+    // map from the observed random variables / stv to total set of random variables 
     return mkSubsetMap(varNames, stvVarNames);
   }
 
+  vector<unsigned> mkStvToVarInvMap(vector<SeqToVarSymbol> const & stvVec, vector<string> const & varNames)
+  {
+    // count and collect names of observed random variables given by the stv's
+    unsigned stvCount = stvVec.size();
+    vector<string> stvVarNames(stvCount);
+    for (unsigned i = 0; i < stvCount; i++)
+      stvVarNames[i] = stvVec[i].varName;
+
+    //map from the varNames to the observed random variables
+    return mkMap(stvVarNames, varNames); //mkMap(to, from)
+  }
 
   void mkStateMask2DVec(stateMask2DVec_t & stateMask2DVec, SeqData const & seqData, vector<SeqToVarSymbol> const & stvVec, vector<string> const & varNames, StateMaskMapSet const & stateMaskMapSet, char missingDataChar)
   {
