@@ -59,6 +59,36 @@ phy::vector_t const minimizexx(phy::vector_t x, boost::function< double (phy::ve
   return toNumber( objfcn.getXPrev() );
 }
 
+NEWMAT::ColumnVector const toColumnVector(phy::vector_t const & v)
+{
+  unsigned n = v.size();
+  NEWMAT::ColumnVector u(n);
+  for (unsigned i = 0; i < n; i++)
+    u[i] = v[i];
+  return u;
+}
+
+
+phy::vector_t const toNumber(NEWMAT::ColumnVector const & v)
+{
+  unsigned n = v.Nrows();
+  phy::vector_t u(n);
+  for (unsigned i = 0; i < n; i++)
+    u[i] = v[i];
+  return u;
+}
+
+#else /* NO_OPTPP */
+
+phy::vector_t const minimizexx(phy::vector_t x, boost::function< double (phy::vector_t const &) > const & objFct, std::string const & statusFileName, unsigned maxFEval, unsigned maxIter)
+{
+  std::cerr << "minimizezz cannot be called as compiled with NO_OPTPP preprocessing directive, which excludes the opt++ numeric optimization libraries. To include opt++ functionality recompile without the NO_OPTPP flag. Program termninates." << std::endl;
+  exit(0);
+}
+
+
+#endif /* NO_OPTPP */
+
 
 // map ]l;oo[ into ]-oo;oo[
 double transform(double x, double l)
@@ -115,33 +145,3 @@ phy::vector_t const forceInRange(phy::vector_t const &x, double min_value, doubl
   }
   return y;
 }
-
-NEWMAT::ColumnVector const toColumnVector(phy::vector_t const & v)
-{
-  unsigned n = v.size();
-  NEWMAT::ColumnVector u(n);
-  for (unsigned i = 0; i < n; i++)
-    u[i] = v[i];
-  return u;
-}
-
-
-phy::vector_t const toNumber(NEWMAT::ColumnVector const & v)
-{
-  unsigned n = v.Nrows();
-  phy::vector_t u(n);
-  for (unsigned i = 0; i < n; i++)
-    u[i] = v[i];
-  return u;
-}
-
-#else /* NO_OPTPP */
-
-phy::vector_t const minimizexx(phy::vector_t x, boost::function< double (phy::vector_t const &) > const & objFct, std::string const & statusFileName, unsigned maxFEval, unsigned maxIter)
-{
-  std::cerr << "minimizezz cannot be called as compiled with NO_OPTPP preprocessing directive, which excludes the opt++ numeric optimization libraries. To include opt++ functionality recompile without the NO_OPTPP flag. Program termninates." << std::endl;
-  exit(0);
-}
-
-
-#endif /* NO_OPTPP */
