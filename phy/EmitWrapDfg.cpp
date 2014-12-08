@@ -142,7 +142,7 @@ namespace phy {
     assert( symCount <= result.size1() and symCount <= result.size2() );
 
     // setup symbol vector
-    vector<string> symVec = initSymVec(stvVec, true);
+    vector<string> symVec = initSymVec(stvVecNonSub, true);
     vector<string> symVecSub = initSymVec(stvVecSub, true);
 
     // map from the observed randome variables / stv to total set of random variables 

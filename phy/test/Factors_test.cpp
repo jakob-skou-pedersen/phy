@@ -154,7 +154,7 @@ BOOST_AUTO_TEST_CASE(RowNormExpect_1)
   BOOST_CHECK(factorMap["inner2"] != NULL);
   BOOST_CHECK_EQUAL(factorMap["inner2"]->mkFunB().size1(), (unsigned) 2);
   BOOST_CHECK_EQUAL(factorMap["inner2"]->mkFunB().size2(), (unsigned) 4);
-  }
+}
 
 
 BOOST_AUTO_TEST_CASE(ColumnNormFactor_general_1) 

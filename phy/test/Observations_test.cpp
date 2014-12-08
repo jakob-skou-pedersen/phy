@@ -291,6 +291,7 @@ BOOST_AUTO_TEST_CASE(Observations_mkSymbol_2)
   BOOST_CHECK( symVec_pair_idx11 == split("....,...,..,...,..", ",") );
 }
 
+
 BOOST_AUTO_TEST_CASE(Observations_mkSymbol_3)
 {
   // setup basic data structures
@@ -342,4 +343,50 @@ BOOST_AUTO_TEST_CASE(Observations_mkSymbol_3)
 
   BOOST_CHECK( boost::lexical_cast<int>(symVec4.at(3)) == 50);
   BOOST_CHECK( boost::lexical_cast<int>(symVec5.at(3)) == 20);
+}
+
+BOOST_AUTO_TEST_CASE(Observations_mkSymbol_4)
+{
+  // setup basic data structures
+  string const fileName1 = "./data/dfgSpecSahooPair/seqToVarSymbol.txt";
+  vector<SeqToVarSymbol> stvVec = readSeqToVarSymbols(fileName1);
+  SeqData seqData;
+
+  seqData.addSeq("X_1","00031,00050,00020");
+  seqData.addSeq("N_1","00150,00160,00080");
+
+  vector<int> stvToSeqMap = mkStvToSeqMap(stvVec, seqData.seqNames);
+  vector<long> seqSizes = getSeqSizes(seqData);
+  
+  // Check symbol generation
+  vector<string> symVec = initSymVec(stvVec, false);
+
+  mkSymbolVector(symVec, seqData.sequences, seqSizes, stvVec, stvToSeqMap, 0, '.');
+  vector<string> symVec1 = symVec;
+  mkSymbolVector(symVec, seqData.sequences, seqSizes, stvVec, stvToSeqMap, 1, '.');
+  vector<string> symVec2 = symVec;
+  mkSymbolVector(symVec, seqData.sequences, seqSizes, stvVec, stvToSeqMap, 2, '.');
+  vector<string> symVec3 = symVec;
+
+  BOOST_CHECK( symVec1.at(0) == "00031");
+  BOOST_CHECK( symVec1.at(1) == "00150");
+  BOOST_CHECK( symVec2.at(0) == "00050");
+  BOOST_CHECK( symVec3.at(1) == "00080");
+
+  BOOST_CHECK( boost::lexical_cast<int>(symVec1.at(0)) == 31);
+  BOOST_CHECK( boost::lexical_cast<int>(symVec1.at(1)) == 150);
+  BOOST_CHECK( boost::lexical_cast<int>(symVec2.at(0)) == 50);
+  BOOST_CHECK( boost::lexical_cast<int>(symVec3.at(1)) == 80);
+
+  // Check diSymbols
+  symVec = initSymVec(stvVec, true); // adjust sizes of symVec
+  mkDiSymbolVector(symVec, seqData.sequences, seqSizes, stvVec, stvToSeqMap, 0, 1, '.');
+  vector<string> symVec4 = symVec;
+  mkDiSymbolVector(symVec, seqData.sequences, seqSizes, stvVec, stvToSeqMap, 0, 2, '.');
+  vector<string> symVec5 = symVec;
+
+  std::cout << symVec4.at(0) << std::endl;
+  std::cout << symVec5.at(1) << std::endl;
+  BOOST_CHECK( boost::lexical_cast<int>(symVec4.at(3)) == 160);
+  BOOST_CHECK( boost::lexical_cast<int>(symVec5.at(3)) == 80);
 }

@@ -1,0 +1,9 @@
+# specification of factors and thereby entire (dual) graph
+
+NAME:		POSTH1
+NB1:		H1
+POT:		beta
+
+NAME:		PRIORH1
+NB1:		H1
+POT:		betaprior

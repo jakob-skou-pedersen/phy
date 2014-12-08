@@ -142,7 +142,7 @@ int main(int argc, char * argv[])
 {
   // option and argument variables
   string dfgSpecPrefix, stateMapsFile, factorPotentialsFile, variablesFile, factorGraphFile;  // specification files
-  string varFile, facFile, subVarFile, postProbFile, normConstFile, maxProbStateFile; // input / ouput files
+  string varFile, facFile, subVarFile, postProbFile, normConstFile, maxProbStateFile, expectFile; // input / ouput files
   string mpsVarVecStr, ppVarVecStr; // other options
   unsigned prec;
   bool minusLogarithm, ppSumOther;
@@ -163,6 +163,7 @@ int main(int argc, char * argv[])
     ("ppFile,o", po::value<string>(& postProbFile)->default_value(""), "Calculate posterior probabilities for each state of each random variable and output to file.")
     ("ncFile,n", po::value<string>(& normConstFile)->default_value(""), "Calculate normalization constant output to file.")
     ("mpsFile,m", po::value<string>(& maxProbStateFile)->default_value(""), "Calculate most probable state for each random variable and output to file.")
+    ("expFile", po::value<string>(& expectFile)->default_value(""), "Calculate expectancies and output to file")
     ("precision,p", po::value<unsigned>(& prec)->default_value(5), "Output precision of real numbers.")
     ("ppSumOther", po::bool_switch(& ppSumOther)->default_value(false), "For post probs, for each state output sum of post probs for all the other states for that variable. This retains precision for post probs very close to one.")
     ("minusLogarithm,l", po::bool_switch(& minusLogarithm)->default_value(false), "Output minus the natural logarithm of result values (program will terminate on negative results...).")
@@ -211,7 +212,7 @@ int main(int argc, char * argv[])
   bool calcMps =  maxProbStateFile.size() ? true : false;
   bool calcNc  =  normConstFile.size() ? true : false;
   bool calcPp  =  postProbFile.size() ? true : false;
-  bool calcExpect = true;
+  bool calcExpect = expectFile.size() ? true : false;
 //  // debug
 //  cout << endl << endl;
 //  cout << "calcMps\t" << calcMps << endl;
@@ -260,6 +261,12 @@ int main(int argc, char * argv[])
   if (calcPp and postProbFile != "-")
     openOutFile(ppF, postProbFile);
   ostream & ppStr = ( ppF.is_open() ) ? ppF : cout;
+
+  // expectancies
+  ofstream expF;
+  if (calcExpect and expectFile != "-")
+    openOutFile(expF, expectFile);
+  ostream & expStr = ( expF.is_open() ) ? expF : cout;
 
   // variables needed in data loop
   string idVar;
@@ -359,7 +366,7 @@ int main(int argc, char * argv[])
       dfgInfo.dfg.runSumProduct(stateMasks);
       xnumber_t expect = dfgInfo.dfg.calcExpect();
       xnumber_t expect2 = dfgInfo.dfg.calcExpect2(stateMasks);
-      std::cout << idVar << "\tExpect:\t" << toString(expect, prec) << "\tExpect2:\t" << toString(expect2, prec) << std::endl;
+      expStr << idVar << "\tExpect:\t" << toString(expect, prec) << "\tExpect2:\t" << toString(expect2, prec) << std::endl;
       //Use counts at each node
     }
 

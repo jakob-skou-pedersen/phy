@@ -1,0 +1,7 @@
+# Specification of variables
+
+STATE_MAP_NAME:	realMap
+VAR_NAMES:	H1
+
+STATE_MAP_NAME:	realMap
+VAR_NAMES:	H2
