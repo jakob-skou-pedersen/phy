@@ -83,13 +83,15 @@ using namespace std;
 	inMessages_ pointers are wiped out on copy. This means that
 	the states of the dynammic programming tables are not kept on
 	copy.*/
-    DFG(DFG const & rhs) : nodes(rhs.nodes), neighbors(rhs.neighbors), variables(rhs.variables), factors(rhs.factors) {}
+    DFG(DFG const & rhs) : nodes(rhs.nodes), neighbors(rhs.neighbors), variables(rhs.variables), factors(rhs.factors), components(rhs.components), roots(rhs.roots) {}
 
     // public data
     vector<DFGNode> nodes;       // Contains and enumerates all the nodes of the graph.
     vector< vector< unsigned > > neighbors; // Defines graph structure in terms of neighboring nodes 
     vector<unsigned> variables;  // enumerates variable nodes
     vector<unsigned> factors;    // enumerates factor nodes
+    vector<unsigned> components;  // assigns each node to a connected component 0 indicates no assignment
+    vector<unsigned> roots; // a root node in each component
 
     /** Reset specific or all factor potentials. Useful with factor optimization, e.g., by EM. */
     // xmatrix_t versions
@@ -223,6 +225,7 @@ using namespace std;
     // Initialize data structures, only need to run once
     void initMessages();
     void initMaxNeighbourStates();
+    void initComponents();
 
     // private data
     // convenience data structures -- perhaps make public

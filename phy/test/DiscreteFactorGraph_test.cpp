@@ -234,6 +234,46 @@ BOOST_AUTO_TEST_CASE(sumProduct_1)
   //  cout << "DFG::calcNormConst: " << fg.calcNormConst(0, stateMasks[0], fg.inMessages_[0]) << endl;
 }
 
+BOOST_AUTO_TEST_CASE(sumProduct_2)
+{
+  //Test disconnected graphs
+  //Read factor graph
+  string const inPrefix                = "./data/dfgSpecUnconnected/";
+  string const stateMapsFile           = "stateMaps.txt";
+  string const factorPotentialsFile    = "factorPotentials.txt";
+  string const variablesFile           = "variables.txt";
+  string const factorGraphFile         = "factorGraph.txt";
+  string const varDataFile             = "test1VarData.txt";
+
+  //Read dfgInfo
+  DfgInfo dfgInfo = readDfgInfo(inPrefix + stateMapsFile, inPrefix + factorPotentialsFile, inPrefix + variablesFile, inPrefix + factorGraphFile);
+
+  //Setup data input
+  stateMaskVec_t stateMasks( dfgInfo.varNames.size() );
+
+  dfgInfo.dfg.runSumProduct(stateMasks);
+  BOOST_CHECK_CLOSE( toNumber(dfgInfo.dfg.calcNormConst(stateMasks)), 1.0, EPS );
+
+  vector<string> varNames;
+  vector<symbol_t> varVec;
+  vector<unsigned> maxVarStates( dfgInfo.varNames.size() );
+
+  varNames.push_back("O1"); varNames.push_back("O3");
+  varVec.push_back("B"); varVec.push_back("B");
+  vector<unsigned> varMap = mkSubsetMap( dfgInfo.varNames, varNames);
+  
+  dfgInfo.stateMaskMapSet.symbols2StateMasks(stateMasks, varVec, varMap);
+  dfgInfo.dfg.runSumProduct(stateMasks);
+  BOOST_CHECK_CLOSE( toNumber(dfgInfo.dfg.calcNormConst(stateMasks)), 0.198, EPS );
+  BOOST_CHECK_CLOSE( toNumber(dfgInfo.dfg.runMaxSum(stateMasks, maxVarStates)), 0.05832, EPS);
+
+  BOOST_CHECK( maxVarStates.at(0) == 1);
+  BOOST_CHECK( maxVarStates.at(1) == 1);
+  BOOST_CHECK( maxVarStates.at(2) == 1);
+  BOOST_CHECK( maxVarStates.at(3) == 1);
+  BOOST_CHECK( maxVarStates.at(4) == 0);
+}
+
 
 BOOST_AUTO_TEST_CASE(calcVariableMarginals_1) 
 {
@@ -575,4 +615,50 @@ BOOST_AUTO_TEST_CASE(VarData_1)
   BOOST_CHECK(dataVec[0].size() == 2);
   BOOST_CHECK(dataVec[1].size() == 2);
   BOOST_CHECK(dataVec[0][0] == "A");
+}
+
+BOOST_AUTO_TEST_CASE(DFG_components_1)
+{
+  string const inPrefix                = "./data/dfgSpecUnconnected/";
+  string const stateMapsFile           = "stateMaps.txt";
+  string const factorPotentialsFile    = "factorPotentials.txt";
+  string const variablesFile           = "variables.txt";
+  string const factorGraphFile         = "factorGraph.txt";
+
+  //Read dfgInfo
+  DfgInfo dfgInfo = readDfgInfo(inPrefix + stateMapsFile, inPrefix + factorPotentialsFile, inPrefix + variablesFile, inPrefix + factorGraphFile);
+
+  dfgInfo.dfg.initComponents();
+
+  //Check components
+  //TODO: remove implicit assumption that variables are the first nodes, followed by factors
+  int HvarIdx = std::find(dfgInfo.varNames.begin(), dfgInfo.varNames.end(), "H")-dfgInfo.varNames.begin();
+  int O1varIdx = std::find(dfgInfo.varNames.begin(), dfgInfo.varNames.end(), "O1")-dfgInfo.varNames.begin();
+  int O2varIdx = std::find(dfgInfo.varNames.begin(), dfgInfo.varNames.end(), "O2")-dfgInfo.varNames.begin();
+  int O3varIdx = std::find(dfgInfo.varNames.begin(), dfgInfo.varNames.end(), "O3")-dfgInfo.varNames.begin();
+  int O4varIdx = std::find(dfgInfo.varNames.begin(), dfgInfo.varNames.end(), "O4")-dfgInfo.varNames.begin();
+  
+  int HfacIdx = std::find(dfgInfo.facNames.begin(), dfgInfo.facNames.end(), "H")-dfgInfo.facNames.begin();
+  int HO1facIdx = std::find(dfgInfo.facNames.begin(), dfgInfo.facNames.end(), "H.O1")-dfgInfo.facNames.begin();
+  int HO2facIdx = std::find(dfgInfo.facNames.begin(), dfgInfo.facNames.end(), "H.O2")-dfgInfo.facNames.begin();
+  int O3facIdx = std::find(dfgInfo.facNames.begin(), dfgInfo.facNames.end(), "O3")-dfgInfo.facNames.begin();
+  int O4facIdx = std::find(dfgInfo.facNames.begin(), dfgInfo.facNames.end(), "O4")-dfgInfo.facNames.begin();
+
+  int varSize = dfgInfo.varNames.size();
+
+  //Check same components
+  BOOST_CHECK( dfgInfo.dfg.components.at(HvarIdx) == dfgInfo.dfg.components.at(HfacIdx+varSize));
+  BOOST_CHECK( dfgInfo.dfg.components.at(HvarIdx) == dfgInfo.dfg.components.at(HO1facIdx+varSize));
+  BOOST_CHECK( dfgInfo.dfg.components.at(HvarIdx) == dfgInfo.dfg.components.at(HO2facIdx+varSize));
+  BOOST_CHECK( dfgInfo.dfg.components.at(O2varIdx) == dfgInfo.dfg.components.at(HO2facIdx+varSize));
+  BOOST_CHECK( dfgInfo.dfg.components.at(O1varIdx) == dfgInfo.dfg.components.at(HO1facIdx+varSize));
+  BOOST_CHECK( dfgInfo.dfg.components.at(O3varIdx) == dfgInfo.dfg.components.at(O3facIdx+varSize));
+  BOOST_CHECK( dfgInfo.dfg.components.at(O4varIdx) == dfgInfo.dfg.components.at(O4facIdx+varSize));
+
+  //Check different components
+  BOOST_CHECK( dfgInfo.dfg.components.at(O3varIdx) != dfgInfo.dfg.components.at(HvarIdx) );
+  BOOST_CHECK( dfgInfo.dfg.components.at(O3varIdx) != dfgInfo.dfg.components.at(O4varIdx) );
+  BOOST_CHECK( dfgInfo.dfg.components.at(HvarIdx) != dfgInfo.dfg.components.at(O4varIdx) );
+
+  //
 }

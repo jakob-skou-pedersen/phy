@@ -1,0 +1,23 @@
+# specification of factors and thereby entire (dual) graph
+
+NAME:		H
+NB1:		H
+POT:		prior
+
+NAME:		H.O1
+NB1:		H
+NB2:		O1
+POT:		inner
+
+NAME:		H.O2
+NB1:		H
+NB2:		O2
+POT:		inner
+
+NAME:		O3
+NB1:		O3
+POT:		prior2
+
+NAME:		O4
+NB1:		O4
+POT:		prior

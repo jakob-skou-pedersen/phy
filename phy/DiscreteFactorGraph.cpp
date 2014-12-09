@@ -5,6 +5,8 @@
  *******************************************************************/
 #include "DiscreteFactorGraph.h"
 
+#include <queue>
+
 #include "boost/tuple/tuple.hpp"
 #include <boost/iterator/zip_iterator.hpp>
 #include <boost/range/iterator_range.hpp>
@@ -326,9 +328,13 @@ namespace phy {
 
   void DFG::runSumProduct(stateMaskVec_t const & stateMasks, vector<vector<xvector_t const *> > & inMessages, vector<vector<xvector_t> > & outMessages) const
   {
-    unsigned root = 0;
-    runSumProductInwardsRec(root, root, stateMasks, inMessages, outMessages);
-    runSumProductOutwardsRec(root, root, stateMasks, inMessages, outMessages);
+    if(roots.size() == 0)
+      errorAbort("DiscreFactorGraph.cpp::runSumProduct: No root nodes");
+    for(int i = 0; i < roots.size(); ++i){
+      unsigned root = roots.at(i);
+      runSumProductInwardsRec(root, root, stateMasks, inMessages, outMessages);
+      runSumProductOutwardsRec(root, root, stateMasks, inMessages, outMessages);
+    }
   }
 
 
@@ -391,21 +397,28 @@ namespace phy {
 
   xnumber_t DFG::runMaxSum(stateMaskVec_t const & stateMasks, vector<unsigned> & maxVariables, vector<vector<xvector_t const *> > & inMessages, vector<vector<xvector_t> > & outMessages, vector<vector<vector<unsigned> > > & maxNeighborStates) const
   {
-    unsigned root = 0;
-    runMaxSumInwardsRec(root, root, stateMasks, inMessages, outMessages, maxNeighborStates);
-
-    // find max at root node
-    unsigned dim = nodes[root].dimension;
-    xvector_t v(dim);
-    calcSumProductMessageVariable(root, root, stateMasks[root], inMessages[root], v);  // sumProduct and maxSum perform the same calculations for variables
-    unsigned maxState = ublas::index_norm_inf(v);
-    xnumber_t maxVal = v[maxState];
-
-    //  backtrack
+    if(roots.size() == 0)
+      errorAbort("DiscreFactorGraph.cpp::runMaxSum: No root nodes");
+    
     if (maxVariables.size() == 0)
       initMaxVariables(maxVariables);
-    backtrackMaxSumOutwardsRec(maxVariables, root, root, maxState, maxNeighborStates);
 
+    xnumber_t maxVal = 1;
+
+    for(int i = 0; i < roots.size(); ++i){
+      unsigned root = roots.at(i);
+      runMaxSumInwardsRec(root, root, stateMasks, inMessages, outMessages, maxNeighborStates);
+
+      // find max at root node
+      unsigned dim = nodes[root].dimension;
+      xvector_t v(dim);
+      calcSumProductMessageVariable(root, root, stateMasks[root], inMessages[root], v);  // sumProduct and maxSum perform the same calculations for variables
+      unsigned maxState = ublas::index_norm_inf(v);
+      maxVal *= v[maxState];
+
+      //  backtrack
+      backtrackMaxSumOutwardsRec(maxVariables, root, root, maxState, maxNeighborStates);
+    }
     return maxVal;
   }
 
@@ -521,9 +534,16 @@ namespace phy {
 
   xnumber_t DFG::calcNormConst(stateMaskVec_t const & stateMasks, vector<vector<xvector_t const *> > & inMessages, vector<vector<xvector_t> > & outMessages) const
   {
-    unsigned const root = 0;
-    runSumProductInwardsRec(root, root, stateMasks, inMessages, outMessages);
-    return calcNormConst(root, stateMasks[root], inMessages[root]);
+    xnumber_t res = 1;
+    if(roots.size() == 0)
+      errorAbort("DiscreFactorGraph.cpp::calcNormConst: No root nodes");
+
+    for(int i = 0; i < roots.size(); ++i){
+      unsigned const root = roots.at(i);
+      runSumProductInwardsRec(root, root, stateMasks, inMessages, outMessages);
+      res *= calcNormConst(root, stateMasks[root], inMessages[root]);
+    }
+    return res;
   }
 
 
@@ -665,6 +685,38 @@ namespace phy {
 //    reset(factorMarginals);
   }
 
+  void DFG::initComponents(){
+    components.resize( nodes.size(), 0 );
+
+    unsigned currentComponent = 0;
+    for(int i = 0; i < components.size(); ++i){
+      if(components.at(i) != 0)
+	continue; //already visited
+
+      //Do BFS starting at node i      
+      currentComponent++;
+      std::queue<unsigned> toVisit;
+      toVisit.push(i);
+      roots.push_back(i);
+
+      while(!toVisit.empty()){
+	//Visiting
+	int visit = toVisit.front();
+	toVisit.pop();
+	components.at(visit) = currentComponent;
+
+	//Push neighbors on queue
+	for(int j = 0; j < neighbors.at(visit).size(); ++j){
+	  //check if already visited
+	  if( components.at( neighbors.at(visit).at(j) ) == 0)
+	    toVisit.push( neighbors.at(visit).at(j) );
+	}
+      }
+      
+
+    }
+  }
+
   
   // get max neighbor dimension
   unsigned DFG::maxNeighborDimension(vector<unsigned> const & nbs) const
@@ -735,8 +787,9 @@ namespace phy {
 
     neighbors.resize( variables.size() ); // placeholder for var neighbors
     neighbors.insert(neighbors.end(), facNeighbors.begin(), facNeighbors.end());  // all facNeighbors refer to variables, which have not changed indices
-    addTwoWayLinks(neighbors); // now add the var neighbors
+    addTwoWayLinks(neighbors); // now add the var 
 
+    initComponents();
     consistencyCheck();
   }
 
@@ -773,7 +826,7 @@ namespace phy {
     neighbors.resize( variables.size() ); // placeholder for var neighbors
     neighbors.insert(neighbors.end(), facNeighbors.begin(), facNeighbors.end());  // all facNeighbors refer to variables, which have not changed indices
     addTwoWayLinks(neighbors); // now add the var neighbors
-
+    initComponents();
     consistencyCheck();
   }
 
@@ -805,29 +858,33 @@ namespace phy {
     if (inMessages2_.size() == 0)
       initMessages(inMessages2_, outMessages2_);
 
-    //calc inward recursion
-    unsigned root = 0;
-    runExpectInwardsRec(root, root, stateMasks, inMessages2_, outMessages2_);
-
-    //use incoming messages to root to calculate expectancy
-    stateMask_t const * stateMask = stateMasks[ convNodeToVar(root) ];
-
     xnumber_t res = 0;
-    if(!nodes[root].isFactor){
-      vector<unsigned> const & nbs = neighbors[root];
+
+    for(int i = 0; i < roots.size(); ++i){
+      //calc inward recursion
+      unsigned root = roots.at(i);
+      runExpectInwardsRec(root, root, stateMasks, inMessages2_, outMessages2_);
+
+      //use incoming messages to root to calculate expectancy
+      stateMask_t const * stateMask = stateMasks[ convNodeToVar(root) ];
+
+
+      if(!nodes[root].isFactor){
+	vector<unsigned> const & nbs = neighbors[root];
       
-      for(unsigned k = 0; k < nodes[root].dimension; ++k){
-	for(unsigned i = 0; i < nbs.size(); ++i){
-	  xnumber_t add = (*inMessages2_[root][i])[k];
-	  if( stateMask){
-	    add *= (*stateMask)[k];
+	for(unsigned k = 0; k < nodes[root].dimension; ++k){
+	  for(unsigned i = 0; i < nbs.size(); ++i){
+	    xnumber_t add = (*inMessages2_[root][i])[k];
+	    if( stateMask){
+	      add *= (*stateMask)[k];
+	    }
+	    for(unsigned j = 0; j < nbs.size(); ++j){
+	      if(i == j)
+		continue;
+	      add *= (*inMessages_[root][j])[k];
+	    }
+	    res += add;
 	  }
-	  for(unsigned j = 0; j < nbs.size(); ++j){
-	    if(i == j)
-	      continue;
-	    add *= (*inMessages_[root][j])[k];
-	  }
-	  res += add;
 	}
       }
     }
