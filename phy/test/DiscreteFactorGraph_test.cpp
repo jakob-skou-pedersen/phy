@@ -26,6 +26,10 @@
 // input/output not included by above
 #include <boost/numeric/ublas/io.hpp>
 #include <iostream>
+#include <algorithm>
+
+// for simulation
+#include <boost/random/mersenne_twister.hpp>
 
 // other stuff
 #include <boost/foreach.hpp>
@@ -661,4 +665,34 @@ BOOST_AUTO_TEST_CASE(DFG_components_1)
   BOOST_CHECK( dfgInfo.dfg.components.at(HvarIdx) != dfgInfo.dfg.components.at(O4varIdx) );
 
   //
+}
+
+BOOST_AUTO_TEST_CASE(DFG_simulation)
+{
+  string const inPrefix                = "./data/dfgSpecUnconnected/";
+  string const stateMapsFile           = "stateMaps.txt";
+  string const factorPotentialsFile    = "factorPotentials.txt";
+  string const variablesFile           = "variables.txt";
+  string const factorGraphFile         = "factorGraph.txt";
+
+  //Read dfgInfo
+  DfgInfo dfgInfo = readDfgInfo(inPrefix + stateMapsFile, inPrefix + factorPotentialsFile, inPrefix + variablesFile, inPrefix + factorGraphFile);
+
+  
+  stateMaskVec_t stateMasks( dfgInfo.dfg.variables.size() );
+  dfgInfo.dfg.runSumProduct(stateMasks);
+  boost::mt19937 gen(std::time(0));
+
+  vector<unsigned> acc(dfgInfo.dfg.variables.size());
+  for(int i = 0; i < 100000; ++i){
+    vector<unsigned> sample = dfgInfo.dfg.sample(gen);
+    for(int j = 0; j < acc.size(); ++j)
+      acc.at(j) += sample.at(j);
+  }
+
+
+  std::copy(acc.begin(), acc.end(), ostream_iterator<unsigned>(std::cout, "\t") );
+
+  
+
 }

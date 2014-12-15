@@ -13,6 +13,8 @@
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/io.hpp>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/variate_generator.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/foreach.hpp>
 #include <vector>
@@ -126,11 +128,11 @@ using namespace std;
     xnumber_t calcNormConst2(stateMaskVec_t const & stateMasks) const;
     xnumber_t calcNormConst2(stateMaskVec_t const & stateMasks, vector<vector<xvector_t const *> > & inMessages) const;
 
-    /** Precondition: runSumProcut has been called (setting all out/inMessages)*/
+    /** Precondition: runSumProcut has been called (setting all out/inMessages). If variableMarginals is an empty vector ::initVariableMarginals will be called*/
     void calcVariableMarginals(vector<xvector_t> & variableMarginals, stateMaskVec_t const & stateMasks);
     void calcVariableMarginals(vector<xvector_t> & variableMarginals, stateMaskVec_t const & stateMasks, vector<vector<xvector_t const *> > & inMessages) const;
 
-    /** Precondition: runSumProcut has been called (setting all out/inMessages)*/
+    /** Precondition: runSumProcut has been called (setting all out/inMessages). If factorMarginals is an empty vector ::initFactorMarginals will be called*/
     void calcFactorMarginals(vector<xmatrix_t> & factorMarginals);
     void calcFactorMarginals(vector<xmatrix_t> & factorMarginals, vector<vector<xvector_t const *> > & inMessages) const;
 
@@ -174,6 +176,13 @@ using namespace std;
 
     /** Consistency check of factor dimensions versus number of neighbors and of potential dimensions and neighbors (var) dimensions */
     void consistencyCheck();
+
+    /** Make a sample from conditional distribution induced by factorgraph, precondition sumProduct has been run */
+    vector<unsigned> sample(boost::mt19937 & gen); 
+
+    /** Precondition: calcFactorMarginals and calcVariableMarginals has been called on members factorMarginals and variableMarginals */
+    void simulateVariable(boost::mt19937 & gen, unsigned current, unsigned sender, unsigned state, vector<unsigned> & sim);
+    void simulateFactor(boost::mt19937 & gen, unsigned current, unsigned sender, unsigned state, vector<unsigned> & sim);
     
     /** write factor info to str */
     void writeInfo( ostream & str, vector<string> const & varNames = vector<string>(), vector<string> const & facNames = vector<string>() );
@@ -235,6 +244,12 @@ using namespace std;
 
     vector<vector<xvector_t const *> > inMessages2_; //For messages of the second type
     vector<vector<xvector_t> > outMessages2_;
+
+    vector<vector_t> variableMarginals;
+    vector<matrix_t> factorMarginals;
+
+    vector<xvector_t> xVariableMarginals;
+    vector<xmatrix_t> xFactorMarginals;
   };
 
   // free functions for dealing vith a vector of observation sets
