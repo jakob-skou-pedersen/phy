@@ -720,31 +720,100 @@ namespace phy {
   }
 
   // IS sample from factor graph
-  /*  vector<unsigned> DFG::sampleIS(boost::mt19937 & gen, vector<vector_t> const & variableMarginals, vector<matrix_t> const & factorMarginals, vector<matrix_t> weights){
-    
+  void DFG::sampleIS(boost::mt19937 & gen, vector<vector_t> const & varMarginals, vector<matrix_t> const & facMarginals, vector<vector_t> const & ISVarMarginals, vector<matrix_t> const & ISFacMarginals, vector<unsigned> & sim, number_t & weight){
+    //return vector
+    sim.resize(variables.size());
+    weight = 1;
 
-      }*/
-
-  // Sample from factor graph
-  vector<unsigned> DFG::sample(boost::mt19937 & gen){
-    
-    if(factorMarginals.size() == 0){
-      stateMaskVec_t stateMasks( variables.size() );
-      calcFactorMarginals(xFactorMarginals);
-      calcVariableMarginals(xVariableMarginals, stateMasks);
+    for(int r = 0; r < roots.size(); ++r){
+      unsigned root = roots.at(r);
       
-      for(int i = 0; i < xFactorMarginals.size(); ++i){
-	factorMarginals.push_back( toNumber( xFactorMarginals.at(i) ) );
-      }
+      if(nodes.at(root).isFactor)
+	errorAbort("DiscreFactorGraph.cpp::DFG::sampleIS: Root nodes currently have to be variables");
 
-      for(int i = 0; i < xVariableMarginals.size(); ++i){
-	variableMarginals.push_back( toNumber( xVariableMarginals.at(i) ) );
+      unsigned varId = convNodeToVar(root);
+      boost::random::discrete_distribution<int, number_t> dist( ISVarMarginals.at(varId).begin(), ISVarMarginals.at(varId).end());
+      boost::variate_generator<boost::mt19937 &, boost::random::discrete_distribution< int, number_t> > distGen( gen, dist);
+      
+      unsigned state = distGen();
+      sim.at(varId) = state;
+      weight *= varMarginals.at(varId)(state)/ISVarMarginals.at(varId)(state)/sum(varMarginals.at(varId))*sum(ISVarMarginals.at(varId));
+
+      simulateVariableIS(gen, root, root, state, facMarginals, ISFacMarginals, sim, weight);
+    }
+  }
+
+    void DFG::simulateVariableIS(boost::mt19937 & gen, unsigned current, unsigned sender, unsigned state, vector<matrix_t> const & facMarginals, vector<matrix_t> const & ISFacMarginals, vector<unsigned> & sim, number_t & weight){
+      //Loop over neighbors except sender ( notice if current==sender, this is the root node)
+      vector<unsigned> const & nbs = neighbors.at(current);
+      for(int i = 0; i < nbs.size(); ++i){
+	unsigned nb = nbs.at(i);
+	if(nb != sender)
+	  simulateFactorIS(gen, nb, current, state, facMarginals, ISFacMarginals, sim, weight);
       }
     }
+
+  void DFG::simulateFactorIS(boost::mt19937 & gen, unsigned current, unsigned sender, unsigned state, vector<matrix_t> const & facMarginals, vector<matrix_t> const & ISFacMarginals,  vector<unsigned> & sim, number_t & weight){
+    //At most a single nb except root
+    vector<unsigned> const & nbs = neighbors.at(current);
+
+    if( nbs.size() == 1)
+      return; //Prior for some variable that has already been set
+    else if( nbs.size() == 2){
+      unsigned facId = convNodeToFac(current);
+
+      if(nbs[0] == sender){
+	const boost::numeric::ublas::matrix_row<const matrix_t> prob( facMarginals.at(facId), state);
+	const boost::numeric::ublas::matrix_row<const matrix_t> ISprob( ISFacMarginals.at(facId), state);
+	boost::random::discrete_distribution<int, number_t> dist( ISprob.begin(), ISprob.end() );
+	boost::variate_generator<boost::mt19937 &, boost::random::discrete_distribution<int, number_t> > distGen( gen, dist);
+	unsigned receiver_state = distGen();
+	
+	//set state
+	sim.at( convNodeToVar(nbs[1])) = receiver_state;
+	
+	//set weight
+	weight *= prob(receiver_state)/ISprob(receiver_state)/sum(prob)*sum(ISprob);
+
+	//call neighbour
+	simulateVariableIS(gen, nbs[1], current, receiver_state, facMarginals, ISFacMarginals, sim, weight);
+      }
+      else if( nbs[1] == sender){
+	const boost::numeric::ublas::matrix_column<const matrix_t> prob( facMarginals.at(facId), state);
+	const boost::numeric::ublas::matrix_column<const matrix_t> ISprob( ISFacMarginals.at(facId), state);
+	boost::random::discrete_distribution<int, number_t> dist( ISprob.begin(), ISprob.end() );
+	boost::variate_generator<boost::mt19937 &, boost::random::discrete_distribution<int, number_t> > distGen( gen, dist);
+	unsigned receiver_state = distGen();
+	
+	//set state
+	sim.at( convNodeToVar(nbs[0])) = receiver_state;
+
+	//set weight
+	weight *= prob(receiver_state)/ISprob(receiver_state)/sum(prob)*sum(ISprob);
+	
+	//call neighbour
+	simulateVariableIS(gen, nbs[0], current, receiver_state, facMarginals, ISFacMarginals, sim, weight);
+      }
+    }
+    else{
+      errorAbort("DiscreFactorGraph.cpp::DFG::simulateFactor: Reached factor with " + toString(nbs.size()) + " neighbors, only 1 or 2 allowed");
+    }    
+  }
+
+  vector<unsigned> DFG::sample(boost::mt19937 & gen, vector<vector_t> const & varMarginals, vector<matrix_t> const & facMarginals){
+    vector<unsigned> ret;
+    sample(gen, varMarginals, facMarginals, ret);
+    return ret;
+  }
+
+  // Sample from factor graph
+  void DFG::sample(boost::mt19937 & gen, vector<vector_t> const & varMarginals, vector<matrix_t> const & facMarginals, vector<unsigned> & sim){
     
+    //TODO: Do some input checks!
+
     //Return vector
-    vector<unsigned> ret(variables.size());
-    
+    sim.resize(variables.size());
+
     for(int r = 0; r < roots.size(); ++r){
       unsigned root = roots.at(r);
       
@@ -753,30 +822,29 @@ namespace phy {
       	errorAbort("DiscreFactorGraph.cpp::DFG::sample: Root nodes currently have to be variables");
 
       unsigned varId = convNodeToVar(root);
-      boost::random::discrete_distribution<int, number_t> dist( variableMarginals.at(varId).begin(), variableMarginals.at(varId).end());
+      boost::random::discrete_distribution<int, number_t> dist( varMarginals.at(varId).begin(), varMarginals.at(varId).end());
       boost::variate_generator<boost::mt19937 &, boost::random::discrete_distribution< int, number_t> > distGen( gen, dist);
-      unsigned state = distGen();
 
-      //Set state
-      ret.at(varId) = state;
+      unsigned state = distGen();
+      sim.at(varId) = state;
 
       //Call simulateVariable
-      simulateVariable(gen, root, root, state, ret);
+      simulateVariable(gen, root, root, state, facMarginals, sim);
     }
-    return ret;
+
   }
 
-  void DFG::simulateVariable(boost::mt19937 & gen, unsigned current, unsigned sender, unsigned state, vector<unsigned> & sim){
+  void DFG::simulateVariable(boost::mt19937 & gen, unsigned current, unsigned sender, unsigned state, vector<matrix_t> const & facMarginals, vector<unsigned> & sim){
     //Loop over neighbors except sender (notice if current==sender, this is the root node)
     vector<unsigned> const & nbs = neighbors.at(current);
     for(int i = 0; i < nbs.size(); ++i){
       unsigned nb = nbs.at(i);
       if(nb != sender)
-	simulateFactor(gen, nb, current, state, sim);
+	simulateFactor(gen, nb, current, state, facMarginals, sim);
     }
   }
 
-  void DFG::simulateFactor(boost::mt19937 & gen, unsigned current, unsigned sender, unsigned state, vector<unsigned> & sim){
+  void DFG::simulateFactor(boost::mt19937 & gen, unsigned current, unsigned sender, unsigned state, vector<matrix_t> const & facMarginals, vector<unsigned> & sim){
     //At most a single nb except root
     vector<unsigned> const & nbs = neighbors.at(current);
 
@@ -786,7 +854,7 @@ namespace phy {
       //Two neighbors send to other
       unsigned facId = convNodeToFac(current);
       if(nbs[0] == sender){
-	boost::numeric::ublas::matrix_row<matrix_t> prob( factorMarginals.at(facId), state);
+        const boost::numeric::ublas::matrix_row<const matrix_t> prob( facMarginals.at(facId), state);
 	boost::random::discrete_distribution<int, number_t> dist( prob.begin(), prob.end() );
 	boost::variate_generator<boost::mt19937 &, boost::random::discrete_distribution<int, number_t> > distGen( gen, dist);
 	unsigned receiver_state = distGen();
@@ -795,10 +863,10 @@ namespace phy {
 	sim.at( convNodeToVar(nbs[1])) = receiver_state;
 	
 	//call neighbour
-	simulateVariable(gen, nbs[1], current, receiver_state, sim);
+	simulateVariable(gen, nbs[1], current, receiver_state, facMarginals, sim);
       }
       else if( nbs[1] == sender){
-	boost::numeric::ublas::matrix_column<matrix_t> prob( factorMarginals.at(facId), state);
+	const boost::numeric::ublas::matrix_column<const matrix_t> prob( facMarginals.at(facId), state);
 	boost::random::discrete_distribution<int, number_t> dist( prob.begin(), prob.end() );
 	boost::variate_generator<boost::mt19937 &, boost::random::discrete_distribution<int, number_t> > distGen( gen, dist);
 	unsigned receiver_state = distGen();
@@ -807,7 +875,7 @@ namespace phy {
 	sim.at( convNodeToVar(nbs[0])) = receiver_state;
 	
 	//call neighbour
-	simulateVariable(gen, nbs[0], current, receiver_state, sim);
+	simulateVariable(gen, nbs[0], current, receiver_state, facMarginals, sim);
       }
     }
     else{
@@ -929,6 +997,23 @@ namespace phy {
     consistencyCheck();
   }
 
+  //Calculate full likelihood
+  number_t DFG::calcFullLikelihood( vector<unsigned> const & sample){
+    number_t res = 1; 
+    //Loop over all factors
+    for(int facId = 0; facId < factors.size(); ++facId){
+      //Find neighbors      
+      vector<unsigned> const & nbs = neighbors[ convFacToNode(facId) ];
+
+      //convtovar read in sample 
+      if( nbs.size() == 1)
+	res *= toNumber(nodes[ convFacToNode(facId) ].potential(0, sample.at( convNodeToVar(nbs[0]) )));
+      if( nbs.size() == 2)
+	res *= toNumber(nodes[ convFacToNode(facId) ].potential( sample.at( convNodeToVar(nbs[0])), sample.at( convNodeToVar(nbs[1])) ));
+    }
+    return res;
+  }
+
   //Calculate expectancies
   xnumber_t DFG::calcExpect(){
     xnumber_t res = 0;
@@ -969,7 +1054,7 @@ namespace phy {
 
 
       if(!nodes[root].isFactor){
-	vector<unsigned> const & nbs = neighbors[root];
+	vector<unsigned> const & nbs = neighbors[ root ];
       
 	for(unsigned k = 0; k < nodes[root].dimension; ++k){
 	  for(unsigned i = 0; i < nbs.size(); ++i){

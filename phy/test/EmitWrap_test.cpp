@@ -129,9 +129,6 @@ BOOST_AUTO_TEST_CASE(EmitWrap_EmitWrapDfg_3){
   xvector_t res1 = calcLikelihoodVector(seqData, dfgInfo1, stvVec, '.');
   xvector_t res2 = calcLikelihoodVector(seqData, dfgInfo2, stvVec, '.');
 
-  std::cout << "res1:\t" << res1 << std::endl;
-  std::cout << "res2:\t" << res2 << std::endl;
-
   //R:> library(VGAM)
   //R:> dbetabinom.ab(20,50,2,3)/dbetabinom.ab(20,50,8,12)
   BOOST_CHECK_CLOSE(0.5429574, toNumber(res1(0)/res2(0)) , 0.01);

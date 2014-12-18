@@ -667,8 +667,9 @@ BOOST_AUTO_TEST_CASE(DFG_components_1)
   //
 }
 
-BOOST_AUTO_TEST_CASE(DFG_simulation)
+BOOST_AUTO_TEST_CASE(DFG_simulation_1)
 {
+  std::cout << "DFG_simulation_1 contains stocastich tests that fails with probability approximately 1%" << endl;
   string const inPrefix                = "./data/dfgSpecUnconnected/";
   string const stateMapsFile           = "stateMaps.txt";
   string const factorPotentialsFile    = "factorPotentials.txt";
@@ -681,18 +682,101 @@ BOOST_AUTO_TEST_CASE(DFG_simulation)
   
   stateMaskVec_t stateMasks( dfgInfo.dfg.variables.size() );
   dfgInfo.dfg.runSumProduct(stateMasks);
+  vector<xvector_t> xvarMarginals;
+  vector<xmatrix_t> xfacMarginals;
+  vector<vector_t> varMarginals;
+  vector<matrix_t> facMarginals;
+
+  dfgInfo.dfg.calcVariableMarginals( xvarMarginals, stateMasks);
+  dfgInfo.dfg.calcFactorMarginals( xfacMarginals);
+
+  for(int i = 0; i < xfacMarginals.size(); ++i){
+    facMarginals.push_back( toNumber( xfacMarginals.at(i) ) );
+  }
+
+  for(int i = 0; i < xvarMarginals.size(); ++i){
+    varMarginals.push_back( toNumber( xvarMarginals.at(i) ) );
+  }
+
   boost::mt19937 gen(std::time(0));
 
   vector<unsigned> acc(dfgInfo.dfg.variables.size());
   for(int i = 0; i < 100000; ++i){
-    vector<unsigned> sample = dfgInfo.dfg.sample(gen);
+    vector<unsigned> sample = dfgInfo.dfg.sample(gen, varMarginals, facMarginals);
     for(int j = 0; j < acc.size(); ++j)
       acc.at(j) += sample.at(j);
   }
 
+  // Stochastic test "should" fail with probability 1%
+  BOOST_CHECK( 39601 < acc.at(0) && acc.at(0) < 40399);
+  BOOST_CHECK( 65614 < acc.at(1) && acc.at(1) < 66386);
+  BOOST_CHECK( 65614 < acc.at(2) && acc.at(2) < 66386);
+  BOOST_CHECK( 29627 < acc.at(3) && acc.at(3) < 30374);
+  BOOST_CHECK( 39601 < acc.at(4) && acc.at(4) < 40399);
+}
 
-  std::copy(acc.begin(), acc.end(), ostream_iterator<unsigned>(std::cout, "\t") );
+BOOST_AUTO_TEST_CASE(DFG_simulation_2)
+{
+  std::cout << "DFG_simulation_2 contains stocastich tests that fails with probability approximately 1%" << endl;
 
+  string const inPrefix                = "./data/dfgSpecUnconnected/";
+  string const stateMapsFile           = "stateMaps.txt";
+  string const factorPotentialsFile    = "factorPotentials.txt";
+  string const variablesFile           = "variables.txt";
+  string const factorGraphFile         = "factorGraph.txt";
+
+  //Read dfgInfo
+  DfgInfo dfgInfo = readDfgInfo(inPrefix + stateMapsFile, inPrefix + factorPotentialsFile, inPrefix + variablesFile, inPrefix + factorGraphFile);
+
+  stateMaskVec_t stateMasks( dfgInfo.dfg.variables.size() );
+  dfgInfo.dfg.runSumProduct(stateMasks);
+  vector<xvector_t> xvarMarginals;
+  vector<xmatrix_t> xfacMarginals;
+  vector<vector_t> varMarginals;
+  vector<matrix_t> facMarginals;
+  vector<vector_t> varMarginalsIS;
+  vector<matrix_t> facMarginalsIS;
+
+  dfgInfo.dfg.calcVariableMarginals( xvarMarginals, stateMasks);
+  dfgInfo.dfg.calcFactorMarginals( xfacMarginals);
+
+  for(int i = 0; i < xfacMarginals.size(); ++i){
+    facMarginals.push_back( toNumber( xfacMarginals.at(i) ) );
+  }
+
+  for(int i = 0; i < xvarMarginals.size(); ++i){
+    varMarginals.push_back( toNumber( xvarMarginals.at(i) ) );
+  }
+
+  facMarginalsIS = facMarginals;
+  varMarginalsIS = varMarginals;
   
+  //Make some modification
+  for(int i = 0; i < varMarginals.size(); ++i){
+    varMarginalsIS.at(i)(0) = varMarginalsIS.at(i)(0)/2;
+  }
+
+  for(int i = 0; i < facMarginals.size(); ++i){
+    facMarginalsIS.at(i)(0,0) = facMarginalsIS.at(i)(0,0)/2;
+  }
+  
+  boost::mt19937 gen(std::time(0));
+
+  vector<number_t> acc(dfgInfo.dfg.variables.size());
+  for(int i = 0; i < 100000; ++i){
+    vector<unsigned> sampleIS;
+    number_t weight;
+    dfgInfo.dfg.sampleIS(gen, varMarginals, facMarginals, varMarginalsIS, facMarginalsIS, sampleIS, weight);
+    for(int j = 0; j < acc.size(); ++j)
+      acc.at(j) += sampleIS.at(j)*weight;
+  }
+
+  // Stochastic test "should" fail with probability 1%
+  BOOST_CHECK( 39601 < acc.at(0) && acc.at(0) < 40399);
+  BOOST_CHECK( 65614 < acc.at(1) && acc.at(1) < 66386);
+  BOOST_CHECK( 65614 < acc.at(2) && acc.at(2) < 66386);
+  BOOST_CHECK( 29627 < acc.at(3) && acc.at(3) < 30374);
+  BOOST_CHECK( 39601 < acc.at(4) && acc.at(4) < 40399);
 
 }
+

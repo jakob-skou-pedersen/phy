@@ -145,6 +145,9 @@ using namespace std;
     xnumber_t runMaxSum(stateMaskVec_t const & stateMasks, vector<unsigned> & maxVariables);
     xnumber_t runMaxSum(stateMaskVec_t const & stateMasks, vector<unsigned> & maxVariables, vector<vector<xvector_t const *> > & inMessages, vector<vector<xvector_t> > & outMessages, vector<vector<vector<unsigned> > > & maxNeighborStates) const; 
 
+    /** Calculate likelihood for a full observation */
+    number_t calcFullLikelihood( vector<unsigned> const & sample);
+
     /** Precondition: runSumProduct has been called */
     xnumber_t calcExpect(); ///< Using naive algorithm
     xnumber_t calcExpect2(stateMaskVec_t const & stateMasks); ///< Using (if implemented correctly) memory efficient algorithm
@@ -178,11 +181,16 @@ using namespace std;
     void consistencyCheck();
 
     /** Make a sample from conditional distribution induced by factorgraph, precondition sumProduct has been run */
-    vector<unsigned> sample(boost::mt19937 & gen); 
+    void sample(boost::mt19937 & gen, vector<vector_t> const & varMarginals, vector<matrix_t> const & facMarginals, vector<unsigned> & sample);
+    vector<unsigned> sample(boost::mt19937 & gen, vector<vector_t> const & varMarginals, vector<matrix_t> const & facMarginals);
+    void sampleIS(boost::mt19937 & gen, vector<vector_t> const & varMarginals, vector<matrix_t> const & facMarginals, vector<vector_t> const & ISVarMarginals, vector<matrix_t> const & ISFacMarginals, vector<unsigned> & sim, number_t & weight);
+
 
     /** Precondition: calcFactorMarginals and calcVariableMarginals has been called on members factorMarginals and variableMarginals */
-    void simulateVariable(boost::mt19937 & gen, unsigned current, unsigned sender, unsigned state, vector<unsigned> & sim);
-    void simulateFactor(boost::mt19937 & gen, unsigned current, unsigned sender, unsigned state, vector<unsigned> & sim);
+    void simulateVariable(boost::mt19937 & gen, unsigned current, unsigned sender, unsigned state, vector<matrix_t> const & facMarginals, vector<unsigned> & sim);
+    void simulateFactor(boost::mt19937 & gen, unsigned current, unsigned sender, unsigned state, vector<matrix_t> const & facMarginals, vector<unsigned> & sim);
+    void simulateVariableIS(boost::mt19937 & gen, unsigned current, unsigned sender, unsigned state, vector<matrix_t> const & facMarginals, vector<matrix_t> const & ISFacMarginals, vector<unsigned> & sim, number_t & weight);
+    void simulateFactorIS(boost::mt19937 & gen, unsigned current, unsigned sender, unsigned state, vector<matrix_t> const & facMarginals, vector<matrix_t> const & ISFacMarginals,  vector<unsigned> & sim, number_t & weight);
     
     /** write factor info to str */
     void writeInfo( ostream & str, vector<string> const & varNames = vector<string>(), vector<string> const & facNames = vector<string>() );

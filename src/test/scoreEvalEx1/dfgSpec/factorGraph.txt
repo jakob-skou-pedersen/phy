@@ -1,0 +1,81 @@
+# specification of factors and thereby entire graph
+
+NAME:		H
+NB1:		H
+POT:		prior
+
+NAME:		H.O1
+NB1:		H
+NB2:		O1
+POT:		inner
+
+NAME:		H.O2
+NB1:		H
+NB2:		O2
+POT:		inner
+
+NAME:		H.O3
+NB1:		H
+NB2:		O3
+POT:		inner
+
+NAME:		H.O4
+NB1:		H
+NB2:		O4
+POT:		inner
+
+NAME:		H.O5
+NB1:		H
+NB2:		O5
+POT:		inner
+
+NAME:		H.O6
+NB1:		H
+NB2:		O6
+POT:		inner
+
+NAME:		H.O7
+NB1:		H
+NB2:		O7
+POT:		inner
+
+NAME:		H.O8
+NB1:		H
+NB2:		O8
+POT:		inner
+
+NAME:		H.O9
+NB1:		H
+NB2:		O9
+POT:		inner
+
+NAME:		H.O10
+NB1:		H
+NB2:		O10
+POT:		inner
+
+NAME:		H.O11
+NB1:		H
+NB2:		O11
+POT:		inner
+
+NAME:		H.O12
+NB1:		H
+NB2:		O12
+POT:		inner
+
+NAME:		H.O13
+NB1:		H
+NB2:		O13
+POT:		inner
+
+NAME:		H.O14
+NB1:		H
+NB2:		O14
+POT:		inner
+
+NAME:		H.O15
+NB1:		H
+NB2:		O15
+POT:		inner
+
