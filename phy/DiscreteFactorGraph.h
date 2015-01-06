@@ -95,6 +95,12 @@ using namespace std;
     vector<unsigned> components;  // assigns each node to a connected component 0 indicates no assignment
     vector<unsigned> roots; // a root node in each component
 
+    // Read-only accessors
+    const vector<xmatrix_t> & getXFactorMarginals(){ return xFactorMarginals;}
+    const vector<xvector_t> & getXVariableMarginals(){ return xVariableMarginals;}
+    const vector<matrix_t> & getFactorMarginals(){ return mFactorMarginals;}
+    const vector<vector_t> & getVariableMarginals(){ return mVariableMarginals;}
+
     /** Reset specific or all factor potentials. Useful with factor optimization, e.g., by EM. */
     // xmatrix_t versions
     void resetFactorPotential(xmatrix_t const & facPotVec, unsigned facId);
@@ -129,10 +135,12 @@ using namespace std;
     xnumber_t calcNormConst2(stateMaskVec_t const & stateMasks, vector<vector<xvector_t const *> > & inMessages) const;
 
     /** Precondition: runSumProcut has been called (setting all out/inMessages). If variableMarginals is an empty vector ::initVariableMarginals will be called*/
+    void calcVariableMarginals(stateMaskVec_t const & stateMasks);
     void calcVariableMarginals(vector<xvector_t> & variableMarginals, stateMaskVec_t const & stateMasks);
     void calcVariableMarginals(vector<xvector_t> & variableMarginals, stateMaskVec_t const & stateMasks, vector<vector<xvector_t const *> > & inMessages) const;
 
     /** Precondition: runSumProcut has been called (setting all out/inMessages). If factorMarginals is an empty vector ::initFactorMarginals will be called*/
+    void calcFactorMarginals();
     void calcFactorMarginals(vector<xmatrix_t> & factorMarginals);
     void calcFactorMarginals(vector<xmatrix_t> & factorMarginals, vector<vector<xvector_t const *> > & inMessages) const;
 
@@ -253,9 +261,8 @@ using namespace std;
     vector<vector<xvector_t const *> > inMessages2_; //For messages of the second type
     vector<vector<xvector_t> > outMessages2_;
 
-    vector<vector_t> variableMarginals;
-    vector<matrix_t> factorMarginals;
-
+    vector<vector_t> mVariableMarginals;
+    vector<matrix_t> mFactorMarginals;
     vector<xvector_t> xVariableMarginals;
     vector<xmatrix_t> xFactorMarginals;
   };

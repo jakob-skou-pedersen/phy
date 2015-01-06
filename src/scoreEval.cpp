@@ -72,58 +72,54 @@ int main(int argc, char * argv[])
 
   //Importance sampling
   {
-    vector<xvector_t> xvarMarginals1;
-    vector<xmatrix_t> xfacMarginals1;
-    vector<xvector_t> xvarMarginals2;
-    vector<xmatrix_t> xfacMarginals2;
+    DfgInfo dfgInfoIS = dfgInfo1;
 
-    vector<vector_t> varMarginals1;
-    vector<matrix_t> facMarginals1;
-    vector<vector_t> varMarginals2;
-    vector<matrix_t> facMarginals2;
-    vector<vector_t> ISvarMarginals;
-    vector<matrix_t> ISfacMarginals;
-
-    dfgInfo1.dfg.calcVariableMarginals( xvarMarginals1, stateMasks);
-    dfgInfo1.dfg.calcFactorMarginals( xfacMarginals1);
-    dfgInfo2.dfg.calcVariableMarginals( xvarMarginals2, stateMasks);
-    dfgInfo2.dfg.calcFactorMarginals( xfacMarginals2);
-
-
-    for(int i = 0; i < xfacMarginals1.size(); ++i){
-      facMarginals1.push_back( toNumber( xfacMarginals1.at(i)));
-      facMarginals2.push_back( toNumber( xfacMarginals2.at(i)));
+    //Calculate IS distribution
+    vector<xmatrix_t> ISfacPotentials(dfgInfoIS.dfg.factors.size());
+    for(int f = 0; f < dfgInfoIS.dfg.factors.size(); ++f){
       
-      //Generate IS distribution
-      ISfacMarginals.push_back( matrix_t( facMarginals1.at(i).size1(), facMarginals1.at(i).size2()) );
-      for(int j = 0; j < facMarginals1.at(i).size1(); ++j)
-	for(int k = 0; k < facMarginals1.at(i).size2(); ++k)
-	  ISfacMarginals.at(i)(j,k) = pow(facMarginals1.at(i)(j,k), 1-alpha)*pow(facMarginals2.at(i)(j,k), alpha);
-
-
-    }
-    for(int i = 0; i < xvarMarginals1.size(); ++i){
-      varMarginals1.push_back( toNumber( xvarMarginals1.at(i)));
-      varMarginals2.push_back( toNumber( xvarMarginals2.at(i)));
-
-      //Generate IS distribution
-      ISvarMarginals.push_back( vector_t( varMarginals1.at(i).size()) );
-      for(int j = 0; j < varMarginals1.at(i).size(); ++j)
-	ISvarMarginals.at(i)(j) = pow(varMarginals1.at(i)(j), 1-alpha)*pow(varMarginals2.at(i)(j), alpha);
+      xmatrix_t const & pot1 = dfgInfo1.dfg.nodes[ dfgInfo1.dfg.convFacToNode(f) ].potential;
+      xmatrix_t const & pot2 = dfgInfo2.dfg.nodes[ dfgInfo2.dfg.convFacToNode(f) ].potential;
+      
+      xmatrix_t potIS(pot1.size1(), pot1.size2());
+      for(int i = 0; i < potIS.size1(); ++i){
+	for(int j = 0; j < potIS.size2(); ++j){
+	  potIS(i,j) = power(pot1(i,j), 1-alpha)*power(pot2(i,j), alpha);
+	}
+      }
+      ISfacPotentials.at(f) = potIS;
     }
 
+    dfgInfoIS.dfg.resetFactorPotentials( ISfacPotentials);
+    dfgInfoIS.dfg.runSumProduct(stateMasks);
+    dfgInfoIS.dfg.calcFactorMarginals();
+    dfgInfoIS.dfg.calcVariableMarginals(stateMasks);
+    dfgInfo1.dfg.calcFactorMarginals();
+    dfgInfo1.dfg.calcVariableMarginals(stateMasks);
+
+
+    //Setup
     boost::mt19937 gen(std::time(0));
-    
     vector<wSample> samples(no_samples);
+    const vector<vector_t> & varMarBg = dfgInfo1.dfg.getVariableMarginals();
+    const vector<matrix_t> & facMarBg = dfgInfo1.dfg.getFactorMarginals();
+    const vector<vector_t> & varMarIS = dfgInfoIS.dfg.getVariableMarginals();
+    const vector<matrix_t> & facMarIS = dfgInfoIS.dfg.getFactorMarginals();
 
     std::cout << "Generating IS samples:" << endl;
-
     for(int i = 0; i < no_samples; ++i){
       //Sample
       vector<unsigned> sampleIS;
-      number_t weight;
-      dfgInfo1.dfg.sampleIS(gen, varMarginals1, facMarginals1, ISvarMarginals, ISfacMarginals, sampleIS, weight);
-      
+      number_t weight = 0.0;
+
+      dfgInfo1.dfg.sampleIS(gen,
+			    varMarBg, 
+			    facMarBg, 
+			    varMarIS, 
+			    facMarIS, 
+			    sampleIS, 
+			    weight);
+
       //Calculate score
       number_t score1 = dfgInfo1.dfg.calcFullLikelihood(sampleIS)/normConst1;
       number_t score2 = dfgInfo2.dfg.calcFullLikelihood(sampleIS)/normConst2;
@@ -148,9 +144,15 @@ int main(int argc, char * argv[])
       sum_of_weights += (*it).second;
       unnormalized_score_sum += (*it).first;
       normalized_score_sum += (*it).first*(*it).second;
-      static bool q999 = true;
-      static bool q99  = true;
-      static bool q95  = true;
+      static bool q9999 = true;
+      static bool q999  = true;
+      static bool q99   = true;
+      static bool q95   = true;
+
+      if(sum_of_weights/no_samples > 0.0001 and q9999){
+	q9999 = false;
+	std::cout << "99.99%:\t" << (*it).first << endl;
+      }
       if(sum_of_weights/no_samples > 0.001 and q999){
 	q999 = false;
 	std::cout << "99.9%:\t" << (*it).first << endl;

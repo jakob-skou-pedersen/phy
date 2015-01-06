@@ -559,6 +559,17 @@ namespace phy {
     return ublas::sum(v);
   }
 
+  void DFG::calcVariableMarginals(stateMaskVec_t const & stateMasks){
+    calcVariableMarginals( xVariableMarginals, stateMasks);
+
+    mVariableMarginals.resize( xVariableMarginals.size() );
+    for(int i = 0; i < xVariableMarginals.size(); ++i){
+      mVariableMarginals.at(i) = toNumber(xVariableMarginals.at(i));
+      //assertion
+      if(mVariableMarginals.at(i).size() != xVariableMarginals.at(i).size() )
+	errorAbort("Developer: VariableMarginals don't have same size");
+    }
+  }
 
   void DFG::calcVariableMarginals(vector<xvector_t> & variableMarginals, stateMaskVec_t const & stateMasks)
   {
@@ -574,6 +585,15 @@ namespace phy {
     for (unsigned i = 0; i < variables.size(); i++) {
       calcSumProductMessageVariable(i, i, stateMasks[i], inMessages[i], variableMarginals[i]);
       variableMarginals[i] *= 1/ Z;
+    }
+  }
+
+  void DFG::calcFactorMarginals(){
+    calcFactorMarginals( xFactorMarginals);
+
+    mFactorMarginals.resize( xFactorMarginals.size() );
+    for(int i = 0; i < xFactorMarginals.size(); ++i){
+      mFactorMarginals.at(i) = toNumber(xFactorMarginals.at(i));
     }
   }
 
@@ -610,7 +630,6 @@ namespace phy {
     for (unsigned facId = 0; facId < factors.size(); facId++)
       factorMarginals[facId] *= 1/ Z;
   }
-
 
   // init data structures given in DFG.
   void DFG::initMessages()
@@ -721,6 +740,16 @@ namespace phy {
 
   // IS sample from factor graph
   void DFG::sampleIS(boost::mt19937 & gen, vector<vector_t> const & varMarginals, vector<matrix_t> const & facMarginals, vector<vector_t> const & ISVarMarginals, vector<matrix_t> const & ISFacMarginals, vector<unsigned> & sim, number_t & weight){
+    //Make assertions
+    if( varMarginals.size() != variables.size() )
+      errorAbort("DFG::sampleIS: varMarginals.size() != variables.size()");
+    if( facMarginals.size() != factors.size() )
+      errorAbort("DFG::sampleIS: facMarginals.size() != factors.size()");
+    if( ISVarMarginals.size() != variables.size() )
+      errorAbort("DFG::sampleIS: ISVarMarginals.size() != variables.size()");
+    if( ISFacMarginals.size() != factors.size() )
+      errorAbort("DFG::sampleIS: ISFacMarginals.size() != factors.size()");
+    
     //return vector
     sim.resize(variables.size());
     weight = 1;
@@ -999,6 +1028,9 @@ namespace phy {
 
   //Calculate full likelihood
   number_t DFG::calcFullLikelihood( vector<unsigned> const & sample){
+    //Make assertions
+    if( sample.size() != variables.size())
+      errorAbort("DFG::calcFullLikelihood: Not full sample");
     number_t res = 1; 
     //Loop over all factors
     for(int facId = 0; facId < factors.size(); ++facId){
